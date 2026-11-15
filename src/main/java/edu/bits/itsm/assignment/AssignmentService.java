@@ -88,6 +88,7 @@ public class AssignmentService {
 
   @Transactional
   public void configure(String key, long actor) {
+    requireAdmin(actor);
     catalog.lock();
     if (!strategies.containsKey(key)) throw new BusinessException("Unknown assignment strategy.");
     jdbc.update("UPDATE assignment_configuration SET strategy=? WHERE id=1", key);
@@ -96,6 +97,7 @@ public class AssignmentService {
 
   @Transactional
   public void technician(long id, boolean available, int capacity, long actor) {
+    requireAdmin(actor);
     catalog.lock();
     if (capacity < 1 || capacity > 100) throw new BusinessException("Capacity must be 1–100.");
     if (jdbc.update(
@@ -113,6 +115,7 @@ public class AssignmentService {
 
   @Transactional
   public void skill(long user, long category, int proficiency, long actor) {
+    requireAdmin(actor);
     catalog.lock();
     catalog.requireCategory(category);
     if (proficiency < 0 || proficiency > 3)
@@ -141,4 +144,11 @@ public class AssignmentService {
         "USER-" + user,
         "Category=" + category + ", proficiency=" + proficiency);
   }
+  private void requireAdmin(long actor) {
+    if (!Boolean.TRUE.equals(jdbc.queryForObject(
+        "SELECT EXISTS(SELECT 1 FROM user_accounts WHERE id=? AND active AND role='ADMIN')",
+        Boolean.class, actor)))
+      throw new org.springframework.security.access.AccessDeniedException("Administrator access required.");
+  }
+
 }

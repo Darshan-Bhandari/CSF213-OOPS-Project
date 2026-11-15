@@ -36,6 +36,7 @@ class CatalogIntegrationTest {
     r.add("spring.datasource.password", () -> "");
   }
   @Autowired CatalogService catalog;
+  @Autowired edu.bits.itsm.assignment.AssignmentService assignment;
   @Autowired UserAccountRepository users;
   @Autowired JdbcTemplate jdbc;
   @Autowired MockMvc mvc;
@@ -103,4 +104,13 @@ class CatalogIntegrationTest {
     assertThrows(BusinessException.class, () -> catalog.saveCategory(Long.MAX_VALUE,"Missing",true,admin.getId()));
     assertEquals(before,jdbc.queryForObject("SELECT count(*) FROM audit_entries",Long.class));
   }
+  @Test void assignmentConfigurationRequiresActiveAdminAtServiceBoundary() {
+    assertThrows(AccessDeniedException.class,()->assignment.configure("LOAD",employee.getId()));
+    assertThrows(AccessDeniedException.class,()->assignment.technician(-1,true,5,employee.getId()));
+    assertThrows(AccessDeniedException.class,()->assignment.skill(-1,1,2,employee.getId()));
+    jdbc.update("UPDATE user_accounts SET active=false WHERE id=?",admin.getId());
+    assertThrows(AccessDeniedException.class,()->assignment.configure("LOAD",admin.getId()));
+    assertEquals("SKILL",assignment.selected());
+  }
+
 }

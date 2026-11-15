@@ -26,6 +26,11 @@
     </profile>
   </profiles>
   <build><plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId><version>3.5.6</version>
+      <configuration><systemPropertyVariables><acceptance.jar>${project.build.directory}/${project.build.finalName}.jar</acceptance.jar></systemPropertyVariables></configuration>
+      <executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions>
+    </plugin>
     <plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin>
     <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version></plugin>
   </plugins></build>

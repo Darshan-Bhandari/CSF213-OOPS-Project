@@ -48,6 +48,8 @@ public class AccountService {
   }
 
   private UserAccount create(String name, String email, String password, Role role, Long actor) {
+    if (name == null || email == null || password == null || role == null)
+      throw new BusinessException("Enter a valid name, email, password and account role.");
     String normalized = email.strip().toLowerCase(Locale.ROOT);
     if (name.isBlank()
         || name.strip().length() > 100

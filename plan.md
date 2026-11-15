@@ -19,20 +19,15 @@ Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, 
 
 ## Team handoff — current session, 16 November 2026
 
-- Phases 1–2 scope/design gates approved. Team responsibilities, final report diagrams, model/budget and submission details remain deferred.
-- Phase 3 verification: real PostgreSQL migrations, 15 foundation cases, role credential logins and role dashboard rendering pass. Existing employee account and saved incident survived both application and PostgreSQL process restarts. Desktop employee dashboard was visually inspected earlier; admin/technician, full-page and responsive visual checks remain outstanding. Do not describe Phase 3 as fully visually accepted.
-- Phase 4 Steps 1–7 backend/form acceptance passed: catalog administration, report creation/detail access, calculated priority/snapshot/corrections, explicit lifecycle, ownership and role enforcement. Conversation privacy, linked replies and same-timestamp stale-edit checks now pass. Resolution/rejection/feedback and ordered history/transaction consistency checks pass; complete workflow restart acceptance and browser visual checks remain open.
-- Latest full regression: **141 tests passed, zero failures/errors/skips** (`./mvnw -o test`, 16 November, 01:44 IST). Breakdown: foundation 15, catalog 6, workflow database/HTTP 36, view rendering 18, rules 56, committed audit/transaction consistency 10. These are automated checks, not browser screenshots.
-- Actual runtime check: employee submitted labeled local ticket `INC-1` (Wi-Fi, Network, impact 2, urgency 2, criticality 3 → score 12/P2), then reopened it after app and database restarts with unchanged ownership/title/classification/priority. It remains CLASSIFIED because the persistent database has no eligible technician. This is a verification incident, not a seeded outage or completed technician demo.
-- Local account inventory: active employee ID 1 is the runtime verification account. Documented demo role accounts are absent from this database; opt-in demo provisioning remains available. Passwords/keys are not recorded here.
-- Migration mismatch resolved: V2 restored to its published contents; demo marker table is in V3. Both fresh databases and persistent restarts now validate V1–V4. Never edit an applied migration or repair checksums to conceal schema drift.
-- Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, `main`. Publish the current workflow source and its supporting modules together so a checkout can compile. Existing later-phase assignment/SLA/notification/reporting/AI scaffolding is included as dependencies; that does not mark Phases 5–6 fully accepted. Earlier Phase 3 ZIP is historical, not the latest source snapshot.
-- Step 5 complete for backend/form checks: assigned technician can add private notes and public information requests; reporter replies link only to requests on the same ticket. Reads enforce actor authorization, employee views omit private note bodies, and internal notes do not trigger notifications. Request reply counts show awaiting/replied status without introducing a lifecycle state or pausing SLA clocks. Invalid and stale submissions retain message drafts with readable errors.
-- V4 adds `conversation_revision` so every saved message makes the incident dirty and advances its optimistic version, including multiple writes at the exact same timestamp. V1–V3 remain unchanged. Fresh-database suite and existing-database upgrade pass; saved public reply on INC-1 survived app and PostgreSQL restarts with unchanged state/deadlines.
-- Step 6 complete for backend/form checks: nonempty resolution details are persisted per cycle; only reporter (or reasoned admin override) can verify/close; reporter rejection starts a new cycle and retains previous resolution/SLA breach/first-response history and target snapshot. No eligible technician leaves it CLASSIFIED/unassigned. Invalid/stale action and feedback submissions retain drafts with readable errors; feedback is optional, reporter-only, rating 1–5 and once per incident after resolution. Closed incidents cannot be reopened through these actions.
-- Step 7 complete for backend acceptance: incident history reads now enforce actor ownership/assignment/active role; global audit/email reads require an active administrator. Employee history excludes private investigation and generated AI suggestion events. New correction/reassignment/SLA/feedback/suggestion audit events use real lifecycle states; priority changes remain explicit in descriptions. Existing audit records are not rewritten.
-- Ten committed-transaction tests verify ordered state reconstruction (including reassignment, system breaches, rejection and closure), mandatory audit transaction scope, rollback of partially written state/messages/resolutions/cycles/feedback/audits/notifications, and one-save/one-conflict for simultaneous same-version message submissions. Failure constraints run only in a separate isolated test database.
-- Immediate next work: Step 8 complete employee-to-technician-to-closure workflow persistence across restarts and remaining visual checks. Repeated-report correlation is approved future scope below; it is not implemented. No live AI calls/model spending/public hosting approved.
+- **Phases 1–4 accepted for the tested scope/environment.** Requirements/design gates remain approved; foundation and all eight core-workflow steps now pass automated, real packaged HTTP/restart and representative desktop/mobile browser acceptance. Final course submission is not complete.
+- Latest clean build: `./mvnw clean verify` passed **143 regression tests + 1 packaged restart integration test**, zero failures/errors/skips (16 November, 02:04 IST). Four independent Python launcher tests also passed. Counts are separated rather than treating a whole browser workflow as dozens of invented test cases.
+- Packaged acceptance uses an isolated database and actual Java/JAR processes: three role logins, public registration/privilege injection, protected admin pages, private note/request/reply, resolution/rejection/second resolution, verification/closure, rating, deactivation, logout and real forbidden POSTs. Java and PostgreSQL restart; incident, messages, both resolutions/cycles, feedback, audit, notifications, accounts, seed markers and migration snapshots remain unchanged. Demo seeding is idempotent and does not reset existing passwords when the supplied seed password changes.
+- Chromium browser acceptance passed at 1440×1000 and 390×844 using three role sessions, including complete forms/lifecycle/privacy/feedback/mobile sign-out, active navigation, no page overflow, no JS exceptions or server 5xx. Desktop/mobile screenshots were inspected. Screenshots/results are local in `.local/acceptance-screenshots/`; cross-browser, touch hardware, full accessibility, performance and production security certification are not implied.
+- Step 8 fixed a real POST denial-forward 405/403 bug, null registration validation, missing active-admin checks on assignment configuration, hidden mobile sign-out, hard-coded Overview navigation selection and null prior-state display. V1–V4 remain unchanged; no checksum repair or existing development database reset.
+- Requirements PDF was rechecked against R01–R27. `docs/architecture.md` records runtime/contracts/patterns; `docs/phase-1-4-acceptance.md` is the acceptance summary and scope/limitations. `docs/testing.md` preserves historical failures plus latest results.
+- Original app/database remain on 127.0.0.1:8080/54329 with existing runtime employee/ticket data. The separate disposable visual demo used 8081/54330 and `.local/visual-final-postgres-data` and is now stopped; demo credentials are generated and kept only in ignored `.local/visual-credentials.json`. Do not confuse these databases/accounts or commit credentials/caches/screenshots. Main database role demos were not silently provisioned.
+- Repository is `Darshan-Bhandari/CSF213-OOPS-Project`, `main`; publish this accepted source and documentation together. The old Phase 3 ZIP is historical. The current packaged JAR is generated under ignored `target/`.
+- **Next: Phase 5 assignment/SLA/notification acceptance.** Supporting source/tests already exist but that phase gate is still open; then Phase 6 AI/reporting, Phase 7 broader stabilization and Phase 8 final deliverables. Repeat-report correlation is approved future scope below and remains unimplemented. Team/group responsibility allocation, report/UML/ER/video/submission details and live AI model/key/budget remain deferred. No live AI calls/spending/public hosting approved.
 
 ## Approved addition — repeated reports indicating wider impact
 
@@ -40,9 +35,9 @@ User requests this feature be included, with implementation deferred while Phase
 
 Design work pending: matching evidence (service, category, symptom and time window), distinct-reporter counting, resistance to duplicate/spam reports, grouping uncertain matches, handling existing assignments/SLA snapshots, administrator correction, and auditable priority changes. Report frequency indicates broader impact; keep reported urgency and original inputs visible. The exact relationship to approved priority/SLA rules must be documented before implementation. Thresholds and matching rules will be chosen with concrete examples and rationale during that design task; no live AI is required or authorized. Track as planned follow-up after the core lifecycle; this addition supersedes earlier wording excluding duplicate/grouping features from scope.
 
-Phase 4 Step 1 backend/form verification is complete: service/category create/edit/deactivate works; active administrator checks cover direct service mutations as well as protected HTTP routes; missing IDs and invalid inputs are rejected; duplicate names ignore case and surrounding spaces; audit entries use persisted IDs. Name comparison avoids near-identical catalog choices; display capitalization is retained. Deactivation retains records and prevents use in new incidents. Desktop admin visual inspection remains pending. Existing later workflow code is being reviewed rather than assumed complete.
+Phase 4 Step 1 verification is complete: service/category create/edit/deactivate works; active administrator checks cover direct service mutations as well as protected HTTP routes; missing IDs and invalid inputs are rejected; duplicate names ignore case and surrounding spaces; audit entries use persisted IDs. Name comparison avoids near-identical catalog choices; display capitalization is retained. Deactivation retains records and prevents use in new incidents. Desktop/mobile admin screenshots and browser flows are now reviewed in Step 8. Later-phase source remains subject to its own acceptance.
 
-Phase 4 Steps 2–4 backend/form verification is complete. Incident forms retain invalid submissions and show readable errors; detail/list/API access is scoped to reporter/assignee/admin; forged priority/state/reporter fields cannot change server-controlled values. Criticality is snapshotted; reasoned admin corrections audit old/new category, impact, urgency and score. Lifecycle edges are explicit and independent of enum order; wrong-role actions, invalid shortcuts, stale versions and closed-ticket reopening are rejected. All 27 priority combinations and all 64 lifecycle state pairs are checked. Full regression and live incident restart checks passed; visual acceptance remains separate.
+Phase 4 Steps 2–4 backend/form verification is complete. Incident forms retain invalid submissions and show readable errors; detail/list/API access is scoped to reporter/assignee/admin; forged priority/state/reporter fields cannot change server-controlled values. Criticality is snapshotted; reasoned admin corrections audit old/new category, impact, urgency and score. Lifecycle edges are explicit and independent of enum order; wrong-role actions, invalid shortcuts, stale versions and closed-ticket reopening are rejected. All 27 priority combinations and all 64 lifecycle state pairs are checked. Full regression, packaged lifecycle restart and representative browser acceptance passed in Step 8.
 
 Priority rationale: use the approved product of impact × urgency × criticality. P4 scores 1–2 cover low combined inputs; P3 3–7 covers moderate combinations; P2 8–17 captures multiple elevated inputs; P1 18–27 requires all inputs to be at least 2 with two at 3. This is a transparent project rule, not an empirically validated industry standard. Affected-user count is contextual and cannot multiply priority by itself. Future correlated-report escalation must preserve original factors and have separately documented rules.
 
@@ -52,10 +47,10 @@ Priority rationale: use the approved product of impact × urgency × criticality
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phase 4 — core incident workflow, `IN PROGRESS`; Steps 1–7 backend/form checks verified. Supporting Phase 5–6 code exists but those phase gates remain open. Phase 3 runtime checks pass with remaining visual limits recorded above. P01–P10 approved; team/submission administration deferred.
+- Current phase: Phase 4 — core incident workflow, `DONE` for tested acceptance scope. Phases 1–3 gates also accepted; Phase 5 is next. Supporting Phase 5–6 code exists but those gates remain open. P01–P10 approved; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
-- Implementation status: foundation and Phase 4 Steps 1–7 backend/form checks pass; 141-test full suite and persistent incident restart check passed. Elevated execution resolved the earlier sandbox PostgreSQL restriction. Remaining phase acceptance and visual limits are in the team handoff above; model/budget and team allocation remain pending.
+- Implementation status: foundation and all Phase 4 steps accepted; clean build, 143 regression + 1 packaged restart test, 4 launcher tests and Chromium desktop/mobile acceptance passed. Elevated execution resolves earlier sandbox restrictions. Remaining phases and tested-environment limits are in the team handoff above.
 - Approved application format: web application (2026-11-15). Current stack is in section 4B; supporting tools approved in section 4C. Public hosting deferred; exact versions will be checked during foundation setup.
 
 ## 3. Requirements register
@@ -109,8 +104,8 @@ Rubric reference (page 16): architecture 10, functionality 60, user experience 1
 | D07 | Intelligent features | APPROVED FEATURES — 2026-11-15 | Category suggestions and suggested resolutions through OpenRouter. Technicians review before acting. Model and budget pending; neither AI output automatically closes an incident nor changes a category without a permitted human action |
 | D08 | Runtime, hosting and budget | APPROVED LOCAL-FIRST — 2026-11-15 | Build and demonstrate locally first; public hosting deferred. No paid-service spending authorized; user adds key/model later |
 | D09 | Notifications | APPROVED — 2026-11-15 | In-app notifications and simulated email; no email credentials required |
-| D10 | Interface direction | REFERENCE PROVIDED — 2026-11-15 | User supplied FyneDesk KPI dashboard image: light background, sidebar, teal accents, filters, metric cards, charts and tables. Exact role screens, branding and metrics remain pending; pictured menu items do not automatically enter scope. |
-| D11 | Review cadence | CURRENT GATE — 2026-11-15 | Prepare concrete Phase 2 rules for user review, then implement approved decisions; ask again only for new material choices |
+| D10 | Interface direction | REFERENCE PROVIDED — 2026-11-15 | User supplied FyneDesk KPI dashboard image: light background, sidebar, teal accents, filters, metric cards, charts and tables. Role screens/metrics subsequently approved in P01/P09 and verified in Step 8; final branding remains deferred. Pictured menu items do not automatically enter scope. |
+| D11 | Review cadence | APPROVED EXECUTION CADENCE — updated 2026-11-16 | User assigns sequential steps and authorizes thorough execution within each; proceed on approved P01–P10 without reapproval, raise new material choices only |
 | D12 | Priority policy | APPROVED — 2026-11-15 | Multiplicative score and thresholds in section 4D |
 | D13 | Assignment policies | APPROVED — 2026-11-15 | Skill-based and load-based strategies; eligibility, ties and capacity in section 4D |
 | D14 | Lifecycle and permissions | APPROVED — 2026-11-15 | Controlled lifecycle, reporter verification, information requests and reopen behavior in section 4D |
@@ -333,7 +328,7 @@ Demo 3: administrator switches assignment strategy on new sample incidents with 
 
 Minimum test catalog: priority combinations; invalid factor; unauthorized privilege registration; wrong-role action; cross-reporter read; unassigned-technician write; invalid state shortcut; empty resolution; category correction/skill eligibility; strategy differences/ties; capacity/no-match; response/resolution exact deadlines; warning/breach deduplication; restart catch-up; policy snapshot/reprioritization; rejection/re-resolution; stale edit conflict; rollback/audit consistency; disabled key; malformed/timeout AI; accepted-suggestion authorization; filters/metrics; persistence across restart. Selected cases now executed; see team handoff and `docs/testing.md` for exact coverage. Remaining cases must still be verified.
 
-Deferred nonblocking administration: member names/group number/ownership allocation, repository destination/visibility, final branding, course upload links and filename-year discrepancy. Live AI key/model and spending decisions are required before real provider requests, not before foundation development.
+Deferred nonblocking administration: member names/group number/ownership allocation, repository visibility, final branding, course upload links and filename-year discrepancy. Live AI key/model and spending decisions are required before real provider requests, not before foundation development.
 
 ## 5. Execution phases
 
@@ -361,14 +356,14 @@ Status: DONE for design gate. P01–P10 approved. Final rendered UML/ER diagrams
 - [x] Confirm core technologies: Java, Spring Boot and PostgreSQL (D04).
 - [x] Confirm GUI: Thymeleaf + HTML + CSS, with JavaScript interactivity (D21).
 - [x] Confirm AI provider: OpenRouter (D22).
-- [ ] Finalize runtime, architecture, supporting dependencies and exact versions.
-- [ ] Select AI model/features, budget, output handling and fallback behavior.
-- [ ] Approve role-specific screens based on the provided dashboard reference.
+- [x] Finalize runtime, architecture, supporting dependencies and exact versions. Verified by clean packaged build; see `docs/architecture.md`.
+- [x] Define approved AI features, output handling and fallback behavior (P07). Model/key/budget remain deferred until live Phase 6 provider verification.
+- [x] Implement approved P01 role screens; representative desktop/mobile acceptance recorded in Step 8.
 - [x] Draft domain objects, contracts, responsibilities and relationships (P08; approved).
-- [ ] Approve lifecycle, permissions, priority, assignment and SLA rules.
-- [ ] Select and justify at least two design patterns and appropriate inheritance.
+- [x] Approve lifecycle, permissions, priority, assignment and SLA rules (P01–P10; earlier unchecked entry superseded by recorded approval).
+- [x] Select and justify State/Strategy and notification inheritance; see implementation contracts/tests in `docs/architecture.md`. Final report/UML remains Phase 8.
 - [x] Draft architecture and use case/class/database specifications (P01/P08); final UML/ER artifacts will follow implemented design.
-- [ ] Define endpoints or equivalent application interfaces, validation and errors.
+- [x] Define implemented page/form/read-only JSON contracts, validation and errors in `docs/architecture.md`.
 - [x] Draft feature-specific acceptance tests and security/nonfunctional expectations (P01–P10; approved, execution tracked separately).
 
 Outputs: approved architecture/design, schema, business rules and implementation backlog with concrete modules/files once the stack is known.
@@ -376,37 +371,37 @@ Exit: design covers R01–R27; user approves proposed technical and business dec
 
 ### Phase 3 — Project foundation
 
-Status: IN PROGRESS. Dependencies: Phase 2 approved.
+Status: DONE for tested foundation acceptance (Step 8). Dependencies: Phase 2 approved.
 
 - [x] Create approved project structure, dependency declarations, Thymeleaf templates/static assets and configuration. Compilation tracked separately.
-- [x] Establish version control: GitHub repository `Darshan-Bhandari/CSF213-OOPS-Project`, branch `main`; initial upload verified at `ee79ea2`. Later local edits remain uncommitted.
-- [x] Write V1 foundation migration and repeatable opt-in demo accounts; runtime migration verification pending.
-- [x] Implement authentication, protected password storage and authorization; test execution pending.
-- [x] Add role-specific navigation and account administration foundation; render verification pending.
+- [x] Establish version control: GitHub repository `Darshan-Bhandari/CSF213-OOPS-Project`, branch `main`; initial upload verified at `ee79ea2`; later accepted work is committed/pushed in session change logs.
+- [x] Write V1 foundation migration and repeatable opt-in demo accounts; runtime validation passed for fresh and restarted databases.
+- [x] Implement authentication, protected password storage and authorization; foundation tests and real role logins passed.
+- [x] Add role-specific navigation and account administration foundation; desktop/mobile browser acceptance passed.
 - [x] Add 15 PostgreSQL integration tests, local database helper, configuration template and README startup instructions.
 - [x] Verify compilation: Maven test-compile succeeded for 18 application classes and 2 test/helper classes targeting Java 21 on JDK 25.0.1. Maven Wrapper 3.3.4 / Maven 3.9.11 verified.
-- [ ] Verify migration execution, login/logout/CSRF/role tests, restart persistence and rendered pages before marking Phase 3 DONE.
+- [x] Verify migration execution, login/logout/CSRF/role tests, restart persistence and rendered pages. Clean package/real HTTP/restart and Chromium desktop/mobile checks passed in Step 8.
 
 Exit: reproducible startup, persistent sample accounts, all roles can log in, unauthorized access is rejected.
 
 ### Phase 4 — Core incident workflow
 
-Status: IN PROGRESS. Steps 1–7 backend/form checks passed; complete workflow restart acceptance and visual inspection remain. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
+Status: DONE for the tested Phase 4 acceptance scope (Step 8). Complete workflow/related-record restart and representative desktop/mobile visual checks passed. Browser/OS/security/performance limits are documented in the acceptance summary.
 
-- [x] Implement service/category administration and extensible classification. Verified add/edit/deactivate, case-insensitive duplicate handling, input validation, backend/HTTP authorization, CSRF and persisted audit subjects in `CatalogIntegrationTest` (6 cases). Admin visual inspection is tracked separately.
+- [x] Implement service/category administration and extensible classification. Verified add/edit/deactivate, case-insensitive duplicate handling, input validation, backend/HTTP authorization, CSRF and persisted audit subjects in `CatalogIntegrationTest` (6 cases). Admin desktop/mobile browser inspection passed in Step 8.
 - [x] Implement incident creation, detail viewing and permitted updates. Validated form, retained invalid input, owner/assignee/admin visibility, protected API and reasoned admin corrections verified by HTTP/database tests.
 - [x] Implement priority calculation and input validation. All 27 valid combinations, invalid factor bounds, server-controlled factors, criticality snapshot and reasoned correction audit verified.
 - [x] Enforce lifecycle transitions and ownership/role rules. All 64 state pairs checked; credential-based role logins and complete HTTP lifecycle pass; wrong role, stale edit, invalid shortcuts and reopening CLOSED rejected.
 - [x] Implement investigation, notes, information requests and employee replies. Verified private note visibility/no notification, own-ticket request links and reply counts, draft retention, validation/CSRF/ownership, unchanged SLA/state, same-timestamp optimistic versions and persistent public reply after full restart.
 - [x] Implement resolution, verification/closure and feedback per approved rules. Verified valid/invalid details and reasons, reporter/admin/technician permissions, separate verification then closure and combined closure, rejection/re-resolution with retained records/SLA snapshot/breaches, no-match fallback, stale drafts, optional reporter feedback with rating bounds and duplicate prevention.
 - [x] Persist audit events with each important mutation from the start. Verified ordered reconstruction and actor/state/incident/time/context fields, protected history reads, MANDATORY audit transactions and true commit/rollback under injected database failures and concurrent stale edits (`AuditConsistencyIntegrationTest`, 10 cases).
-- [ ] Verify complete lifecycle and data survival across restart.
+- [x] Verify complete lifecycle and data survival across restart. `WorkflowRestartIT` runs the packaged JAR, all three roles and both process restarts with full related-record equality; browser script completes/reviews the lifecycle at desktop/mobile widths.
 
 Exit: employee-to-technician-to-closure workflow works with complete persisted history and invalid transitions rejected.
 
 ### Phase 5 — Assignment, SLAs and notifications
 
-Status: NOT STARTED. Dependencies: Phase 4 and D09/D13/D15.
+Status: NOT STARTED for Phase 5 acceptance; supporting code exists. Dependencies: Phase 4 and D09/D13/D15.
 
 - [ ] Implement two interchangeable assignment strategies and selection/configuration.
 - [ ] Handle availability, workload limits, ties and no eligible technician.
@@ -420,7 +415,7 @@ Exit: both strategies, SLA warnings/breaches and both notification channels are 
 
 ### Phase 6 — Intelligence and reporting
 
-Status: NOT STARTED. Dependencies: core data and approved D07/D18/D20.
+Status: NOT STARTED for Phase 6 acceptance; supporting code exists. Dependencies: core data and approved D07/D18/D20.
 
 - [ ] Build OpenRouter integration for the approved AI feature(s), with configurable key/model, validation and failure handling; user adds their own key at the end. Do not choose a model or spend budget implicitly.
 - [ ] Verify startup and non-AI workflows with the key absent; clearly identify unavailable AI and test controlled success/failure responses.
@@ -480,7 +475,7 @@ First round:
 6. FEATURES ANSWERED — Category and resolution suggestions, reviewed by technicians. Key added later; model and budget pending before live calls.
 7. RUNTIME ANSWERED — Local first, public hosting deferred; no spending approved.
 8. CHANNELS ANSWERED — In-app plus simulated email; polished reference-based dashboard approved. Detailed screens approved in P01.
-9. Pause after each phase or execute the approved plan and return for new decisions?
+9. ANSWERED — Execute the assigned sequential step thoroughly; do not stop inside approved work to reapprove settled rules. Current next gate is Phase 5.
 10. Additional professor instructions, templates, links, naming corrections or interim deadlines?
 
 P01–P10 (D12–D18) approved. Exact AI model/budget and deferred administration are not foundation blockers. Ask only about new material decisions.
@@ -498,21 +493,21 @@ P01–P10 (D12–D18) approved. Exact AI model/budget and deferred administratio
 | 21 | Report completion and rehearsal/recording |
 | 22 | Submission buffer and final verification |
 
-As of 15 November, scope/design gates for Phases 1–2 are approved; Phase 3 runtime acceptance remains outstanding. Re-estimate remaining implementation after runtime verification. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
+As of 16 November, Phases 1–4 acceptance is complete in the tested environment; Phase 5 is next. Original targets above remain historical/provisional; estimate remaining phase work while protecting the recording/submission buffer. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
 
 ## 8. Risks, ambiguities and blockers
 
 | Item | Current state / action |
 |---|---|
 | Detailed business rules | P01–P10 approved; implement against recorded policies |
-| Build environment | Normal Maven Java network resolution denied. Offline official-dependency cache allowed successful application/test compilation. PostgreSQL initdb denied shared-memory allocation before test bodies ran; no integration tests passed. Native Apple Silicon binary profile added. Git initialization and push succeeded using permitted elevated Git operations. Elevated runtime execution also starts PostgreSQL and loopback sockets successfully; 15 foundation tests passed. Restart is now blocked by a migration checksum mismatch while local files are being edited. |
-| Short deadline | Eight calendar days from initial planning; prioritize mandatory functionality and protect final-day buffer |
+| Build environment | Resolved for tested macOS/JDK environment: elevated Maven/network/socket/native execution permits clean verify, packaged restart and browser checks. Historical sandbox and checksum failures are retained in the change log. V1–V4 validate; no current migration blocker. |
+| Short deadline | Six calendar days until 22 November; prioritize mandatory functionality and protect final-day buffer |
 | Video filename | PDF's example uses `1_OOP_S1_2025-2026_Project` despite 2026–2027 course year; seek clarification before final naming |
 | Submission destinations | Shared-folder and spreadsheet links not supplied in the PDF |
 | Submission cutoff | Date given, exact time unspecified; obtain course instructions if available |
 | Intelligence/innovation overlap | Do not promise bonus credit for merely fulfilling mandatory features |
 | Team and recording | Member allocation and recording availability unknown |
-| Service integrations | Budget, credentials and network availability undecided; select behavior explicitly |
+| Service integrations | Live AI model/key/budget remain undecided; no provider calls or spending approved. Local build/network checks passed. |
 
 ## 9. Progress and evidence
 
@@ -524,7 +519,7 @@ As of 15 November, scope/design gates for Phases 1–2 are approved; Phase 3 run
 | 2026-11-15 | Updated core stack and dashboard reference recorded | Latest screenshots select Thymeleaf and OpenRouter; sections 4B and D21/D22 supersede earlier choices |
 | 2026-11-15 | Added root `AGENTS.md` for Codex project workflow | User asked to begin using Codex to automate project work; instructions preserve approved scope and verified status |
 
-Next action: implement and verify Phase 3 foundation, then proceed to approved incident workflows. No need to reapprove settled scope/tools/business rules; credentials, model and team details can be provided later.
+Next action: Phase 5 acceptance of assignment strategies, eligibility/capacity/concurrency, SLA warnings/breaches/restart catch-up and both notification channels. Phases 1–4 acceptance summary is in `docs/phase-1-4-acceptance.md`. Credentials/model/team details remain deferred as recorded.
 
 ## 10. Change log
 
@@ -569,3 +564,9 @@ Next action: implement and verify Phase 3 foundation, then proceed to approved i
 | 2026-11-16 | Began Step 7: enforce actor authorization on history reads and correct lifecycle audit state fields; preparing real committed-transaction failure checks | User requested complete incident history and transaction consistency |
 
 | 2026-11-16 | Completed Step 7 history and transaction consistency acceptance; protected history reads and corrected new audit lifecycle state fields | Full suite 141/141 passed, including 10 independent committed-transaction/concurrency/failure tests. Existing audit data unchanged; full workflow restart and visual checks remain Step 8 |
+
+| 2026-11-16 | Started Step 8 thorough Phases 1–4 acceptance: clean packaging/setup, full credentialed lifecycle with app/database restarts, security/requirements review and browser capability discovery | User requested extra thorough checks including previous phases; acceptance in progress |
+
+| 2026-11-16 | Packaged app/database restart workflow preserved records; real HTTP CSRF rejection exposed GET-only access-denied page returning 405 on POST. Changed denial page to handle forwarded methods | Step 8 acceptance caught a defect not exposed by MockMvc forwarding; rerun pending |
+
+| 2026-11-16 | Completed Step 8 and Phases 1–4 acceptance review; reconciled stale checklists, documented architecture/contracts and final evidence, fixed security/UI gaps found during real packaged/browser checks | `mvnw clean verify`: 143 regression + 1 packaged restart test passed; 4 launcher tests; Chromium full workflow at desktop/mobile with reviewed screenshots; later-phase and cross-environment limits retained |

@@ -1,6 +1,6 @@
 # Verification record
 
-Latest run (16 November 2026, 01:44 IST): **141 passed, zero failures/errors/skips**. Phase 4 Steps 1–7 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
+Latest Step 8 acceptance (16 November 2026): **143 regression + 1 packaged restart test passed**, zero failures/errors/skips; **4 launcher tests** and full Chromium desktop/mobile browser workflow passed. Phases 1–4 are accepted in the documented environment. Earlier failures below are historical. See the last section for current scope.
 
 ## Foundation verification
 
@@ -129,3 +129,17 @@ History reconstruction: ordered audit IDs chain from CREATED through classificat
 History service reads now require an authorized current actor for audit, messages, resolutions, SLA events, feedback and staff suggestions. Global audit and simulated-email reads require an active administrator. New audit entries store lifecycle states in previous/new-state fields; priority changes are described separately. Historical audit rows are not rewritten, so older priority-correction rows may retain their previous format. No schema migration/reset/repair was needed. Application audit reads/writes are protected; this does not claim tamper resistance against someone with direct database write access.
 
 Evidence: `/private/tmp/csf213-step7-targeted.log`, `/private/tmp/csf213-step7-final.log`, `/private/tmp/csf213-step7-live.log` and Surefire XML/text. Step 8 full lifecycle restart and visual acceptance remain pending.
+
+## Step 8 — Phases 1–4 acceptance, 16 November 2026
+
+See `phase-1-4-acceptance.md` for the complete review and `architecture.md` for implementation contracts. The 17-page course source was re-extracted and cross-checked against the requirements register. Final report/UML/ER/team/video/submission work remains deferred to later phases.
+
+Final `./mvnw clean verify` at 02:04 IST: **143 Surefire cases + 1 Failsafe packaged integration case passed**. Breakdown: Foundation 16, Catalog 7, Workflow 36, Views 18, Rules 56, AuditConsistency 10; `WorkflowRestartIT` 1. Four launcher tests also passed. Real packaged JAR/HTTP demonstrated demo login for every role, complete lifecycle including two resolution cycles and feedback, privacy/CSRF/deactivation/logout checks, stop/restart of Java and PostgreSQL and equality of all relevant records. Demo seed idempotence and unchanged existing passwords were verified even with a new supplied seed password. Packaging output is `target/campus-itsm-0.1.0-SNAPSHOT.jar`; reports are `target/surefire-reports` and `target/failsafe-reports`.
+
+Real HTTP caught a forbidden POST forwarding defect (405 instead of 403); fixed the GET-only denial handler and reran acceptance successfully. Additional review tightened null registration validation and active-admin checks for assignment configuration. Mobile sign-out was restored, active navigation now tracks the current route and prior-null audit state no longer leaks literal null into the UI. Regression cases cover the validation/authorization changes.
+
+Browser runner `scripts/browser_acceptance.cjs` passed on a separate fresh localhost demo instance with Chromium at 1440×1000 and 390×844. It exercises all three role logins, admin pages, report/assignment/acknowledgment/investigation, private/public messages and linked reply, unchanged conversation deadlines, rejection/re-resolution, closure, feedback and all three mobile sign-outs. Active navigation and no page-level horizontal overflow are asserted. No page JS exceptions or server 5xx occurred. Full-page screenshots were reviewed for representative desktop dashboards/configuration/investigation and mobile dashboards/configuration/closed details. Screenshots/results are ignored local artifacts in `.local/acceptance-screenshots/`; an additional `admin-preview.png` is the concise visual handoff. This does not certify Firefox/Safari, every screen width, accessibility, load/performance or production security.
+
+The browser/demo runtime was isolated on 8081/54330 with `.local/visual-final-postgres-data` and was stopped after verification; original app 8080 remains running. Generated credentials remain only in ignored local configuration. Original development records were preserved. V1–V4 were not edited, no checksum repair occurred, and the database helper's optional port/directory overrides were exercised. Later-phase AI/SLA/reporting acceptance remains open, with no live provider spending.
+
+Evidence: `/private/tmp/csf213-step8-final.log`, `/private/tmp/csf213-step8-browser-final.log`, `/private/tmp/csf213-visual-final-app.log`, `.local/acceptance-screenshots/results.json`. The earlier first packaged attempt failed on the denial handler and is superseded by the passing final run. Browser harness selector corrections and the launcher's macOS symlink-aware test assertion did not change application behavior.

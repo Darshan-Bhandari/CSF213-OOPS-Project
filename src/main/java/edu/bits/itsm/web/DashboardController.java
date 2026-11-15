@@ -57,7 +57,7 @@ public class DashboardController {
     return "dashboard";
   }
 
-  @GetMapping("/access-denied")
+  @org.springframework.web.bind.annotation.RequestMapping("/access-denied")
   String denied(HttpServletResponse response) {
     response.setStatus(403);
     return "error/403";

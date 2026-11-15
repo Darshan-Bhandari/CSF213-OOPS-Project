@@ -2,7 +2,9 @@
 
 Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. AI integration is planned through OpenRouter, with a user-supplied key and model.
 
-The project is being built in phases. **Current verified progress: foundation plus Phase 4 Steps 1–7 backend/form checks.** Catalog administration, incident reporting/detail access, calculated priority, guarded lifecycle, private/public investigation conversation, resolution/rejection, closure, reporter feedback and protected incident history are implemented. Supporting assignment/SLA/notification/reporting and AI source is included; remaining acceptance is tracked in `plan.md`. The latest automated suite passed 141 cases. Visual browser acceptance remains partial; no live AI provider call is verified.
+**Phases 1–4 are accepted in the tested environment.** The current source supports role authentication/admin catalog, incident reporting and priority, guarded lifecycle, private/public investigation, requests/replies, resolution/rejection, closure, feedback and protected history. Clean verification passed **143 regression tests + 1 packaged restart test**, with **4 launcher tests** and desktop/mobile Chromium browser acceptance. See [acceptance scope](docs/phase-1-4-acceptance.md), [architecture](docs/architecture.md), and [current plan](plan.md).
+
+Supporting assignment/SLA/notification/reporting and AI code exists; Phase 5–6 acceptance remains open. No live AI request or public deployment is verified. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
 
 ## Requirements
 
@@ -78,11 +80,12 @@ Seeding is idempotent: existing accounts and passwords are retained on restart. 
 ## Tests and packaging
 
 ```sh
-./mvnw test
-./mvnw package
+./mvnw test       # regression suite
+./mvnw clean verify  # clean JAR build + real packaged HTTP/app/database restart acceptance
+python3 -m unittest discover -s src/test/python -v
 ```
 
-Tests start an isolated PostgreSQL process on a random port, run real migrations, and roll back each test's data. No demo passwords, real user data or AI keys are required. Test results appear in `target/surefire-reports`. See `docs/testing.md` for cases and actual execution status.
+Tests start an isolated PostgreSQL process on a random port, run real migrations, and roll back each test's data. No demo passwords, real user data or AI keys are required. Regression results appear in `target/surefire-reports`; packaged restart results appear in `target/failsafe-reports`. See `docs/testing.md` for cases and actual execution status.
 
 Package output: `target/campus-itsm-0.1.0-SNAPSHOT.jar`. Running the jar directly uses exported environment variables; `.env` is loaded only by the provided launcher.
 
@@ -96,7 +99,33 @@ Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `mai
 
 ## Current verification status
 
-Elevated execution permits local PostgreSQL and sockets in this managed workspace. The full suite passed **141 tests, zero failures/errors/skips**; fresh databases and persistent V1–V4 migration validation pass. A labeled local incident was reported through HTTP and retained its details, owner and priority after both app and database restarts. The employee desktop dashboard was visually inspected earlier; full-page/responsive and admin/technician visual checks remain pending. See `docs/testing.md` and `plan.md` for evidence and exact limits. Historical build/network failures do not describe the latest successful run.
+Elevated execution permits PostgreSQL and local sockets in this managed workspace. The latest clean `verify` passed 143 regression cases plus packaged JAR acceptance that restarts both Java and PostgreSQL and checks all related records. Four launcher tests passed. Three-role browser workflows/screenshots were checked at 1440×1000 and 390×844 in Chromium; other browsers/OSs, full accessibility, performance and production hardening remain outside this acceptance pass. Historical failed runs are retained in `docs/testing.md` with later outcomes.
+
+## Optional browser acceptance
+
+Requires Node.js 20+ and Playwright (tested 1.62.1), only for browser checks. The application itself has no Node/frontend build dependency. Start an **isolated disposable** database/demo instance on loopback ports different from your normal app:
+
+```sh
+./mvnw test-compile exec:java -Dexec.mainClass=edu.bits.itsm.DevelopmentDatabase -Dexec.classpathScope=test -Ddev.db.port=54330 -Ddev.db.directory=.local/browser-test-data
+```
+
+Run the app in another terminal using that database, `SERVER_PORT=8081`, demo profile and a password you choose. Provide the same password in `DEMO_PASSWORD` to the browser runner; it creates/updates labeled verification tickets in that disposable instance. The database helper defaults remain 54329 and `.local/postgres-data` if overrides are absent.
+
+With Playwright installed locally, the runner is:
+
+```sh
+BROWSER_BASE_URL=http://127.0.0.1:8081 node scripts/browser_acceptance.cjs
+```
+
+If Playwright is not installed, an optional project-local installation is:
+
+```sh
+npm install --prefix .local/browser-tools playwright@1.62.1
+PLAYWRIGHT_BROWSERS_PATH="$PWD/.local/playwright-browsers" node .local/browser-tools/node_modules/playwright/cli.js install chromium --only-shell
+NODE_PATH="$PWD/.local/browser-tools/node_modules" PLAYWRIGHT_BROWSERS_PATH="$PWD/.local/playwright-browsers" BROWSER_BASE_URL=http://127.0.0.1:8081 node scripts/browser_acceptance.cjs
+```
+
+`DEMO_PASSWORD` must already be exported for these runner commands. Alternatively set `DEMO_CREDENTIALS_FILE` to an ignored local JSON file with a `password` field. Passwords are not printed. Screenshots and results default to ignored `.local/acceptance-screenshots/`. The runner accepts only localhost targets. See the acceptance summary for what is tested and what is deferred.
 
 ## Third-party wrapper
 

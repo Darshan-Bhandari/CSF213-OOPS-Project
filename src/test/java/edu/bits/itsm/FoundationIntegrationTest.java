@@ -245,4 +245,13 @@ class FoundationIntegrationTest {
         .andExpect(redirectedUrl("/login?logout"));
     assertTrue(session.isInvalid());
   }
+  @Test
+  void incompleteDirectRegistrationIsRejectedWithoutPartialAccounts() {
+    long before=accounts.count();
+    for(String[] input:java.util.List.of(new String[]{null,"null-name@example.test",PASSWORD},
+        new String[]{"Name",null,PASSWORD},new String[]{"Name","null-password@example.test",null}))
+      assertThrows(edu.bits.itsm.shared.BusinessException.class,()->service.register(input[0],input[1],input[2]));
+    assertEquals(before,accounts.count());
+  }
+
 }
