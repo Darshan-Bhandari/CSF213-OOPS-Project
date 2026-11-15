@@ -219,6 +219,7 @@ public class IncidentService {
       long id, long version, String action, String details, AccountPrincipal actor) {
     var i = editing(id, version, actor);
     Instant now = clock.instant();
+    if (action == null) throw new BusinessException("Choose an incident action.");
     switch (action) {
       case "ACKNOWLEDGE" -> {
         technician(i, actor);
@@ -243,7 +244,7 @@ public class IncidentService {
       case "RESOLVE" -> {
         technician(i, actor);
         details = text(details, 8000);
-        step(i, IncidentStatus.RESOLVED, actor.getAccountId(), "RESOLVED", "Resolution recorded");
+        step(i, IncidentStatus.RESOLVED, actor.getAccountId(), "RESOLVED", "Resolution recorded for cycle " + i.getCycle());
         jdbc.update(
             "INSERT INTO resolutions(incident_id,cycle,technician_id,details,created_at) VALUES"
                 + " (?,?,?,?,?)",
@@ -260,7 +261,7 @@ public class IncidentService {
         if (actor.getRole() != Role.EMPLOYEE && actor.getRole() != Role.ADMIN)
           throw new AccessDeniedException("Reporter verification required.");
         String why =
-            actor.getRole() == Role.ADMIN ? text(details, 1000) : "Reporter confirmed resolution";
+            actor.getRole() == Role.ADMIN ? "Administrator override: " + text(details, 1000) : "Reporter confirmed resolution";
         if (!action.equals("CLOSE"))
           step(i, IncidentStatus.VERIFIED, actor.getAccountId(), "VERIFIED", why);
         if (!action.equals("VERIFY")) {
@@ -275,7 +276,8 @@ public class IncidentService {
         sla.check(i);
         i.reject(now);
         audit.incident(
-            actor.getAccountId(), id, "RESOLUTION_REJECTED", "RESOLVED", "CLASSIFIED", details);
+            actor.getAccountId(), id, "RESOLUTION_REJECTED", "RESOLVED", "CLASSIFIED",
+            "Cycle " + (i.getCycle() - 1) + " rejected: " + details + "; started cycle " + i.getCycle());
         sla.startCycle(i);
         incidents.saveAndFlush(i);
         autoAssign(i, actor.getAccountId());
@@ -323,7 +325,9 @@ public class IncidentService {
   public void feedback(long id, int rating, String comment, AccountPrincipal actor) {
     catalog.lock();
     var i = view(id, actor);
-    if (actor.getRole() != Role.EMPLOYEE || i.getStatus().isActive())
+    if (actor.getRole() != Role.EMPLOYEE)
+      throw new AccessDeniedException("Only the reporter can submit feedback.");
+    if (i.getStatus().isActive())
       throw new BusinessException("The reporter can rate an incident after resolution.");
     if (rating < 1 || rating > 5 || comment == null || comment.length() > 2000)
       throw new BusinessException("Rating must be 1–5; comment at most 2000 characters.");
@@ -334,7 +338,7 @@ public class IncidentService {
         id,
         actor.getAccountId(),
         rating,
-        comment,
+        comment.strip(),
         Timestamp.from(clock.instant()));
     audit.incident(actor.getAccountId(), id, "FEEDBACK_ADDED", null, null, "Rating " + rating);
   }

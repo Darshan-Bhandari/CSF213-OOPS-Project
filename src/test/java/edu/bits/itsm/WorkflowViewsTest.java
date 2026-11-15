@@ -162,6 +162,8 @@ class WorkflowViewsTest {
       model.addAttribute("viewer", new AccountPrincipal(account));
       model.addAttribute("form", new IncidentReportForm());
       model.addAttribute("messageForm", new IncidentMessageForm());
+      model.addAttribute("actionForm", new IncidentActionForm());
+      model.addAttribute("feedbackForm", new IncidentFeedbackForm());
       var now = Instant.parse("2026-11-15T10:00:00Z");
       var incident =
           new Incident(

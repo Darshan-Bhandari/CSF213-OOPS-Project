@@ -1,6 +1,6 @@
 # Verification record
 
-Latest run (15 November 2026, 23:25 IST): **121 passed, zero failures/errors/skips**. Phase 4 Steps 1–5 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
+Latest run (16 November 2026, 01:33 IST): **131 passed, zero failures/errors/skips**. Phase 4 Steps 1–6 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
 
 ## Foundation verification
 
@@ -98,3 +98,20 @@ Final command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test` (elevat
 V4 adds a nonnegative conversation revision used to make each message a real incident mutation for optimistic locking. Earlier migrations are untouched. Runtime upgrade validated V1–V4 and applied V4 once to the existing persistent database. A labeled public reply on INC-1 was submitted through actual employee HTTP login; its version increased while status/deadlines stayed unchanged. Both application and PostgreSQL were restarted; existing login, saved reply, version, status and deadlines were verified again. No data reset or checksum repair.
 
 Evidence: `/private/tmp/csf213-step5-final.log`, `/private/tmp/csf213-step5-live.log`, `/private/tmp/csf213-step5-db-restart.log`, `/private/tmp/csf213-step5-restart.log`; Surefire results in `target/surefire-reports`. No browser visual inspection was performed for these new conversation controls; view rendering tests do not replace it. The local test reply remains for follow-up. Step 6 resolution/rejection/feedback and later concurrency/history acceptance remain separate.
+
+## Phase 4 Step 6 — resolution, rejection, closure and feedback, 16 November 2026
+
+Full command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test` with elevated local process/socket access. **131 tests passed, zero failures/errors/skips**: foundation 15, catalog 6, workflow PostgreSQL/HTTP 36, view rendering 18, rules 56. Targeted workflow/rendering run also passed. No schema migration or live AI call was needed.
+
+Ten additional workflow integration cases verify:
+
+- Nonempty resolution details, technician identity and cycle completion persist; reporter can verify then close in separate steps. Feedback is optional; closing without it works. Repeated closure is rejected.
+- Blank/oversized resolutions and blank/oversized rejection reasons fail without writing success records or moving the lifecycle. Stale resolution submissions retain the entered draft and return 409.
+- A rejected late first fix retains its resolution record, completed cycle deadline/time, first acknowledgment/resolution timestamps and recorded SLA breach. A second cycle uses the incident’s stored target despite catalog policy changes; re-resolution creates a second record and leaves the earlier breach intact.
+- Rejection without an eligible technician leaves CLASSIFIED/unassigned with both cycle records and previous resolution retained.
+- Administrator verification/closure requires a reason and logs the administrator identity and explicit override text in both verification and closure audit entries. Technicians/unrelated employees cannot verify, close or reject on behalf of the reporter; administrators cannot reject as the reporter.
+- Feedback is reporter-only and requires resolution. Out-of-range, empty/non-numeric ratings, excessive comments and missing CSRF are rejected. Both rating boundaries (1, 5) persist with reporter identity; comments are trimmed and escaped in HTML. Duplicate submission cannot overwrite earlier feedback or add another success audit.
+
+Action and feedback forms now retain invalid input and expose readable validation errors on incident details. Resolution/rejection audit context includes the relevant cycle; administrator override reasons are explicit. Latest app startup uses the same persistent development database; no data reset or schema repair occurred. End-to-end persistence of resolved/rejected cycles across process restarts and visual browser inspection are still tracked under later acceptance tasks; these tests do not claim those checks were performed.
+
+Evidence: `/private/tmp/csf213-step6-targeted.log`, `/private/tmp/csf213-step6-final.log`, `/private/tmp/csf213-step6-live.log`, plus Surefire XML/text in `target/surefire-reports` (local outputs excluded from Git).

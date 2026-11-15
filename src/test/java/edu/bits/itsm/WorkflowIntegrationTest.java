@@ -563,4 +563,169 @@ class WorkflowIntegrationTest {
     assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
   }
 
+  @Test
+  void resolveVerifyThenCloseRetainsResolutionAndAllowsNoFeedback() throws Exception {
+    var i=create();resolve(i);
+    var resolution=history.resolutions(i.getId()).getFirst();
+    assertEquals("Restored access after troubleshooting.",resolution.get("details"));
+    assertEquals(technician.getAccountId(),((Number)resolution.get("technician_id")).longValue());
+    assertEquals(1,((Number)resolution.get("cycle")).intValue());
+    assertEquals(i.getResolvedAt(),jdbc.queryForObject("SELECT resolved_at FROM resolution_cycles WHERE incident_id=? AND cycle=1",
+        java.sql.Timestamp.class,i.getId()).toInstant());
+    String path="/incidents/"+i.getId()+"/action";
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion()).param("action","VERIFY"))
+        .andExpect(redirectedUrl("/incidents/"+i.getId()));
+    assertEquals(IncidentStatus.VERIFIED,i.getStatus());
+    assertNull(i.getClosedAt());
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion()).param("action","CLOSE"))
+        .andExpect(redirectedUrl("/incidents/"+i.getId()));
+    assertEquals(IncidentStatus.CLOSED,i.getStatus());assertNotNull(i.getClosedAt());
+    assertTrue(history.feedback(i.getId()).isEmpty());
+    assertEquals(java.util.List.of("VERIFIED","CLOSED"),jdbc.queryForList(
+        "SELECT action FROM audit_entries WHERE incident_id=? AND action IN ('VERIFIED','CLOSED') ORDER BY id",String.class,i.getId()));
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion()).param("action","CLOSE"))
+        .andExpect(status().isBadRequest());
+    assertEquals(1,history.resolutions(i.getId()).size());
+  }
+
+  @Test
+  void invalidResolutionAndRejectionDoNotWriteSuccessRecords() throws Exception {
+    var i=create();
+    incidents.transition(i.getId(),i.getVersion(),"ACKNOWLEDGE","",technician);
+    incidents.transition(i.getId(),i.getVersion(),"START","",technician);
+    String path="/incidents/"+i.getId()+"/action";
+    for(String details:java.util.List.of(" ","x".repeat(8001)))
+      mvc.perform(post(path).with(user(technician)).with(csrf()).param("version",""+i.getVersion())
+          .param("action","RESOLVE").param("details",details)).andExpect(status().isBadRequest());
+    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId()).isEmpty());
+    incidents.transition(i.getId(),i.getVersion(),"RESOLVE","Actual solution",technician);
+    for(String reason:java.util.List.of(" ","Rejection draft "+"x".repeat(1001)))
+      mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
+          .param("action","REJECT").param("details",reason)).andExpect(status().isBadRequest());
+    assertEquals(1,i.getCycle());assertEquals(IncidentStatus.RESOLVED,i.getStatus());
+    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM audit_entries WHERE incident_id=? AND action='RESOLUTION_REJECTED'",Integer.class,i.getId()));
+    assertEquals(1,history.resolutions(i.getId()).size());
+  }
+
+  @Test
+  void rejectionAndSecondResolutionPreservePreviousCycleBreachAndSnapshot() {
+    var i=create();
+    incidents.transition(i.getId(),i.getVersion(),"ACKNOWLEDGE","",technician);
+    incidents.transition(i.getId(),i.getVersion(),"START","",technician);
+    var firstAcknowledgment=i.getAcknowledgedAt();var firstDeadline=i.getResolutionDue();
+    clock.advance(1801);
+    incidents.transition(i.getId(),i.getVersion(),"RESOLVE","First attempted fix",technician);
+    var firstResolution=i.getFirstResolvedAt();
+    assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=? AND cycle=1 AND kind='RESOLUTION_BREACH'",Integer.class,i.getId()));
+    catalog.savePolicy(service,"P1",10,20,admin.getAccountId());
+    clock.advance(5);var rejectionTime=clock.instant();
+    incidents.transition(i.getId(),i.getVersion(),"REJECT","Still failing after reconnecting",employee);
+    assertEquals(2,i.getCycle());assertEquals(IncidentStatus.ASSIGNED,i.getStatus());
+    assertEquals(rejectionTime.plusSeconds(1800),i.getResolutionDue());
+    assertEquals(firstAcknowledgment,i.getAcknowledgedAt());assertEquals(firstResolution,i.getFirstResolvedAt());
+    assertNull(i.getResolvedAt());
+    assertEquals(firstDeadline,jdbc.queryForObject("SELECT deadline FROM resolution_cycles WHERE incident_id=? AND cycle=1",java.sql.Timestamp.class,i.getId()).toInstant());
+    assertEquals(firstResolution,jdbc.queryForObject("SELECT resolved_at FROM resolution_cycles WHERE incident_id=? AND cycle=1",java.sql.Timestamp.class,i.getId()).toInstant());
+    clock.advance(10);resolve(i);
+    assertEquals(2,history.resolutions(i.getId()).size());
+    assertEquals(firstResolution,i.getFirstResolvedAt());
+    assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=? AND cycle=1 AND kind='RESOLUTION_BREACH'",Integer.class,i.getId()));
+    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=? AND cycle=2 AND kind='RESOLUTION_BREACH'",Integer.class,i.getId()));
+    String rejection=jdbc.queryForObject("SELECT description FROM audit_entries WHERE incident_id=? AND action='RESOLUTION_REJECTED'",String.class,i.getId());
+    assertTrue(rejection.contains("Cycle 1 rejected"));assertTrue(rejection.contains("started cycle 2"));
+  }
+
+  @Test
+  void rejectionWithoutEligibleTechnicianRetainsClassifiedAndHistory() {
+    var i=create();resolve(i);
+    assignment.technician(technician.getAccountId(),false,5,admin.getAccountId());
+    incidents.transition(i.getId(),i.getVersion(),"REJECT","Issue persists",employee);
+    assertEquals(IncidentStatus.CLASSIFIED,i.getStatus());assertNull(i.getAssigneeId());
+    assertEquals(2,i.getCycle());assertEquals(1,history.resolutions(i.getId()).size());
+    assertEquals(2,jdbc.queryForObject("SELECT count(*) FROM resolution_cycles WHERE incident_id=?",Integer.class,i.getId()));
+  }
+
+  @Test
+  void administratorVerificationAndClosureRequireAndAuditReason() throws Exception {
+    var i=create();resolve(i);String path="/incidents/"+i.getId()+"/action";
+    mvc.perform(post(path).with(user(admin)).with(csrf()).param("version",""+i.getVersion())
+        .param("action","VERIFY_CLOSE").param("details"," ")).andExpect(status().isBadRequest());
+    assertEquals(IncidentStatus.RESOLVED,i.getStatus());
+    mvc.perform(post(path).with(user(admin)).with(csrf()).param("version",""+i.getVersion())
+        .param("action","VERIFY_CLOSE").param("details","Reporter confirmed offline; authorized support closure"))
+        .andExpect(redirectedUrl("/incidents/"+i.getId()));
+    assertEquals(IncidentStatus.CLOSED,i.getStatus());
+    var rows=jdbc.queryForList("SELECT actor_id,description FROM audit_entries WHERE incident_id=? AND action IN ('VERIFIED','CLOSED') ORDER BY id",i.getId());
+    assertEquals(2,rows.size());
+    for(var row:rows) {
+      assertEquals(admin.getAccountId(),((Number)row.get("actor_id")).longValue());
+      assertTrue(row.get("description").toString().contains("Administrator override: Reporter confirmed offline"));
+    }
+  }
+
+  @Test
+  void closureRejectionAndFeedbackRespectRoleAndOwnership() throws Exception {
+    var i=create();resolve(i);String path="/incidents/"+i.getId();
+    for(String action:java.util.List.of("VERIFY_CLOSE","REJECT")) {
+      mvc.perform(post(path+"/action").with(user(technician)).with(csrf()).param("version",""+i.getVersion())
+          .param("action",action).param("details","Technician override attempt")).andExpect(status().isForbidden());
+      mvc.perform(post(path+"/action").with(user(other)).with(csrf()).param("version",""+i.getVersion())
+          .param("action",action).param("details","Other reporter attempt")).andExpect(status().isForbidden());
+    }
+    mvc.perform(post(path+"/action").with(user(admin)).with(csrf()).param("version",""+i.getVersion())
+        .param("action","REJECT").param("details","Administrator rejection attempt")).andExpect(status().isForbidden());
+    for(var actor:java.util.List.of(other,technician,admin))
+      mvc.perform(post(path+"/feedback").with(user(actor)).with(csrf()).param("rating","5").param("comment","Unauthorized"))
+          .andExpect(status().isForbidden());
+    assertTrue(history.feedback(i.getId()).isEmpty());assertEquals(IncidentStatus.RESOLVED,i.getStatus());
+  }
+
+  @Test
+  void feedbackRequiresResolutionAndValidRatingRetainsComment() throws Exception {
+    var i=create();String path="/incidents/"+i.getId()+"/feedback";
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("rating","5").param("comment","Too soon"))
+        .andExpect(status().isBadRequest());
+    resolve(i);
+    for(String rating:java.util.List.of("0","6","not-a-number",""))
+      mvc.perform(post(path).with(user(employee)).with(csrf()).param("rating",rating).param("comment","Keep my feedback draft"))
+          .andExpect(status().isBadRequest()).andExpect(model().attributeHasFieldErrors("feedbackForm","rating"))
+          .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep my feedback draft")));
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("rating","3").param("comment","x".repeat(2001)))
+        .andExpect(status().isBadRequest());
+    mvc.perform(post(path).with(user(employee)).param("rating","5").param("comment","Missing CSRF"))
+        .andExpect(status().isForbidden());
+    assertTrue(history.feedback(i.getId()).isEmpty());
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(ints={1,5})
+  void reporterFeedbackPersistsOnceAndEscapesComment(int rating) throws Exception {
+    var i=create();resolve(i);String path="/incidents/"+i.getId();
+    mvc.perform(post(path+"/feedback").with(user(employee)).with(csrf()).param("rating",""+rating)
+        .param("comment","  <script>feedback</script>  ")).andExpect(redirectedUrl(path));
+    var feedback=history.feedback(i.getId()).getFirst();
+    assertEquals(rating,feedback.get("rating"));assertEquals("<script>feedback</script>",feedback.get("comment"));
+    assertEquals(employee.getAccountId(),((Number)feedback.get("reporter_id")).longValue());
+    mvc.perform(get(path).with(user(employee))).andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("<script>feedback</script>"))));
+    mvc.perform(post(path+"/feedback").with(user(employee)).with(csrf()).param("rating","3").param("comment","Overwrite"))
+        .andExpect(status().isBadRequest());
+    assertEquals(1,history.feedback(i.getId()).size());
+    assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM audit_entries WHERE incident_id=? AND action='FEEDBACK_ADDED'",Integer.class,i.getId()));
+  }
+
+  @Test
+  void staleResolutionRetainsDraftAndCannotResolveNewerVersion() throws Exception {
+    var i=create();
+    incidents.transition(i.getId(),i.getVersion(),"ACKNOWLEDGE","",technician);
+    incidents.transition(i.getId(),i.getVersion(),"START","",technician);
+    long stale=i.getVersion();
+    incidents.message(i.getId(),i.getVersion(),"INTERNAL","Additional diagnostic finding",null,technician);
+    mvc.perform(post("/incidents/"+i.getId()+"/action").with(user(technician)).with(csrf())
+        .param("version",""+stale).param("action","RESOLVE").param("details","Keep this resolution draft"))
+        .andExpect(status().isConflict()).andExpect(model().attributeHasErrors("actionForm"))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep this resolution draft")));
+    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId()).isEmpty());
+  }
+
 }

@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-15 (Asia/Kolkata)
+Last updated: 2026-11-16 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -17,19 +17,20 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
-## Team handoff — current session, 15 November 2026
+## Team handoff — current session, 16 November 2026
 
 - Phases 1–2 scope/design gates approved. Team responsibilities, final report diagrams, model/budget and submission details remain deferred.
 - Phase 3 verification: real PostgreSQL migrations, 15 foundation cases, role credential logins and role dashboard rendering pass. Existing employee account and saved incident survived both application and PostgreSQL process restarts. Desktop employee dashboard was visually inspected earlier; admin/technician, full-page and responsive visual checks remain outstanding. Do not describe Phase 3 as fully visually accepted.
-- Phase 4 Steps 1–5 backend/form acceptance passed: catalog administration, report creation/detail access, calculated priority/snapshot/corrections, explicit lifecycle, ownership and role enforcement. Conversation privacy, linked replies and same-timestamp stale-edit checks now pass. Remaining resolution/rejection/feedback/history acceptance tasks are tracked below; the full lifecycle already has a passing HTTP integration check.
-- Latest full regression: **121 tests passed, zero failures/errors/skips** (`./mvnw -o test`, 15 November, 23:25 IST). Breakdown: foundation 15, catalog 6, workflow database/HTTP 26, view rendering 18, rules 56. These are automated checks, not browser screenshots.
+- Phase 4 Steps 1–6 backend/form acceptance passed: catalog administration, report creation/detail access, calculated priority/snapshot/corrections, explicit lifecycle, ownership and role enforcement. Conversation privacy, linked replies and same-timestamp stale-edit checks now pass. Step 6 resolution/rejection/closure/feedback checks now pass; complete history acceptance and browser visual checks remain open.
+- Latest full regression: **131 tests passed, zero failures/errors/skips** (`./mvnw -o test`, 16 November, 01:33 IST). Breakdown: foundation 15, catalog 6, workflow database/HTTP 36, view rendering 18, rules 56. These are automated checks, not browser screenshots.
 - Actual runtime check: employee submitted labeled local ticket `INC-1` (Wi-Fi, Network, impact 2, urgency 2, criticality 3 → score 12/P2), then reopened it after app and database restarts with unchanged ownership/title/classification/priority. It remains CLASSIFIED because the persistent database has no eligible technician. This is a verification incident, not a seeded outage or completed technician demo.
 - Local account inventory: active employee ID 1 is the runtime verification account. Documented demo role accounts are absent from this database; opt-in demo provisioning remains available. Passwords/keys are not recorded here.
 - Migration mismatch resolved: V2 restored to its published contents; demo marker table is in V3. Both fresh databases and persistent restarts now validate V1–V4. Never edit an applied migration or repair checksums to conceal schema drift.
 - Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, `main`. Publish the current workflow source and its supporting modules together so a checkout can compile. Existing later-phase assignment/SLA/notification/reporting/AI scaffolding is included as dependencies; that does not mark Phases 5–6 fully accepted. Earlier Phase 3 ZIP is historical, not the latest source snapshot.
 - Step 5 complete for backend/form checks: assigned technician can add private notes and public information requests; reporter replies link only to requests on the same ticket. Reads enforce actor authorization, employee views omit private note bodies, and internal notes do not trigger notifications. Request reply counts show awaiting/replied status without introducing a lifecycle state or pausing SLA clocks. Invalid and stale submissions retain message drafts with readable errors.
 - V4 adds `conversation_revision` so every saved message makes the incident dirty and advances its optimistic version, including multiple writes at the exact same timestamp. V1–V3 remain unchanged. Fresh-database suite and existing-database upgrade pass; saved public reply on INC-1 survived app and PostgreSQL restarts with unchanged state/deadlines.
-- Immediate next work: Step 6 resolution, rejection/re-resolution, verification/closure and feedback acceptance, then complete history acceptance and remaining visual checks. Repeated-report correlation is approved future scope below; it is not implemented. No live AI calls/model spending/public hosting approved.
+- Step 6 complete for backend/form checks: nonempty resolution details are persisted per cycle; only reporter (or reasoned admin override) can verify/close; reporter rejection starts a new cycle and retains previous resolution/SLA breach/first-response history and target snapshot. No eligible technician leaves it CLASSIFIED/unassigned. Invalid/stale action and feedback submissions retain drafts with readable errors; feedback is optional, reporter-only, rating 1–5 and once per incident after resolution. Closed incidents cannot be reopened through these actions.
+- Immediate next work: Step 7 full incident-history/transaction consistency acceptance, then Step 8 complete workflow/restart acceptance and remaining visual checks. Repeated-report correlation is approved future scope below; it is not implemented. No live AI calls/model spending/public hosting approved.
 
 ## Approved addition — repeated reports indicating wider impact
 
@@ -49,10 +50,10 @@ Priority rationale: use the approved product of impact × urgency × criticality
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phase 4 — core incident workflow, `IN PROGRESS`; Steps 1–5 backend/form checks verified. Supporting Phase 5–6 code exists but those phase gates remain open. Phase 3 runtime checks pass with remaining visual limits recorded above. P01–P10 approved; team/submission administration deferred.
+- Current phase: Phase 4 — core incident workflow, `IN PROGRESS`; Steps 1–6 backend/form checks verified. Supporting Phase 5–6 code exists but those phase gates remain open. Phase 3 runtime checks pass with remaining visual limits recorded above. P01–P10 approved; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
-- Implementation status: foundation and Phase 4 Steps 1–5 backend/form checks pass; 121-test full suite and persistent incident restart check passed. Elevated execution resolved the earlier sandbox PostgreSQL restriction. Remaining phase acceptance and visual limits are in the team handoff above; model/budget and team allocation remain pending.
+- Implementation status: foundation and Phase 4 Steps 1–6 backend/form checks pass; 131-test full suite and persistent incident restart check passed. Elevated execution resolved the earlier sandbox PostgreSQL restriction. Remaining phase acceptance and visual limits are in the team handoff above; model/budget and team allocation remain pending.
 - Approved application format: web application (2026-11-15). Current stack is in section 4B; supporting tools approved in section 4C. Public hosting deferred; exact versions will be checked during foundation setup.
 
 ## 3. Requirements register
@@ -388,14 +389,14 @@ Exit: reproducible startup, persistent sample accounts, all roles can log in, un
 
 ### Phase 4 — Core incident workflow
 
-Status: IN PROGRESS. Steps 1–5 backend/form checks passed; resolution/history acceptance and visual inspection remain. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
+Status: IN PROGRESS. Steps 1–6 backend/form checks passed; full history/workflow acceptance and visual inspection remain. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
 
 - [x] Implement service/category administration and extensible classification. Verified add/edit/deactivate, case-insensitive duplicate handling, input validation, backend/HTTP authorization, CSRF and persisted audit subjects in `CatalogIntegrationTest` (6 cases). Admin visual inspection is tracked separately.
 - [x] Implement incident creation, detail viewing and permitted updates. Validated form, retained invalid input, owner/assignee/admin visibility, protected API and reasoned admin corrections verified by HTTP/database tests.
 - [x] Implement priority calculation and input validation. All 27 valid combinations, invalid factor bounds, server-controlled factors, criticality snapshot and reasoned correction audit verified.
 - [x] Enforce lifecycle transitions and ownership/role rules. All 64 state pairs checked; credential-based role logins and complete HTTP lifecycle pass; wrong role, stale edit, invalid shortcuts and reopening CLOSED rejected.
 - [x] Implement investigation, notes, information requests and employee replies. Verified private note visibility/no notification, own-ticket request links and reply counts, draft retention, validation/CSRF/ownership, unchanged SLA/state, same-timestamp optimistic versions and persistent public reply after full restart.
-- [ ] Implement resolution, verification/closure and feedback per approved rules.
+- [x] Implement resolution, verification/closure and feedback per approved rules. Verified valid/invalid details and reasons, reporter/admin/technician permissions, separate verification then closure and combined closure, rejection/re-resolution with retained records/SLA snapshot/breaches, no-match fallback, stale drafts, optional reporter feedback with rating bounds and duplicate prevention.
 - [ ] Persist audit events with each important mutation from the start.
 - [ ] Verify complete lifecycle and data survival across restart.
 
@@ -558,3 +559,7 @@ Next action: implement and verify Phase 3 foundation, then proceed to approved i
 | 2026-11-15 | Began Step 5: enforced actor-based message reads, linked request replies, retained invalid drafts and added V4 conversation revision for reliable optimistic versions | User requested investigation notes, information requests and replies; verification in progress |
 
 | 2026-11-15 | Completed Step 5 conversation backend/form checks and V4 conversation revision | Full suite 121/121 passed; live public reply on INC-1 retained after app + PostgreSQL restarts; browser visual checks remain pending |
+
+| 2026-11-16 | Started Step 6 resolution/rejection/closure/feedback review and acceptance; added retained action/feedback drafts and clearer cycle/override audit context | User requested Step 6; verification in progress |
+
+| 2026-11-16 | Completed Step 6 backend/form acceptance; preserved action/feedback drafts, clarified cycle and administrator override audits, restricted feedback to reporter | Full suite 131/131 passed: 36 workflow PostgreSQL/HTTP cases including rejected fix and second resolution. No schema change. History/restart acceptance and visual checks remain separate |

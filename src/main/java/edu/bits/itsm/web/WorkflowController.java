@@ -94,6 +94,13 @@ public class WorkflowController {
     var i = incidents.view(id, actor);
     catalog(model);
     model.addAttribute("incident", i);
+    if (!model.containsAttribute("actionForm")) {
+      var form = new IncidentActionForm();
+      form.setVersion(i.getVersion());
+      model.addAttribute("actionForm", form);
+    }
+    if (!model.containsAttribute("feedbackForm"))
+      model.addAttribute("feedbackForm", new IncidentFeedbackForm());
     if (!model.containsAttribute("messageForm")) {
       var form = new IncidentMessageForm();
       form.setVersion(i.getVersion());
@@ -115,12 +122,23 @@ public class WorkflowController {
   @PostMapping("/incidents/{id}/action")
   String action(
       @PathVariable long id,
-      @RequestParam long version,
-      @RequestParam String action,
-      @RequestParam(defaultValue = "") String details,
-      @AuthenticationPrincipal AccountPrincipal actor) {
-    incidents.transition(id, version, action, details, actor);
-    return back(id);
+      @jakarta.validation.Valid @ModelAttribute("actionForm") IncidentActionForm form,
+      org.springframework.validation.BindingResult errors,
+      @AuthenticationPrincipal AccountPrincipal actor,
+      Model model,
+      jakarta.servlet.http.HttpServletResponse response) {
+    int status = 400;
+    if (!errors.hasErrors()) {
+      try {
+        incidents.transition(id, form.getVersion(), form.getAction(), form.getDetails(), actor);
+        return back(id);
+      } catch (edu.bits.itsm.shared.BusinessException ex) {
+        errors.reject("action", ex.getMessage());
+        if (ex instanceof edu.bits.itsm.shared.ConflictException) status = 409;
+      }
+    }
+    response.setStatus(status);
+    return detail(id, actor, model);
   }
 
   @PostMapping("/incidents/{id}/messages")
@@ -149,11 +167,21 @@ public class WorkflowController {
   @PostMapping("/incidents/{id}/feedback")
   String feedback(
       @PathVariable long id,
-      @RequestParam int rating,
-      @RequestParam(defaultValue = "") String comment,
-      @AuthenticationPrincipal AccountPrincipal actor) {
-    incidents.feedback(id, rating, comment, actor);
-    return back(id);
+      @jakarta.validation.Valid @ModelAttribute("feedbackForm") IncidentFeedbackForm form,
+      org.springframework.validation.BindingResult errors,
+      @AuthenticationPrincipal AccountPrincipal actor,
+      Model model,
+      jakarta.servlet.http.HttpServletResponse response) {
+    if (!errors.hasErrors()) {
+      try {
+        incidents.feedback(id, form.getRating(), form.getComment(), actor);
+        return back(id);
+      } catch (edu.bits.itsm.shared.BusinessException ex) {
+        errors.reject("feedback", ex.getMessage());
+      }
+    }
+    response.setStatus(400);
+    return detail(id, actor, model);
   }
 
   @PostMapping("/admin/incidents/{id}/assignment")
