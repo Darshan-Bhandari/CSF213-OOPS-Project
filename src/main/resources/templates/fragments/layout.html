@@ -1,0 +1,10 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head th:fragment="head(title)">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${title} + ' · Campus IT'">Campus IT</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"></head><body>
+<aside th:fragment="sidebar" class="sidebar"><a class="brand" th:href="@{/}"><span class="brand-icon">C</span>Campus IT<span class="small">SERVICE DESK</span></a>
+<div class="nav-label">WORKSPACE</div><a class="nav-item selected" th:href="@{/}">Overview</a>
+<a class="nav-item" th:if="${viewer.role.name() == 'ADMIN'}" th:href="@{/admin/users}">Users &amp; technicians</a>
+<div class="sidebar-bottom"><span class="role-pill" th:text="${viewer.role}"></span><p th:text="${viewer.displayName}"></p>
+<form th:action="@{/logout}" method="post"><button class="button secondary" type="submit">Sign out</button></form></div></aside>
+<header th:fragment="topbar" class="topbar"><span>BITS campus / IT support</span><span class="online"><i></i> Local workspace</span></header>
+</body></html>

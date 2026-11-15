@@ -1,0 +1,13 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/layout :: head('Accounts')}"></head><body>
+<aside th:replace="~{fragments/layout :: sidebar}"></aside><div class="workspace"><header th:replace="~{fragments/layout :: topbar}"></header><main class="content">
+<p class="eyebrow">ADMINISTRATION</p><h1>Users &amp; technicians</h1><p class="muted">Manage access while preserving account history.</p>
+<div class="alert" th:if="${success}" th:text="${success}"></div><div class="alert error" th:if="${error}" th:text="${error}"></div>
+<section class="panel"><h2>Create account</h2><form class="account-form" th:action="@{/admin/users}" th:object="${form}" method="post">
+<div class="alert error" th:if="${#fields.hasErrors('*')}"><p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p></div>
+<label>Full name<input th:field="*{displayName}" maxlength="100" required></label><label>Email<input th:field="*{email}" type="email" maxlength="254" required></label>
+<label>Initial password<input name="password" type="password" minlength="8" maxlength="64" autocomplete="new-password" required></label>
+<label>Role<select th:field="*{role}"><option th:each="r : ${T(edu.bits.itsm.identity.Role).values()}" th:value="${r}" th:text="${r}"></option></select></label><button class="button" type="submit">Create account</button></form></section>
+<section class="panel table-panel"><h2>Account directory</h2><div class="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody><tr th:each="account : ${accounts}">
+<td th:text="${account.displayName}"></td><td th:text="${account.email}"></td><td><span class="role-pill" th:text="${account.role}"></span></td><td th:text="${account.active ? 'Active' : 'Inactive'}"></td>
+<td><form th:if="${account.id != viewer.accountId}" th:action="@{/admin/users/{id}/active(id=${account.id})}" method="post"><input type="hidden" name="active" th:value="${!account.active}"><button class="text-button" type="submit" th:text="${account.active ? 'Deactivate' : 'Activate'}"></button></form><span th:if="${account.id == viewer.accountId}" class="muted">Your account</span></td>
+</tr></tbody></table></div></section></main></div></body></html>

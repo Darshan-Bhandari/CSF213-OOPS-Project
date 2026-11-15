@@ -1,0 +1,8 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/layout :: head('Sign in')}"></head>
+<body class="auth-page"><main class="auth-card"><div class="brand-icon">C</div><p class="eyebrow">BITS CAMPUS IT</p><h1>Welcome back.</h1><p class="muted">One place for your campus IT support.</p>
+<div class="alert error" th:if="${param.error}">Invalid email or password, or the account is inactive.</div>
+<div class="alert" th:if="${param.registered}">Account created. You can sign in now.</div>
+<div class="alert" th:if="${param.logout}">You have signed out.</div><div class="alert" th:if="${param.expired}">Please sign in again.</div>
+<form th:action="@{/login}" method="post"><label>Email<input name="email" type="email" autocomplete="username" required autofocus></label>
+<label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="button wide" type="submit">Sign in →</button></form>
+<p class="muted">New here? <a th:href="@{/register}">Create an employee account</a></p></main></body></html>
