@@ -43,3 +43,9 @@ Elevated execution resolves the sandbox socket/shared-memory restriction. `./mvn
 The application started on 127.0.0.1:8080 against persistent `.local/postgres-data`. Actual HTTP registration and login reached the authenticated employee dashboard (200). A restart attempt then failed Flyway checksum validation for an applied migration changed during concurrent local work. No repair/reset was performed. Restart persistence and visual browser inspection remain unverified. Do not mark Phase 3 complete yet.
 
 Evidence: `target/surefire-reports/edu.bits.itsm.FoundationIntegrationTest.txt`; temporary session logs `/private/tmp/csf213-runtime-elevated.log`, `/private/tmp/csf213-app.log`, `/private/tmp/csf213-app-restart.log`. These local logs/build outputs are not committed. The development database process is left running for follow-up; the application restart failed.
+
+## Migration mismatch resolved — 15 November 2026
+
+V2 was restored byte-for-byte to its committed contents. The added `demo_seed_markers` table now belongs to `V3__demo_seed_markers.sql`. FoundationIntegrationTest passed again: **15 tests, zero failures/errors** on a fresh isolated PostgreSQL database. The existing persistent database validated all three migrations and applied only V3. A subsequent application restart validated all three and reported no pending migration. The account registered before the mismatch authenticated successfully after both startups and reached the employee dashboard (HTTP 200). No checksum repair or database reset was performed. Visual browser inspection remains outstanding.
+
+Evidence: `/private/tmp/csf213-migration-tests.log`, `/private/tmp/csf213-migration-startup.log`, `/private/tmp/csf213-migration-restart.log`. Application remains available on 127.0.0.1:8080 with the development database on 127.0.0.1:54329. Application-restart persistence has been checked; this does not claim a full database-process restart test.
