@@ -1,6 +1,6 @@
 # Verification record
 
-Latest run (15 November 2026, 23:18 IST): **114 passed, zero failures/errors/skips**. Phase 4 Steps 1–4 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
+Latest run (15 November 2026, 23:25 IST): **121 passed, zero failures/errors/skips**. Phase 4 Steps 1–5 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
 
 ## Foundation verification
 
@@ -83,3 +83,18 @@ Verified lifecycle: all 64 state pairs checked against approved edges, credentia
 Live check using existing local employee: created labeled incident INC-1 via HTTP (Wi-Fi/Network, 2 × 2 × 3 = 12/P2). No eligible technician was present so it remained CLASSIFIED. Stopped and restarted both app and PostgreSQL with the same data directory; authenticated employee reopened it with the same title, owner, score and classification. All three migrations validated, no repair/reset. The local account/ticket remain available for follow-up.
 
 Evidence: `/private/tmp/csf213-phase4-final.log`, `/private/tmp/csf213-phase4-live.log`, `/private/tmp/csf213-phase4-db-restart.log`, `/private/tmp/csf213-phase4-restart.log`; Surefire XML/text in `target/surefire-reports`. Local secrets, database files and build/log outputs are excluded from Git. Existing later-phase helper sources are included with the runnable snapshot; these results do not mark Phases 5–6 fully accepted.
+
+## Phase 4 Step 5 — conversation and investigation, 15 November 2026
+
+Final command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test` (elevated process/socket access). **121 passed, zero failures/errors/skips**: foundation 15, catalog 6, workflow PostgreSQL/HTTP 26, template rendering 18, rules 56. Seven added integration cases cover:
+
+- Internal notes visible only to assigned technician/admin; reporter HTML and authorized history reads omit their bodies. Internal notes create no notification and their body is not copied into audit descriptions.
+- Information request/public reply links are preserved and reply counts update. Reply target must be a REQUEST on the same incident; other incidents, internal notes, general messages and missing IDs are rejected.
+- Information requests/replies retain status, cycle and both SLA deadlines. Public/request notifications are recorded; no SLA pause or new lifecycle state is introduced.
+- Every message increments incident version even at the same fixed instant. A stale HTTP draft receives 409, remains visible, and creates no additional message.
+- Wrong-role note/request actions, unrelated reporters, unassigned technicians and missing CSRF are rejected. Blank/oversized messages, unknown kinds and malformed reply IDs are rejected without success history; valid draft text is retained on errors.
+- Resolved/closed incidents reject further investigation messages with a readable error.
+
+V4 adds a nonnegative conversation revision used to make each message a real incident mutation for optimistic locking. Earlier migrations are untouched. Runtime upgrade validated V1–V4 and applied V4 once to the existing persistent database. A labeled public reply on INC-1 was submitted through actual employee HTTP login; its version increased while status/deadlines stayed unchanged. Both application and PostgreSQL were restarted; existing login, saved reply, version, status and deadlines were verified again. No data reset or checksum repair.
+
+Evidence: `/private/tmp/csf213-step5-final.log`, `/private/tmp/csf213-step5-live.log`, `/private/tmp/csf213-step5-db-restart.log`, `/private/tmp/csf213-step5-restart.log`; Surefire results in `target/surefire-reports`. No browser visual inspection was performed for these new conversation controls; view rendering tests do not replace it. The local test reply remains for follow-up. Step 6 resolution/rejection/feedback and later concurrency/history acceptance remain separate.

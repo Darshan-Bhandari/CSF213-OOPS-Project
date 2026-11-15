@@ -7,17 +7,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class IncidentHistory {
   private final JdbcTemplate jdbc;
+  private final IncidentService incidents;
 
-  public IncidentHistory(JdbcTemplate jdbc) {
+  public IncidentHistory(JdbcTemplate jdbc, IncidentService incidents) {
     this.jdbc = jdbc;
+    this.incidents = incidents;
   }
 
-  public List<Map<String, Object>> messages(long id, boolean internal) {
+  @org.springframework.transaction.annotation.Transactional(readOnly = true)
+  public List<Map<String, Object>> messages(long id, edu.bits.itsm.identity.AccountPrincipal actor) {
+    incidents.view(id, actor);
+    boolean internal = actor.getRole() != edu.bits.itsm.identity.Role.EMPLOYEE;
     return jdbc.queryForList(
-        "SELECT m.*,u.display_name FROM incident_messages m JOIN user_accounts u ON"
-            + " u.id=m.author_id WHERE incident_id=? AND (? OR kind<>'INTERNAL') ORDER BY m.id",
-        id,
-        internal);
+        "SELECT m.*,u.display_name,(SELECT count(*) FROM incident_messages reply WHERE"
+            + " reply.response_to=m.id AND reply.kind='PUBLIC' AND reply.incident_id=m.incident_id) reply_count"
+            + " FROM incident_messages m JOIN user_accounts u ON u.id=m.author_id"
+            + " WHERE m.incident_id=? AND (? OR m.kind<>'INTERNAL') ORDER BY m.id",
+        id, internal);
   }
 
   public List<Map<String, Object>> audit(long id) {

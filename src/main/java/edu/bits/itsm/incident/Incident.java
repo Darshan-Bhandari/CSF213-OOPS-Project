@@ -13,6 +13,7 @@ public class Incident {
   private Long id;
 
   @Version private long version;
+  private long conversationRevision;
   private String title, description;
   @Column(name = "reporter_id")
   private Long reporterId;
@@ -148,6 +149,15 @@ public class Incident {
   public void draft(String value, Instant now) {
     resolutionDraft = value;
     touch(now);
+  }
+
+  public void recordMessage(Instant now) {
+    conversationRevision++;
+    touch(now);
+  }
+
+  public long getConversationRevision() {
+    return conversationRevision;
   }
 
   public void touch(Instant now) {

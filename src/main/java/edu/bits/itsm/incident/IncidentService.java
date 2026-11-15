@@ -293,42 +293,30 @@ public class IncidentService {
     body = text(body, 4000);
     if (!i.getStatus().isActive())
       throw new BusinessException("Add investigation messages while the incident is active.");
-    if (!Set.of("PUBLIC", "INTERNAL", "REQUEST").contains(kind))
+    if (kind == null || !Set.of("PUBLIC", "INTERNAL", "REQUEST").contains(kind))
       throw new BusinessException("Unknown message type.");
     if (!kind.equals("PUBLIC")) technician(i, actor);
     if (responseTo != null) {
-      if (actor.getRole() != Role.EMPLOYEE)
-        throw new BusinessException("Only the reporter responds to information requests.");
+      if (actor.getRole() != Role.EMPLOYEE || !kind.equals("PUBLIC"))
+        throw new BusinessException("Only the reporter can send public replies to information requests.");
       if (jdbc.queryForObject(
-              "SELECT count(*) FROM incident_messages WHERE id=? AND incident_id=? AND"
-                  + " kind='REQUEST'",
-              Long.class,
-              responseTo,
-              id)
-          != 1) throw new BusinessException("Information request not found.");
+              "SELECT count(*) FROM incident_messages WHERE id=? AND incident_id=? AND kind='REQUEST'",
+              Long.class, responseTo, id) != 1)
+        throw new BusinessException("Information request not found on this incident.");
     }
-    jdbc.update(
+    Long messageId = jdbc.queryForObject(
         "INSERT INTO incident_messages(incident_id,author_id,kind,body,response_to,created_at)"
-            + " VALUES (?,?,?,?,?,?)",
-        id,
-        actor.getAccountId(),
-        kind,
-        body,
-        responseTo,
-        Timestamp.from(clock.instant()));
-    i.touch(clock.instant());
-    audit.incident(
-        actor.getAccountId(),
-        id,
-        "MESSAGE_ADDED",
-        i.getStatus().name(),
-        i.getStatus().name(),
-        kind + " message recorded");
+            + " VALUES (?,?,?,?,?,?) RETURNING id",
+        Long.class, id, actor.getAccountId(), kind, body, responseTo, Timestamp.from(clock.instant()));
+    i.recordMessage(clock.instant());
+    audit.incident(actor.getAccountId(), id, "MESSAGE_ADDED", i.getStatus().name(),
+        i.getStatus().name(), kind + " message #" + messageId
+            + (responseTo == null ? "" : "; reply to request #" + responseTo));
     if (!kind.equals("INTERNAL"))
-      notifications.incident(
-          i,
+      notifications.incident(i,
           kind.equals("REQUEST") ? "Information requested" : "New incident reply",
           "INC-" + id + " has a new message.");
+    incidents.saveAndFlush(i);
   }
 
   @Transactional

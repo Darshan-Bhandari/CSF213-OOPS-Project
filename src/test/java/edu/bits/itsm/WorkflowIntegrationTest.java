@@ -88,6 +88,7 @@ class WorkflowIntegrationTest {
   @Autowired PasswordEncoder encoder;
   @Autowired IncidentService incidents;
   @Autowired IncidentRepository repository;
+  @Autowired IncidentHistory history;
   @Autowired AssignmentService assignment;
   @Autowired SlaMonitor monitor;
   @Autowired CatalogService catalog;
@@ -433,6 +434,133 @@ class WorkflowIntegrationTest {
         .param("action","REJECT").param("details","Try reopening closed incident"))
         .andExpect(status().isBadRequest());
     assertEquals(IncidentStatus.CLOSED,i.getStatus());
+  }
+
+  long messageId(long incident, String kind) {
+    return jdbc.queryForObject("SELECT max(id) FROM incident_messages WHERE incident_id=? AND kind=?",
+        Long.class,incident,kind);
+  }
+
+  @Test
+  void internalNotesArePrivateAndDoNotNotifyReporter() throws Exception {
+    var i=create();
+    long notificationsBefore=jdbc.queryForObject("SELECT count(*) FROM notifications",Long.class);
+    incidents.message(i.getId(),i.getVersion(),"INTERNAL","Private router credential investigation",null,technician);
+    assertEquals(notificationsBefore,jdbc.queryForObject("SELECT count(*) FROM notifications",Long.class));
+    assertTrue(history.messages(i.getId(),employee).isEmpty());
+    assertEquals(1,history.messages(i.getId(),technician).size());
+    assertEquals(1,history.messages(i.getId(),admin).size());
+    assertThrows(AccessDeniedException.class,()->history.messages(i.getId(),other));
+    mvc.perform(get("/incidents/"+i.getId()).with(user(employee)))
+        .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(
+            org.hamcrest.Matchers.containsString("Private router credential investigation"))));
+    mvc.perform(get("/incidents/"+i.getId()).with(user(technician)))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Private router credential investigation")));
+    String audit=jdbc.queryForObject("SELECT description FROM audit_entries WHERE incident_id=? AND action='MESSAGE_ADDED'",
+        String.class,i.getId());
+    assertTrue(audit.contains("INTERNAL message #"));
+    assertFalse(audit.contains("Private router"));
+  }
+
+  @Test
+  void informationRequestsAndRepliesTrackLinksWithoutChangingSlaOrState() throws Exception {
+    var i=create();
+    var responseDue=i.getResponseDue();var resolutionDue=i.getResolutionDue();
+    var status=i.getStatus();int cycle=i.getCycle();
+    incidents.message(i.getId(),i.getVersion(),"REQUEST","Which building is affected?",null,technician);
+    long request=messageId(i.getId(),"REQUEST");
+    assertEquals(0L,history.messages(i.getId(),employee).getFirst().get("reply_count"));
+    incidents.message(i.getId(),i.getVersion(),"PUBLIC","Library first floor",request,employee);
+    var messages=history.messages(i.getId(),employee);
+    assertEquals(2,messages.size());
+    assertEquals(1L,messages.getFirst().get("reply_count"));
+    assertEquals(request,((Number)messages.getLast().get("response_to")).longValue());
+    assertEquals(responseDue,i.getResponseDue());assertEquals(resolutionDue,i.getResolutionDue());
+    assertEquals(status,i.getStatus());assertEquals(cycle,i.getCycle());
+    assertEquals(2L,i.getConversationRevision());
+    mvc.perform(get("/incidents/"+i.getId()).with(user(employee)))
+        .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Replies: 1")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Library first floor")));
+    assertEquals(2,jdbc.queryForObject("SELECT count(DISTINCT subject) FROM notifications WHERE incident_id=?"
+        +" AND subject IN ('Information requested','New incident reply')",Integer.class,i.getId()));
+  }
+
+  @Test
+  void fixedClockMessagesIncrementVersionAndRejectStaleForms() throws Exception {
+    var i=create();long stale=i.getVersion();
+    incidents.message(i.getId(),stale,"PUBLIC","First message",null,employee);
+    assertTrue(i.getVersion()>stale);
+    mvc.perform(post("/incidents/"+i.getId()+"/messages").with(user(employee)).with(csrf())
+        .param("version",""+stale).param("kind","PUBLIC").param("body","Keep my stale draft"))
+        .andExpect(status().isConflict()).andExpect(model().attributeHasErrors("messageForm"))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep my stale draft")));
+    assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
+    incidents.message(i.getId(),i.getVersion(),"PUBLIC","Second message at same instant",null,employee);
+    assertEquals(2L,i.getConversationRevision());
+    assertEquals(2,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
+  }
+
+  @Test
+  void repliesCannotTargetAnotherIncidentInternalNoteOrOrdinaryReply() {
+    var i=create();var another=create();
+    incidents.message(another.getId(),another.getVersion(),"REQUEST","Other incident question",null,technician);
+    long otherRequest=messageId(another.getId(),"REQUEST");
+    incidents.message(i.getId(),i.getVersion(),"INTERNAL","Private note",null,technician);
+    long note=messageId(i.getId(),"INTERNAL");
+    incidents.message(i.getId(),i.getVersion(),"PUBLIC","General update",null,employee);
+    long reply=messageId(i.getId(),"PUBLIC");
+    for(long target:new long[]{otherRequest,note,reply,Long.MAX_VALUE})
+      assertThrows(BusinessException.class,()->incidents.message(i.getId(),i.getVersion(),"PUBLIC","Invalid target",target,employee));
+    assertEquals(2,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
+  }
+
+  @Test
+  void messageTypesAndOwnershipAreEnforcedOverHttp() throws Exception {
+    var i=create();String path="/incidents/"+i.getId()+"/messages";
+    for(String kind:java.util.List.of("INTERNAL","REQUEST"))
+      mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
+          .param("kind",kind).param("body","Attempt private action"))
+          .andExpect(status().isForbidden());
+    mvc.perform(post(path).with(user(other)).with(csrf()).param("version",""+i.getVersion())
+        .param("kind","PUBLIC").param("body","Other reporter"))
+        .andExpect(status().isForbidden());
+    var unassigned=new AccountPrincipal(accounts.createByAdmin("Other technician","message-tech@workflow.test",
+        "Test-password-123",Role.TECHNICIAN,admin.getAccountId()));
+    assertThrows(AccessDeniedException.class,()->incidents.message(i.getId(),i.getVersion(),"PUBLIC","Not assigned",null,unassigned));
+    mvc.perform(post(path).with(user(employee)).param("version",""+i.getVersion())
+        .param("kind","PUBLIC").param("body","Missing CSRF"))
+        .andExpect(status().isForbidden());
+    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
+  }
+
+  @Test
+  void invalidMessagePreservesDraftAndDoesNotCreateHistory() throws Exception {
+    var i=create();String path="/incidents/"+i.getId()+"/messages";
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
+        .param("kind","PUBLIC").param("body","Keep this message").param("responseTo","invalid"))
+        .andExpect(status().isBadRequest()).andExpect(model().attributeHasFieldErrors("messageForm","responseTo"))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep this message")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Choose a valid information request")));
+    for(String body:java.util.List.of(" ","x".repeat(4001)))
+      mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
+          .param("kind","PUBLIC").param("body",body))
+          .andExpect(status().isBadRequest()).andExpect(model().attributeHasFieldErrors("messageForm","body"));
+    mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
+        .param("kind","UNKNOWN").param("body","Bad kind"))
+        .andExpect(status().isBadRequest());
+    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM audit_entries WHERE incident_id=? AND action='MESSAGE_ADDED'",Integer.class,i.getId()));
+    assertEquals(0L,i.getConversationRevision());
+  }
+
+  @Test
+  void resolvedAndClosedIncidentsRejectFurtherInvestigation() throws Exception {
+    var i=create();resolve(i);
+    assertThrows(BusinessException.class,()->incidents.message(i.getId(),i.getVersion(),"PUBLIC","Too late",null,employee));
+    incidents.transition(i.getId(),i.getVersion(),"VERIFY_CLOSE","",employee);
+    mvc.perform(post("/incidents/"+i.getId()+"/messages").with(user(employee)).with(csrf())
+        .param("version",""+i.getVersion()).param("kind","PUBLIC").param("body","Closed ticket reply"))
+        .andExpect(status().isBadRequest()).andExpect(content().string(org.hamcrest.Matchers.containsString("while the incident is active")));
+    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM incident_messages WHERE incident_id=?",Integer.class,i.getId()));
   }
 
 }

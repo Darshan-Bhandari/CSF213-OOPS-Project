@@ -2,7 +2,7 @@
 
 Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. AI integration is planned through OpenRouter, with a user-supplied key and model.
 
-The project is being built in phases. **Current verified progress: foundation plus Phase 4 Steps 1–4 backend/form checks.** Catalog administration, incident reporting/detail access, calculated priority and guarded lifecycle are implemented. Supporting assignment/SLA/notification/reporting and AI source is included; remaining acceptance is tracked in `plan.md`. The latest automated suite passed 114 cases. Visual browser acceptance remains partial; no live AI provider call is verified.
+The project is being built in phases. **Current verified progress: foundation plus Phase 4 Steps 1–5 backend/form checks.** Catalog administration, incident reporting/detail access, calculated priority, guarded lifecycle and private/public investigation conversation are implemented. Supporting assignment/SLA/notification/reporting and AI source is included; remaining acceptance is tracked in `plan.md`. The latest automated suite passed 121 cases. Visual browser acceptance remains partial; no live AI provider call is verified.
 
 ## Requirements
 
@@ -96,7 +96,7 @@ Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `mai
 
 ## Current verification status
 
-Elevated execution permits local PostgreSQL and sockets in this managed workspace. The full suite passed **114 tests, zero failures/errors/skips**; fresh databases and persistent V1–V3 migration validation pass. A labeled local incident was reported through HTTP and retained its details, owner and priority after both app and database restarts. The employee desktop dashboard was visually inspected earlier; full-page/responsive and admin/technician visual checks remain pending. See `docs/testing.md` and `plan.md` for evidence and exact limits. Historical build/network failures do not describe the latest successful run.
+Elevated execution permits local PostgreSQL and sockets in this managed workspace. The full suite passed **121 tests, zero failures/errors/skips**; fresh databases and persistent V1–V4 migration validation pass. A labeled local incident was reported through HTTP and retained its details, owner and priority after both app and database restarts. The employee desktop dashboard was visually inspected earlier; full-page/responsive and admin/technician visual checks remain pending. See `docs/testing.md` and `plan.md` for evidence and exact limits. Historical build/network failures do not describe the latest successful run.
 
 ## Third-party wrapper
 

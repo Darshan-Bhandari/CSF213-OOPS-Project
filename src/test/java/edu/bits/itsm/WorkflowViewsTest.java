@@ -161,6 +161,7 @@ class WorkflowViewsTest {
       ReflectionTestUtils.setField(account, "id", 2L);
       model.addAttribute("viewer", new AccountPrincipal(account));
       model.addAttribute("form", new IncidentReportForm());
+      model.addAttribute("messageForm", new IncidentMessageForm());
       var now = Instant.parse("2026-11-15T10:00:00Z");
       var incident =
           new Incident(

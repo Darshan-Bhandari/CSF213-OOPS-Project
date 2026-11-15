@@ -94,8 +94,13 @@ public class WorkflowController {
     var i = incidents.view(id, actor);
     catalog(model);
     model.addAttribute("incident", i);
+    if (!model.containsAttribute("messageForm")) {
+      var form = new IncidentMessageForm();
+      form.setVersion(i.getVersion());
+      model.addAttribute("messageForm", form);
+    }
     model.addAttribute("staff", actor.getRole() != Role.EMPLOYEE);
-    model.addAttribute("messages", history.messages(id, actor.getRole() != Role.EMPLOYEE));
+    model.addAttribute("messages", history.messages(id, actor));
     model.addAttribute("audit", history.audit(id));
     model.addAttribute("resolutions", history.resolutions(id));
     model.addAttribute("events", history.events(id));
@@ -121,13 +126,24 @@ public class WorkflowController {
   @PostMapping("/incidents/{id}/messages")
   String message(
       @PathVariable long id,
-      @RequestParam long version,
-      @RequestParam String kind,
-      @RequestParam String body,
-      @RequestParam(required = false) Long responseTo,
-      @AuthenticationPrincipal AccountPrincipal actor) {
-    incidents.message(id, version, kind, body, responseTo, actor);
-    return back(id);
+      @jakarta.validation.Valid @ModelAttribute("messageForm") IncidentMessageForm form,
+      org.springframework.validation.BindingResult errors,
+      @AuthenticationPrincipal AccountPrincipal actor,
+      Model model,
+      jakarta.servlet.http.HttpServletResponse response) {
+    int status = 400;
+    if (!errors.hasErrors()) {
+      try {
+        incidents.message(id, form.getVersion(), form.getKind(), form.getBody(), form.getResponseTo(), actor);
+        return back(id);
+      } catch (edu.bits.itsm.shared.BusinessException ex) {
+        errors.reject("message", ex.getMessage());
+        if (ex instanceof edu.bits.itsm.shared.ConflictException) status = 409;
+      }
+    }
+    response.setStatus(status);
+    model.addAttribute("messageError", errors.getAllErrors().getFirst().getDefaultMessage());
+    return detail(id, actor, model);
   }
 
   @PostMapping("/incidents/{id}/feedback")
