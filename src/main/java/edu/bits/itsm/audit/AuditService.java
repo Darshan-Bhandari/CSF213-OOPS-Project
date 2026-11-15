@@ -22,4 +22,10 @@ public class AuditService {
         subject,
         description);
   }
+
+  @Transactional(propagation = Propagation.MANDATORY)
+  public void incident(Long actor, long incident, String action, String previous, String next, String description) {
+    jdbc.update("INSERT INTO audit_entries(actor_id,action,subject,description,incident_id,previous_state,new_state) VALUES (?,?,?,?,?,?,?)",
+      actor, action, "INC-"+incident, description, incident, previous, next);
+  }
 }
