@@ -13,8 +13,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class DashboardController {
   private final JdbcTemplate jdbc;
   private final AiConfiguration ai;
+  private final edu.bits.itsm.reporting.IncidentQueryService queries;
+  private final edu.bits.itsm.catalog.CatalogService catalog;
+  private final edu.bits.itsm.assignment.AssignmentService assignment;
 
-  public DashboardController(JdbcTemplate jdbc, AiConfiguration ai) {
+  public DashboardController(JdbcTemplate jdbc, AiConfiguration ai,
+      edu.bits.itsm.reporting.IncidentQueryService queries,
+      edu.bits.itsm.catalog.CatalogService catalog,
+      edu.bits.itsm.assignment.AssignmentService assignment) {
+    this.queries = queries;
+    this.catalog = catalog;
+    this.assignment = assignment;
     this.jdbc = jdbc;
     this.ai = ai;
   }
@@ -27,7 +36,15 @@ public class DashboardController {
   }
 
   @GetMapping({"/employee/dashboard", "/technician/dashboard", "/admin/dashboard"})
-  String dashboard(Model model) {
+  String dashboard(@AuthenticationPrincipal AccountPrincipal actor,
+      @org.springframework.web.bind.annotation.ModelAttribute("filter") edu.bits.itsm.incident.IncidentFilter filter,
+      Model model) {
+    model.addAttribute("categories", catalog.categories());
+    model.addAttribute("services", catalog.services());
+    model.addAttribute("technicians", assignment.technicians());
+    model.addAttribute("statuses", edu.bits.itsm.incident.IncidentStatus.values());
+    model.addAttribute("stats", queries.metrics(actor, filter));
+    model.addAttribute("categoryAnalysis", queries.byCategory(actor, filter));
     model.addAttribute(
         "serviceCount",
         jdbc.queryForObject("SELECT COUNT(*) FROM it_services WHERE active", Long.class));

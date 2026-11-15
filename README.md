@@ -2,7 +2,7 @@
 
 Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. AI integration is planned through OpenRouter, with a user-supplied key and model.
 
-The project is being built in phases. **Current implementation: Phase 3 foundation.** Incident reporting, assignment, incident lifecycle, SLA monitoring, notifications, AI suggestions and incident analytics are subsequent phases. The current dashboard displays actual catalog configuration counts and explicitly labels the foundation state.
+The project is being built in phases. **Current verified progress: foundation plus Phase 4 Steps 1–4 backend/form checks.** Catalog administration, incident reporting/detail access, calculated priority and guarded lifecycle are implemented. Supporting assignment/SLA/notification/reporting and AI source is included; remaining acceptance is tracked in `plan.md`. The latest automated suite passed 114 cases. Visual browser acceptance remains partial; no live AI provider call is verified.
 
 ## Requirements
 
@@ -73,7 +73,7 @@ Seeding is idempotent: existing accounts and passwords are retained on restart. 
 - Account changes produce audit records in the same transaction.
 - PostgreSQL schema managed by Flyway; Hibernate validates rather than silently changing it.
 - Persistent catalog: five campus services, six categories and four default SLA policies.
-- Missing OpenRouter configuration does not prevent startup. No AI provider calls are implemented in Phase 3.
+- Missing OpenRouter configuration does not prevent startup. AI adapter source is present for later acceptance; no live provider request was made or verified.
 
 ## Tests and packaging
 
@@ -88,15 +88,15 @@ Package output: `target/campus-itsm-0.1.0-SNAPSHOT.jar`. Running the jar directl
 
 ## OpenRouter configuration — later
 
-At the AI phase, set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env`. No model is chosen and no API spending is authorized implicitly. Backend integration, validation and live testing remain tracked in `plan.md`. Never commit a key. Enabling these values alone does not implement AI features.
+At the AI phase, set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env`. No model is chosen and no API spending is authorized implicitly. Adapter source, validation and remaining provider verification are tracked in `plan.md`. Never commit a key. Configuring a key/model enables provider access; it does not establish that live AI behavior has been verified.
 
 ## Version control
 
 Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `main`. Initial project upload is complete. Check `plan.md` for uncommitted work and current verification status. Do not commit `.env`, `.local`, database files or build output.
 
-## Current verification limitation
+## Current verification status
 
-The managed workspace has blocked Java network connections, preventing Maven's normal dependency resolution, and blocks Git metadata creation. Application and test sources compiled successfully using an offline cache of officially downloaded dependencies. The integration attempt could not initialize PostgreSQL because shared-memory allocation was denied; no integration cases passed. Database/browser behavior remains unverified; see `docs/testing.md` and `plan.md` for the final recorded status.
+Elevated execution permits local PostgreSQL and sockets in this managed workspace. The full suite passed **114 tests, zero failures/errors/skips**; fresh databases and persistent V1–V3 migration validation pass. A labeled local incident was reported through HTTP and retained its details, owner and priority after both app and database restarts. The employee desktop dashboard was visually inspected earlier; full-page/responsive and admin/technician visual checks remain pending. See `docs/testing.md` and `plan.md` for evidence and exact limits. Historical build/network failures do not describe the latest successful run.
 
 ## Third-party wrapper
 

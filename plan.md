@@ -19,18 +19,15 @@ Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, 
 
 ## Team handoff — current session, 15 November 2026
 
-- Phases 1–2: scope and executable design approved. Some older unchecked design items below are superseded by P01–P10; final diagrams, team allocation, AI model/budget and submission details remain deferred.
-- Phase 3: foundation implemented; earlier compilation passed. Runtime acceptance is IN PROGRESS in this session; earlier PostgreSQL attempts failed before assertions because shared-memory access was denied.
-- Version control is established: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `main`. Commits `36e021e` and `ee79ea2` uploaded source, documentation, requirements PDF and the Phase 3 archive, preserving the initial remote commit.
-- Local work beyond those commits includes modified incident/assignment/SLA/notification/reporting classes plus new AI adapter and workflow controller sources. These changes are uncommitted and unverified; they must not be treated as completed phases or assumed available to teammates on GitHub. Other work may be editing this shared folder during verification.
-- Runtime results this session: 15/15 foundation integration cases passed against real PostgreSQL (zero failures/errors). Actual HTTP registration/login and employee dashboard succeeded on port 8080. The initial restart failed because V2 had been edited; the follow-up restored V2 and added V3. Existing-database upgrade and a second application restart now pass, including login with the pre-existing account. Visual browser inspection remains outstanding.
-- Fixes made during verification: explicit incident reporter/assignee column mappings; dashboard model data for the new filters/metrics template; explicit priority option values.
-- Migration mismatch RESOLVED: V2 restored byte-for-byte to the committed version; `demo_seed_markers` moved into `V3__demo_seed_markers.sql`. 15/15 foundation tests pass; the persistent database upgraded to V3 and validated on a second startup, with the existing account retained. No checksum repair or data reset was used. Keep applied migrations immutable and add schema changes in new numbered migrations.
-- Account inventory checked: this local database contains only active employee ID 1, the runtime verification account. The documented `employee@campus.test`, `technician@campus.test` and `admin@campus.test` demo accounts are absent; no local `.env` exists. Do not assume friends’ accounts from another database are present here.
-- Persistence verified after restarting both PostgreSQL and the application using the same data directory: saved existing account authenticated and employee dashboard returned HTTP 200. Schema validated at V3.
-- Visual check: browser login succeeded; inspected desktop employee dashboard screenshot, including sidebar, filters and metric cards. No visible overlap in the inspected viewport. After full restart the browser correctly showed login again. Browser tools became unavailable following interruption; full-page/responsive and admin/technician visual checks remain pending. No screenshot artifact was saved.
-- Immediate next work: remaining page/role visual checks and reconciliation of the Phase 3 acceptance checklist; newer workflow code remains separately unverified.
-- No live AI calls, model spending or public hosting has been approved. These are not required for foundation verification.
+- Phases 1–2 scope/design gates approved. Team responsibilities, final report diagrams, model/budget and submission details remain deferred.
+- Phase 3 verification: real PostgreSQL migrations, 15 foundation cases, role credential logins and role dashboard rendering pass. Existing employee account and saved incident survived both application and PostgreSQL process restarts. Desktop employee dashboard was visually inspected earlier; admin/technician, full-page and responsive visual checks remain outstanding. Do not describe Phase 3 as fully visually accepted.
+- Phase 4 Steps 1–4 backend/form acceptance passed: catalog administration, report creation/detail access, calculated priority/snapshot/corrections, explicit lifecycle, ownership and role enforcement. Remaining conversation/resolution/history acceptance tasks are tracked below; the full lifecycle already has a passing HTTP integration check.
+- Latest full regression: **114 tests passed, zero failures/errors/skips** (`./mvnw -o test`, 15 November, 23:18 IST). Breakdown: foundation 15, catalog 6, workflow database/HTTP 19, view rendering 18, rules 56. These are automated checks, not browser screenshots.
+- Actual runtime check: employee submitted labeled local ticket `INC-1` (Wi-Fi, Network, impact 2, urgency 2, criticality 3 → score 12/P2), then reopened it after app and database restarts with unchanged ownership/title/classification/priority. It remains CLASSIFIED because the persistent database has no eligible technician. This is a verification incident, not a seeded outage or completed technician demo.
+- Local account inventory: active employee ID 1 is the runtime verification account. Documented demo role accounts are absent from this database; opt-in demo provisioning remains available. Passwords/keys are not recorded here.
+- Migration mismatch resolved: V2 restored to its published contents; demo marker table is in V3. Both fresh databases and persistent restarts validate V1–V3. Never edit an applied migration or repair checksums to conceal schema drift.
+- Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, `main`. Publish the current workflow source and its supporting modules together so a checkout can compile. Existing later-phase assignment/SLA/notification/reporting/AI scaffolding is included as dependencies; that does not mark Phases 5–6 fully accepted. Earlier Phase 3 ZIP is historical, not the latest source snapshot.
+- Immediate next work: Phase 4 conversation/information-request privacy and resolution/rejection/feedback/history acceptance, then remaining visual checks. Repeated-report correlation is approved future scope below; it is not implemented. No live AI calls/model spending/public hosting approved.
 
 ## Approved addition — repeated reports indicating wider impact
 
@@ -40,7 +37,9 @@ Design work pending: matching evidence (service, category, symptom and time wind
 
 Phase 4 Step 1 backend/form verification is complete: service/category create/edit/deactivate works; active administrator checks cover direct service mutations as well as protected HTTP routes; missing IDs and invalid inputs are rejected; duplicate names ignore case and surrounding spaces; audit entries use persisted IDs. Name comparison avoids near-identical catalog choices; display capitalization is retained. Deactivation retains records and prevents use in new incidents. Desktop admin visual inspection remains pending. Existing later workflow code is being reviewed rather than assumed complete.
 
-Verification: `CatalogIntegrationTest` (6 tests) plus `FoundationIntegrationTest` (15 tests) passed, zero failures/errors, against real isolated PostgreSQL. Next: Phase 4 Step 2 incident creation/detail and permitted updates, then priority, lifecycle, conversation, resolution and history acceptance in order.
+Phase 4 Steps 2–4 backend/form verification is complete. Incident forms retain invalid submissions and show readable errors; detail/list/API access is scoped to reporter/assignee/admin; forged priority/state/reporter fields cannot change server-controlled values. Criticality is snapshotted; reasoned admin corrections audit old/new category, impact, urgency and score. Lifecycle edges are explicit and independent of enum order; wrong-role actions, invalid shortcuts, stale versions and closed-ticket reopening are rejected. All 27 priority combinations and all 64 lifecycle state pairs are checked. Full regression and live incident restart checks passed; visual acceptance remains separate.
+
+Priority rationale: use the approved product of impact × urgency × criticality. P4 scores 1–2 cover low combined inputs; P3 3–7 covers moderate combinations; P2 8–17 captures multiple elevated inputs; P1 18–27 requires all inputs to be at least 2 with two at 3. This is a transparent project rule, not an empirically validated industry standard. Affected-user count is contextual and cannot multiply priority by itself. Future correlated-report escalation must preserve original factors and have separately documented rules.
 
 ## 2. Source and current state
 
@@ -48,10 +47,10 @@ Verification: `CatalogIntegrationTest` (6 tests) plus `FoundationIntegrationTest
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phases 4–6 — core workflows, automation and reporting, `IN PROGRESS`. User reports Phase 3 works locally (2026-11-15); independent runtime verification remains separately recorded. Phase 2 design P01–P10 approved by user; team/submission administration deferred.
+- Current phase: Phase 4 — core incident workflow, `IN PROGRESS`; Steps 1–4 backend/form checks verified. Supporting Phase 5–6 code exists but those phase gates remain open. Phase 3 runtime checks pass with remaining visual limits recorded above. P01–P10 approved; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
-- Implementation status: Phase 3 source created; not yet verified complete. Campus IT setting, full mandatory scope plus polished dashboard, category/resolution AI suggestions, two notification channels, local-first execution and supporting tools approved. Detailed business rules P01–P10 approved; foundation source/configuration/migration/UI/tests created. Application and test-source compilation passed; runtime integration verification blocked by PostgreSQL shared-memory permission denial; model and team allocation remain pending.
+- Implementation status: foundation and Phase 4 Steps 1–4 backend/form checks pass; 114-test full suite and persistent incident restart check passed. Elevated execution resolved the earlier sandbox PostgreSQL restriction. Remaining phase acceptance and visual limits are in the team handoff above; model/budget and team allocation remain pending.
 - Approved application format: web application (2026-11-15). Current stack is in section 4B; supporting tools approved in section 4C. Public hosting deferred; exact versions will be checked during foundation setup.
 
 ## 3. Requirements register
@@ -327,7 +326,7 @@ Demo 1: employee reports campus Wi-Fi outage → priority/SLA computed → assig
 Demo 2: technician investigates/requests information → employee replies → technician previews/applies AI category/resolution suggestion → resolves → employee verifies/closes/gives feedback → complete audit. Requires live key/model to claim AI demonstration.
 Demo 3: administrator switches assignment strategy on new sample incidents with deliberately different proficiency/load → demonstrates unassigned fallback and SLA warning/breach via labelled short-target demo configuration → filters/report totals and history. Do not invent duplicate detection/escalation features beyond approved scope.
 
-Minimum test catalog: priority combinations; invalid factor; unauthorized privilege registration; wrong-role action; cross-reporter read; unassigned-technician write; invalid state shortcut; empty resolution; category correction/skill eligibility; strategy differences/ties; capacity/no-match; response/resolution exact deadlines; warning/breach deduplication; restart catch-up; policy snapshot/reprioritization; rejection/re-resolution; stale edit conflict; rollback/audit consistency; disabled key; malformed/timeout AI; accepted-suggestion authorization; filters/metrics; persistence across restart. Tests not executed yet.
+Minimum test catalog: priority combinations; invalid factor; unauthorized privilege registration; wrong-role action; cross-reporter read; unassigned-technician write; invalid state shortcut; empty resolution; category correction/skill eligibility; strategy differences/ties; capacity/no-match; response/resolution exact deadlines; warning/breach deduplication; restart catch-up; policy snapshot/reprioritization; rejection/re-resolution; stale edit conflict; rollback/audit consistency; disabled key; malformed/timeout AI; accepted-suggestion authorization; filters/metrics; persistence across restart. Selected cases now executed; see team handoff and `docs/testing.md` for exact coverage. Remaining cases must still be verified.
 
 Deferred nonblocking administration: member names/group number/ownership allocation, repository destination/visibility, final branding, course upload links and filename-year discrepancy. Live AI key/model and spending decisions are required before real provider requests, not before foundation development.
 
@@ -387,12 +386,12 @@ Exit: reproducible startup, persistent sample accounts, all roles can log in, un
 
 ### Phase 4 — Core incident workflow
 
-Status: IN PROGRESS. Step 1 backend/form checks passed; Step 2 incident reporting/detail is next. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
+Status: IN PROGRESS. Steps 1–4 backend/form checks passed; later workflow acceptance and visual inspection remain. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
 
 - [x] Implement service/category administration and extensible classification. Verified add/edit/deactivate, case-insensitive duplicate handling, input validation, backend/HTTP authorization, CSRF and persisted audit subjects in `CatalogIntegrationTest` (6 cases). Admin visual inspection is tracked separately.
-- [ ] Implement incident creation, detail viewing and permitted updates.
-- [ ] Implement priority calculation and input validation.
-- [ ] Enforce lifecycle transitions and ownership/role rules.
+- [x] Implement incident creation, detail viewing and permitted updates. Validated form, retained invalid input, owner/assignee/admin visibility, protected API and reasoned admin corrections verified by HTTP/database tests.
+- [x] Implement priority calculation and input validation. All 27 valid combinations, invalid factor bounds, server-controlled factors, criticality snapshot and reasoned correction audit verified.
+- [x] Enforce lifecycle transitions and ownership/role rules. All 64 state pairs checked; credential-based role logins and complete HTTP lifecycle pass; wrong role, stale edit, invalid shortcuts and reopening CLOSED rejected.
 - [ ] Implement investigation, notes, information requests and employee replies.
 - [ ] Implement resolution, verification/closure and feedback per approved rules.
 - [ ] Persist audit events with each important mutation from the start.
@@ -551,3 +550,5 @@ Next action: implement and verify Phase 3 foundation, then proceed to approved i
 | 2026-11-15 | Approved future correlation of repeated reports to increase priority; delegated threshold selection with justification. Began Phase 4 Step 1 catalog administration | User requested scope addition and sequential execution |
 
 | 2026-11-15 | Completed Phase 4 Step 1 catalog backend/form verification; enforced active-admin mutation checks, missing-ID errors, normalized duplicate validation and correct audit subjects | 6 catalog + 15 foundation integration tests passed, zero failures/errors; admin visual inspection remains pending |
+
+| 2026-11-15 | Completed Phase 4 Steps 2–4 backend/form checks; added retained validation forms, current-account checks, explicit state graph and explanatory correction audit | Full suite 114/114 passed; actual INC-1 creation and detail survived app + PostgreSQL restarts. Visual checks remain separate; later-phase support source is published without declaring those phases complete |

@@ -1,4 +1,8 @@
-# Foundation verification
+# Verification record
+
+Latest run (15 November 2026, 23:18 IST): **114 passed, zero failures/errors/skips**. Phase 4 Steps 1–4 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
+
+## Foundation verification
 
 Scope: Phase 3 accounts, security, migrations and role-specific pages. These are implemented test cases, not a claim of execution success. Full project acceptance still requires later incident/business-rule and browser tests.
 
@@ -65,3 +69,17 @@ Command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test -Dtest=Catalog
 Catalog coverage: admin page render and service form submission; trimmed names; add/edit/deactivate/reactivate with real IDs in audit records; category deactivation retains the record and rejects new selection; employee/technician HTTP denial; direct non-admin/inactive-admin service denial; CSRF rejection; case-insensitive duplicate category rejected with a readable error; invalid service names/criticality and missing service/category IDs do not write success audits. Admin desktop visual inspection and later lifecycle acceptance remain separate outstanding checks. Repeat-report correlation is planned scope, not implemented/tested here.
 
 Local run log: `/private/tmp/csf213-catalog-tests.log`. Surefire reports: `target/surefire-reports`. Results describe the tested snapshot; other local workflow changes remain independently in progress.
+
+## Phase 4 Steps 2–4 — final verification, 15 November 2026
+
+Command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test` with elevated local process/socket access. **114 passed, zero failures/errors/skips**: FoundationIntegrationTest 15, CatalogIntegrationTest 6, WorkflowIntegrationTest 19, WorkflowViewsTest 18, WorkflowRulesTest 56. Tests use real isolated PostgreSQL for database/HTTP cases; template fixtures verify rendering but do not establish visual layout quality. No live AI call was made.
+
+Verified reporting and access: employee form submission redirects to persisted details; invalid/malformed factors retain title/description with readable validation errors; inactive services and missing CSRF reject creation; privilege/priority/state/owner injection is ignored; unrelated employee HTML/API reads are forbidden and lists are scoped. Direct deactivated-account access and reporting are rejected.
+
+Verified priority: every valid impact/urgency/criticality combination has an explicit expected P1–P4 result, all factor bounds are rejected, service criticality changes preserve historical snapshots, and administrator corrections require a reason and audit old/new input values. Affected-user count remains context rather than a multiplier.
+
+Verified lifecycle: all 64 state pairs checked against approved edges, credential-based logins for employee/technician/admin reach their role dashboards, assigned technician acknowledgment/start/resolution and reporter verification/closure complete through HTTP with ordered audit events. Wrong-role actions, unassigned technician writes, invalid shortcuts, stale edits and reopening CLOSED are rejected. Later conversation, rejection, feedback and concurrency acceptance still require their own fuller review.
+
+Live check using existing local employee: created labeled incident INC-1 via HTTP (Wi-Fi/Network, 2 × 2 × 3 = 12/P2). No eligible technician was present so it remained CLASSIFIED. Stopped and restarted both app and PostgreSQL with the same data directory; authenticated employee reopened it with the same title, owner, score and classification. All three migrations validated, no repair/reset. The local account/ticket remain available for follow-up.
+
+Evidence: `/private/tmp/csf213-phase4-final.log`, `/private/tmp/csf213-phase4-live.log`, `/private/tmp/csf213-phase4-db-restart.log`, `/private/tmp/csf213-phase4-restart.log`; Surefire XML/text in `target/surefire-reports`. Local secrets, database files and build/log outputs are excluded from Git. Existing later-phase helper sources are included with the runnable snapshot; these results do not mark Phases 5–6 fully accepted.

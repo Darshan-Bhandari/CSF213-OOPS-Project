@@ -1,0 +1,10 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body><form th:fragment="filters(target)" th:action="${target}" method="get" th:object="${filter}" class="panel filters" id="incident-filters">
+<input type="hidden" th:field="*{page}"><label>Search<input th:field="*{query}" placeholder="ID, title or description" maxlength="200"></label>
+<label>From<input th:field="*{from}" type="date"></label><label>To<input th:field="*{to}" type="date"></label>
+<label>Status<select th:field="*{status}"><option value="">All statuses</option><option th:each="s:${statuses}" th:value="${s}" th:text="${s}"></option></select></label>
+<label>Priority<select th:field="*{priority}"><option value="">All priorities</option><option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option><option value="P4">P4</option></select></label>
+<label>Category<select th:field="*{category}"><option value="">All categories</option><option th:each="c:${categories}" th:value="${c['id']}" th:text="${c['name']}"></option></select></label>
+<label>Service<select th:field="*{service}"><option value="">All services</option><option th:each="s:${services}" th:value="${s['id']}" th:text="${s['name']}"></option></select></label>
+<label th:if="${viewer.role.name()=='ADMIN'}">Technician<select th:field="*{technician}"><option value="">All technicians</option><option th:each="t:${technicians}" th:value="${t['id']}" th:text="${t['display_name']}"></option></select></label>
+<label>SLA status<select th:field="*{sla}"><option value="">All SLA statuses</option><option value="CLEAR">No recorded breach</option><option value="WARNING">Warning, no breach</option><option value="BREACHED">Recorded breach</option></select></label>
+<button class="button" type="submit" data-reset-page>Apply filters</button><a class="text-button" th:href="${target}">Clear</a></form></body></html>

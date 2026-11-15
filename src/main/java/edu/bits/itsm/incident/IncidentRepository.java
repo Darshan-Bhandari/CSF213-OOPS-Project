@@ -1,4 +1,8 @@
 package edu.bits.itsm.incident;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
-public interface IncidentRepository extends JpaRepository<Incident,Long>{List<Incident> findAllByStatusNot(IncidentStatus status);}
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface IncidentRepository extends JpaRepository<Incident, Long> {
+  List<Incident> findAllByStatusNot(IncidentStatus status);
+}
