@@ -57,3 +57,11 @@ Read-only JDBC inventory found only active employee ID 1 (the runtime verificati
 Browser sign-in reached the employee dashboard. Desktop screenshot inspection showed readable sidebar navigation, filter controls and metric cards with no visible overlap in the inspected viewport. This is a limited desktop visual check, not full-page, responsive or all-role visual acceptance. No screenshot file was saved before interruption.
 
 Stopped and restarted the app and PostgreSQL with the same `.local/postgres-data`; Flyway validated V1–V3. The browser returned to login after restart (expected for session loss). Existing account authentication was then confirmed over HTTP after both process restarts, reaching the employee dashboard with HTTP 200. Browser tools became unavailable after interruption, so further browser checks remain pending. Logs: `/private/tmp/csf213-db-restart.log`, `/private/tmp/csf213-full-restart.log`, `/private/tmp/csf213-db-resume.log`, `/private/tmp/csf213-app-resume.log`. No account passwords or hashes are included in these docs.
+
+## Phase 4 Step 1 — catalog administration, 15 November 2026
+
+Command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test -Dtest=CatalogIntegrationTest,FoundationIntegrationTest` (elevated local process/socket access). Result: **21 tests passed**, zero failures/errors/skips: 6 catalog integration cases and 15 foundation regression cases. Real PostgreSQL and Flyway V1–V3 are used; test writes roll back.
+
+Catalog coverage: admin page render and service form submission; trimmed names; add/edit/deactivate/reactivate with real IDs in audit records; category deactivation retains the record and rejects new selection; employee/technician HTTP denial; direct non-admin/inactive-admin service denial; CSRF rejection; case-insensitive duplicate category rejected with a readable error; invalid service names/criticality and missing service/category IDs do not write success audits. Admin desktop visual inspection and later lifecycle acceptance remain separate outstanding checks. Repeat-report correlation is planned scope, not implemented/tested here.
+
+Local run log: `/private/tmp/csf213-catalog-tests.log`. Surefire reports: `target/surefire-reports`. Results describe the tested snapshot; other local workflow changes remain independently in progress.

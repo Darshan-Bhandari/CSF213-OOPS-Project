@@ -32,6 +32,16 @@ Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, 
 - Immediate next work: remaining page/role visual checks and reconciliation of the Phase 3 acceptance checklist; newer workflow code remains separately unverified.
 - No live AI calls, model spending or public hosting has been approved. These are not required for foundation verification.
 
+## Approved addition — repeated reports indicating wider impact
+
+User requests this feature be included, with implementation deferred while Phase 4 proceeds one step at a time. Correlate similar incidents from different reporters as possible shared problems; sufficient independent reports should raise the response priority. User delegates routine threshold choices and requests their justification. Do not claim this feature already exists.
+
+Design work pending: matching evidence (service, category, symptom and time window), distinct-reporter counting, resistance to duplicate/spam reports, grouping uncertain matches, handling existing assignments/SLA snapshots, administrator correction, and auditable priority changes. Report frequency indicates broader impact; keep reported urgency and original inputs visible. The exact relationship to approved priority/SLA rules must be documented before implementation. Thresholds and matching rules will be chosen with concrete examples and rationale during that design task; no live AI is required or authorized. Track as planned follow-up after the core lifecycle; this addition supersedes earlier wording excluding duplicate/grouping features from scope.
+
+Phase 4 Step 1 backend/form verification is complete: service/category create/edit/deactivate works; active administrator checks cover direct service mutations as well as protected HTTP routes; missing IDs and invalid inputs are rejected; duplicate names ignore case and surrounding spaces; audit entries use persisted IDs. Name comparison avoids near-identical catalog choices; display capitalization is retained. Deactivation retains records and prevents use in new incidents. Desktop admin visual inspection remains pending. Existing later workflow code is being reviewed rather than assumed complete.
+
+Verification: `CatalogIntegrationTest` (6 tests) plus `FoundationIntegrationTest` (15 tests) passed, zero failures/errors, against real isolated PostgreSQL. Next: Phase 4 Step 2 incident creation/detail and permitted updates, then priority, lifecycle, conversation, resolution and history acceptance in order.
+
 ## 2. Source and current state
 
 - Authoritative requirements: `OOP_S1_2026-2027_Project.pdf`, 17 pages, CS F213/MAC F212 OOP, Semester I 2026–2027.
@@ -377,9 +387,9 @@ Exit: reproducible startup, persistent sample accounts, all roles can log in, un
 
 ### Phase 4 — Core incident workflow
 
-Status: NOT STARTED. Dependencies: Phase 3; approved lifecycle/priority/visibility rules.
+Status: IN PROGRESS. Step 1 backend/form checks passed; Step 2 incident reporting/detail is next. Remaining Phase 3 role visual checks are recorded separately; approved lifecycle/priority/visibility rules apply.
 
-- [ ] Implement service/category administration and extensible classification.
+- [x] Implement service/category administration and extensible classification. Verified add/edit/deactivate, case-insensitive duplicate handling, input validation, backend/HTTP authorization, CSRF and persisted audit subjects in `CatalogIntegrationTest` (6 cases). Admin visual inspection is tracked separately.
 - [ ] Implement incident creation, detail viewing and permitted updates.
 - [ ] Implement priority calculation and input validation.
 - [ ] Enforce lifecycle transitions and ownership/role rules.
@@ -537,3 +547,7 @@ Next action: implement and verify Phase 3 foundation, then proceed to approved i
 | 2026-11-15 | Resolved V2 checksum mismatch by moving demo marker table into V3; 15 foundation tests passed; persistent upgrade, second startup and pre-existing account login passed | `/private/tmp/csf213-migration-tests.log`, `/private/tmp/csf213-migration-startup.log`, `/private/tmp/csf213-migration-restart.log`; no Flyway repair or database reset |
 
 | 2026-11-15 | Inspected real account inventory and employee dashboard in browser; verified saved login after database and app process restarts | Only runtime employee exists locally; desktop viewport inspected; admin/technician visual checks remain pending after browser tools became unavailable |
+
+| 2026-11-15 | Approved future correlation of repeated reports to increase priority; delegated threshold selection with justification. Began Phase 4 Step 1 catalog administration | User requested scope addition and sequential execution |
+
+| 2026-11-15 | Completed Phase 4 Step 1 catalog backend/form verification; enforced active-admin mutation checks, missing-ID errors, normalized duplicate validation and correct audit subjects | 6 catalog + 15 foundation integration tests passed, zero failures/errors; admin visual inspection remains pending |
