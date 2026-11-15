@@ -566,7 +566,7 @@ class WorkflowIntegrationTest {
   @Test
   void resolveVerifyThenCloseRetainsResolutionAndAllowsNoFeedback() throws Exception {
     var i=create();resolve(i);
-    var resolution=history.resolutions(i.getId()).getFirst();
+    var resolution=history.resolutions(i.getId(), employee).getFirst();
     assertEquals("Restored access after troubleshooting.",resolution.get("details"));
     assertEquals(technician.getAccountId(),((Number)resolution.get("technician_id")).longValue());
     assertEquals(1,((Number)resolution.get("cycle")).intValue());
@@ -580,12 +580,12 @@ class WorkflowIntegrationTest {
     mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion()).param("action","CLOSE"))
         .andExpect(redirectedUrl("/incidents/"+i.getId()));
     assertEquals(IncidentStatus.CLOSED,i.getStatus());assertNotNull(i.getClosedAt());
-    assertTrue(history.feedback(i.getId()).isEmpty());
+    assertTrue(history.feedback(i.getId(), employee).isEmpty());
     assertEquals(java.util.List.of("VERIFIED","CLOSED"),jdbc.queryForList(
         "SELECT action FROM audit_entries WHERE incident_id=? AND action IN ('VERIFIED','CLOSED') ORDER BY id",String.class,i.getId()));
     mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion()).param("action","CLOSE"))
         .andExpect(status().isBadRequest());
-    assertEquals(1,history.resolutions(i.getId()).size());
+    assertEquals(1,history.resolutions(i.getId(), employee).size());
   }
 
   @Test
@@ -597,14 +597,14 @@ class WorkflowIntegrationTest {
     for(String details:java.util.List.of(" ","x".repeat(8001)))
       mvc.perform(post(path).with(user(technician)).with(csrf()).param("version",""+i.getVersion())
           .param("action","RESOLVE").param("details",details)).andExpect(status().isBadRequest());
-    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId()).isEmpty());
+    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId(), employee).isEmpty());
     incidents.transition(i.getId(),i.getVersion(),"RESOLVE","Actual solution",technician);
     for(String reason:java.util.List.of(" ","Rejection draft "+"x".repeat(1001)))
       mvc.perform(post(path).with(user(employee)).with(csrf()).param("version",""+i.getVersion())
           .param("action","REJECT").param("details",reason)).andExpect(status().isBadRequest());
     assertEquals(1,i.getCycle());assertEquals(IncidentStatus.RESOLVED,i.getStatus());
     assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM audit_entries WHERE incident_id=? AND action='RESOLUTION_REJECTED'",Integer.class,i.getId()));
-    assertEquals(1,history.resolutions(i.getId()).size());
+    assertEquals(1,history.resolutions(i.getId(), employee).size());
   }
 
   @Test
@@ -627,7 +627,7 @@ class WorkflowIntegrationTest {
     assertEquals(firstDeadline,jdbc.queryForObject("SELECT deadline FROM resolution_cycles WHERE incident_id=? AND cycle=1",java.sql.Timestamp.class,i.getId()).toInstant());
     assertEquals(firstResolution,jdbc.queryForObject("SELECT resolved_at FROM resolution_cycles WHERE incident_id=? AND cycle=1",java.sql.Timestamp.class,i.getId()).toInstant());
     clock.advance(10);resolve(i);
-    assertEquals(2,history.resolutions(i.getId()).size());
+    assertEquals(2,history.resolutions(i.getId(), employee).size());
     assertEquals(firstResolution,i.getFirstResolvedAt());
     assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=? AND cycle=1 AND kind='RESOLUTION_BREACH'",Integer.class,i.getId()));
     assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=? AND cycle=2 AND kind='RESOLUTION_BREACH'",Integer.class,i.getId()));
@@ -641,7 +641,7 @@ class WorkflowIntegrationTest {
     assignment.technician(technician.getAccountId(),false,5,admin.getAccountId());
     incidents.transition(i.getId(),i.getVersion(),"REJECT","Issue persists",employee);
     assertEquals(IncidentStatus.CLASSIFIED,i.getStatus());assertNull(i.getAssigneeId());
-    assertEquals(2,i.getCycle());assertEquals(1,history.resolutions(i.getId()).size());
+    assertEquals(2,i.getCycle());assertEquals(1,history.resolutions(i.getId(), employee).size());
     assertEquals(2,jdbc.queryForObject("SELECT count(*) FROM resolution_cycles WHERE incident_id=?",Integer.class,i.getId()));
   }
 
@@ -677,7 +677,7 @@ class WorkflowIntegrationTest {
     for(var actor:java.util.List.of(other,technician,admin))
       mvc.perform(post(path+"/feedback").with(user(actor)).with(csrf()).param("rating","5").param("comment","Unauthorized"))
           .andExpect(status().isForbidden());
-    assertTrue(history.feedback(i.getId()).isEmpty());assertEquals(IncidentStatus.RESOLVED,i.getStatus());
+    assertTrue(history.feedback(i.getId(), employee).isEmpty());assertEquals(IncidentStatus.RESOLVED,i.getStatus());
   }
 
   @Test
@@ -694,7 +694,7 @@ class WorkflowIntegrationTest {
         .andExpect(status().isBadRequest());
     mvc.perform(post(path).with(user(employee)).param("rating","5").param("comment","Missing CSRF"))
         .andExpect(status().isForbidden());
-    assertTrue(history.feedback(i.getId()).isEmpty());
+    assertTrue(history.feedback(i.getId(), employee).isEmpty());
   }
 
   @org.junit.jupiter.params.ParameterizedTest
@@ -703,14 +703,14 @@ class WorkflowIntegrationTest {
     var i=create();resolve(i);String path="/incidents/"+i.getId();
     mvc.perform(post(path+"/feedback").with(user(employee)).with(csrf()).param("rating",""+rating)
         .param("comment","  <script>feedback</script>  ")).andExpect(redirectedUrl(path));
-    var feedback=history.feedback(i.getId()).getFirst();
+    var feedback=history.feedback(i.getId(), employee).getFirst();
     assertEquals(rating,feedback.get("rating"));assertEquals("<script>feedback</script>",feedback.get("comment"));
     assertEquals(employee.getAccountId(),((Number)feedback.get("reporter_id")).longValue());
     mvc.perform(get(path).with(user(employee))).andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("<script>feedback</script>"))));
     mvc.perform(post(path+"/feedback").with(user(employee)).with(csrf()).param("rating","3").param("comment","Overwrite"))
         .andExpect(status().isBadRequest());
-    assertEquals(1,history.feedback(i.getId()).size());
+    assertEquals(1,history.feedback(i.getId(), employee).size());
     assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM audit_entries WHERE incident_id=? AND action='FEEDBACK_ADDED'",Integer.class,i.getId()));
   }
 
@@ -725,7 +725,7 @@ class WorkflowIntegrationTest {
         .param("version",""+stale).param("action","RESOLVE").param("details","Keep this resolution draft"))
         .andExpect(status().isConflict()).andExpect(model().attributeHasErrors("actionForm"))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep this resolution draft")));
-    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId()).isEmpty());
+    assertEquals(IncidentStatus.IN_PROGRESS,i.getStatus());assertTrue(history.resolutions(i.getId(), employee).isEmpty());
   }
 
 }

@@ -209,7 +209,7 @@ public class IncidentService {
         actor.getAccountId(),
         id,
         "REASSIGNMENT",
-        null,
+        i.getStatus().name(),
         i.getStatus().name(),
         "Previous technician=" + old + "; " + reason);
   }
@@ -340,7 +340,7 @@ public class IncidentService {
         rating,
         comment.strip(),
         Timestamp.from(clock.instant()));
-    audit.incident(actor.getAccountId(), id, "FEEDBACK_ADDED", null, null, "Rating " + rating);
+    audit.incident(actor.getAccountId(), id, "FEEDBACK_ADDED", i.getStatus().name(), i.getStatus().name(), "Rating " + rating);
   }
 
   @Transactional
@@ -374,9 +374,10 @@ public class IncidentService {
         actor.getAccountId(),
         id,
         "INCIDENT_CORRECTED",
-        oldPriority,
-        score.getPriority(),
-        "Category=" + oldCategory + " -> " + category
+        i.getStatus().name(),
+        i.getStatus().name(),
+        "Priority=" + oldPriority + " -> " + score.getPriority()
+            + "; category=" + oldCategory + " -> " + category
             + "; impact=" + oldAssessment.getImpact() + " -> " + impact
             + "; urgency=" + oldAssessment.getUrgency() + " -> " + urgency
             + "; criticality snapshot=" + score.getCriticality()
@@ -433,8 +434,8 @@ public class IncidentService {
         actor.getAccountId(),
         id,
         "AI_SUGGESTION_APPLIED",
-        null,
-        null,
+        i.getStatus().name(),
+        i.getStatus().name(),
         "Suggestion " + suggestion + "; human confirmed; no lifecycle action");
   }
 }

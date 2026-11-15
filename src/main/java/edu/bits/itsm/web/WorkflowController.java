@@ -108,13 +108,13 @@ public class WorkflowController {
     }
     model.addAttribute("staff", actor.getRole() != Role.EMPLOYEE);
     model.addAttribute("messages", history.messages(id, actor));
-    model.addAttribute("audit", history.audit(id));
-    model.addAttribute("resolutions", history.resolutions(id));
-    model.addAttribute("events", history.events(id));
-    model.addAttribute("feedback", history.feedback(id));
+    model.addAttribute("audit", history.audit(id, actor));
+    model.addAttribute("resolutions", history.resolutions(id, actor));
+    model.addAttribute("events", history.events(id, actor));
+    model.addAttribute("feedback", history.feedback(id, actor));
     model.addAttribute(
         "suggestions",
-        actor.getRole() == Role.EMPLOYEE ? java.util.List.of() : history.suggestions(id));
+        actor.getRole() == Role.EMPLOYEE ? java.util.List.of() : history.suggestions(id, actor));
     model.addAttribute("aiConfigured", config.isConfigured());
     return "incidents/detail";
   }
@@ -310,14 +310,14 @@ public class WorkflowController {
   }
 
   @GetMapping("/admin/audit")
-  String audit(Model model) {
-    model.addAttribute("rows", history.allAudit());
+  String audit(Model model, @AuthenticationPrincipal AccountPrincipal actor) {
+    model.addAttribute("rows", history.allAudit(actor));
     return "admin/audit";
   }
 
   @GetMapping("/admin/email")
-  String email(Model model) {
-    model.addAttribute("rows", history.email());
+  String email(Model model, @AuthenticationPrincipal AccountPrincipal actor) {
+    model.addAttribute("rows", history.email(actor));
     return "admin/email";
   }
 

@@ -61,8 +61,8 @@ public class AiSuggestionStore {
         actor.getAccountId(),
         id,
         "AI_SUGGESTION_GENERATED",
-        null,
-        null,
+        i.getStatus().name(),
+        i.getStatus().name(),
         kind + " suggestion saved for human review; model=" + model);
   }
 }

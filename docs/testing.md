@@ -1,6 +1,6 @@
 # Verification record
 
-Latest run (16 November 2026, 01:33 IST): **131 passed, zero failures/errors/skips**. Phase 4 Steps 1–6 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
+Latest run (16 November 2026, 01:44 IST): **141 passed, zero failures/errors/skips**. Phase 4 Steps 1–7 backend/form checks pass; browser acceptance is partial. Earlier failures below are historical. See the last section for current scope.
 
 ## Foundation verification
 
@@ -115,3 +115,17 @@ Ten additional workflow integration cases verify:
 Action and feedback forms now retain invalid input and expose readable validation errors on incident details. Resolution/rejection audit context includes the relevant cycle; administrator override reasons are explicit. Latest app startup uses the same persistent development database; no data reset or schema repair occurred. End-to-end persistence of resolved/rejected cycles across process restarts and visual browser inspection are still tracked under later acceptance tasks; these tests do not claim those checks were performed.
 
 Evidence: `/private/tmp/csf213-step6-targeted.log`, `/private/tmp/csf213-step6-final.log`, `/private/tmp/csf213-step6-live.log`, plus Surefire XML/text in `target/surefire-reports` (local outputs excluded from Git).
+
+## Phase 4 Step 7 — complete history and transaction consistency, 16 November 2026
+
+Final command: `MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o test` with elevated process/socket access. **141 passed, zero failures/errors/skips**: previous 131 cases plus 10 in `AuditConsistencyIntegrationTest`. Unlike earlier rollback-scoped fixture tests, the new class has no enclosing test transaction: application service calls actually commit or roll back, and subsequent reads use independent transactions. It owns a separate embedded PostgreSQL database. Its fixture cleanup/failure constraints never target `.local/postgres-data`.
+
+Verified failure cases: audit writes without a business transaction are rejected; classification audit failure rolls back the inserted incident and initial history; message audit failure removes the inserted message/revision; resolution insert failure restores lifecycle/history; failure during the final CLOSED flush rolls back both verification/closure audits and already-written notifications; reassignment audit failure after rejection restores the prior resolution and removes the new cycle; feedback audit failure removes the feedback row. Snapshot assertions cover versions, assignment, state, cycle, conversation revision, deadlines and related-row counts. Temporary test-only constraints are dropped in finally blocks. PostgreSQL sequence gaps after rollback are valid and not treated as corruption.
+
+Concurrency: two actual threads submit messages against the same incident version and fixed clock. Exactly one succeeds, the other receives ConflictException; only one message, audit event, version/revision increase and set of notifications commits.
+
+History reconstruction: ordered audit IDs chain from CREATED through classification/assignment, messages, reasoned reassignment/correction, system SLA breach events, resolution/rejection/reassignment, second resolution, verification, closure and feedback. Incident ID/subject, actor/System identity, timestamps and descriptions are present; resulting state matches the persisted incident. Staff history is complete; reporter history filters internal-message and generated-AI-suggestion events. An explicit stored AI fixture checks access only; no provider was called and AI acceptance is not implied.
+
+History service reads now require an authorized current actor for audit, messages, resolutions, SLA events, feedback and staff suggestions. Global audit and simulated-email reads require an active administrator. New audit entries store lifecycle states in previous/new-state fields; priority changes are described separately. Historical audit rows are not rewritten, so older priority-correction rows may retain their previous format. No schema migration/reset/repair was needed. Application audit reads/writes are protected; this does not claim tamper resistance against someone with direct database write access.
+
+Evidence: `/private/tmp/csf213-step7-targeted.log`, `/private/tmp/csf213-step7-final.log`, `/private/tmp/csf213-step7-live.log` and Surefire XML/text. Step 8 full lifecycle restart and visual acceptance remain pending.

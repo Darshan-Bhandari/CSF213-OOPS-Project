@@ -71,7 +71,7 @@ public class SlaService {
             Timestamp.from(clock.instant()));
     if (inserted == 1) {
       audit.incident(
-          null, i.getId(), kind, null, null, "Cycle " + cycle + ", deadline " + deadline);
+          null, i.getId(), kind, i.getStatus().name(), i.getStatus().name(), "Cycle " + cycle + ", deadline " + deadline);
       notifications.incident(
           i, kind.replace('_', ' '), "INC-" + i.getId() + " · deadline " + deadline);
     }
