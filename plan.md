@@ -17,13 +17,24 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Team handoff — current session, 15 November 2026
+
+- Phases 1–2: scope and executable design approved. Some older unchecked design items below are superseded by P01–P10; final diagrams, team allocation, AI model/budget and submission details remain deferred.
+- Phase 3: foundation implemented; earlier compilation passed. Runtime acceptance is IN PROGRESS in this session; earlier PostgreSQL attempts failed before assertions because shared-memory access was denied.
+- Version control is established: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `main`. Commits `36e021e` and `ee79ea2` uploaded source, documentation, requirements PDF and the Phase 3 archive, preserving the initial remote commit.
+- Local work beyond those commits includes modified incident/assignment/SLA/notification/reporting classes plus new AI adapter and workflow controller sources. These changes are uncommitted and unverified; they must not be treated as completed phases or assumed available to teammates on GitHub. Other work may be editing this shared folder during verification.
+- Runtime results this session: 15/15 foundation integration cases passed against real PostgreSQL (zero failures/errors). Actual HTTP registration/login and employee dashboard succeeded on port 8080. Application restart subsequently failed Flyway validation because an applied migration checksum changed during concurrent local work. Restart persistence is NOT verified; visual browser inspection remains outstanding.
+- Fixes made during verification: explicit incident reporter/assignee column mappings; dashboard model data for the new filters/metrics template; explicit priority option values.
+- Immediate next work: coordinate edits to migrations, restore applied migration contents and express schema changes in a new migration; rerun integration and restart checks on a stable snapshot. Do not repair migration checksums or delete persistent data to hide the mismatch.
+- No live AI calls, model spending or public hosting has been approved. These are not required for foundation verification.
+
 ## 2. Source and current state
 
 - Authoritative requirements: `OOP_S1_2026-2027_Project.pdf`, 17 pages, CS F213/MAC F212 OOP, Semester I 2026–2027.
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phase 3 — project foundation, `IN PROGRESS`. Phase 2 design P01–P10 approved by user; team/submission administration deferred.
+- Current phase: Phases 4–6 — core workflows, automation and reporting, `IN PROGRESS`. User reports Phase 3 works locally (2026-11-15); independent runtime verification remains separately recorded. Phase 2 design P01–P10 approved by user; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
 - Implementation status: Phase 3 source created; not yet verified complete. Campus IT setting, full mandatory scope plus polished dashboard, category/resolution AI suggestions, two notification channels, local-first execution and supporting tools approved. Detailed business rules P01–P10 approved; foundation source/configuration/migration/UI/tests created. Application and test-source compilation passed; runtime integration verification blocked by PostgreSQL shared-memory permission denial; model and team allocation remain pending.
@@ -350,7 +361,7 @@ Exit: design covers R01–R27; user approves proposed technical and business dec
 Status: IN PROGRESS. Dependencies: Phase 2 approved.
 
 - [x] Create approved project structure, dependency declarations, Thymeleaf templates/static assets and configuration. Compilation tracked separately.
-- [ ] Establish version control and agreed repository destination. `git init` denied by workspace permissions; source ignore rules prepared, remote destination deferred.
+- [x] Establish version control: GitHub repository `Darshan-Bhandari/CSF213-OOPS-Project`, branch `main`; initial upload verified at `ee79ea2`. Later local edits remain uncommitted.
 - [x] Write V1 foundation migration and repeatable opt-in demo accounts; runtime migration verification pending.
 - [x] Implement authentication, protected password storage and authorization; test execution pending.
 - [x] Add role-specific navigation and account administration foundation; render verification pending.
@@ -469,14 +480,14 @@ P01–P10 (D12–D18) approved. Exact AI model/budget and deferred administratio
 | 21 | Report completion and rehearsal/recording |
 | 22 | Submission buffer and final verification |
 
-As of 15 November, Phase 1 remains in progress; the original 14–15 November targets have not been met. Re-estimate after scope/stack and availability are known. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
+As of 15 November, scope/design gates for Phases 1–2 are approved; Phase 3 runtime acceptance remains outstanding. Re-estimate remaining implementation after runtime verification. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
 
 ## 8. Risks, ambiguities and blockers
 
 | Item | Current state / action |
 |---|---|
 | Detailed business rules | P01–P10 approved; implement against recorded policies |
-| Build environment | Normal Maven Java network resolution denied. Offline official-dependency cache allowed successful application/test compilation. PostgreSQL initdb denied shared-memory allocation before test bodies ran; no integration tests passed. Native Apple Silicon binary profile added. Git initialization still denied. No approval escalation requested. |
+| Build environment | Normal Maven Java network resolution denied. Offline official-dependency cache allowed successful application/test compilation. PostgreSQL initdb denied shared-memory allocation before test bodies ran; no integration tests passed. Native Apple Silicon binary profile added. Git initialization and push succeeded using permitted elevated Git operations. Elevated runtime execution also starts PostgreSQL and loopback sockets successfully; 15 foundation tests passed. Restart is now blocked by a migration checksum mismatch while local files are being edited. |
 | Short deadline | Eight calendar days from initial planning; prioritize mandatory functionality and protect final-day buffer |
 | Video filename | PDF's example uses `1_OOP_S1_2025-2026_Project` despite 2026–2027 course year; seek clarification before final naming |
 | Submission destinations | Shared-folder and spreadsheet links not supplied in the PDF |
@@ -513,3 +524,8 @@ Next action: implement and verify Phase 3 foundation, then proceed to approved i
 | 2026-11-15 | Integration execution attempted but blocked before test assertions by PostgreSQL shared-memory allocation denial; no integration pass claimed. Added native Apple Silicon PostgreSQL test profile | Surefire initially reported 16 initialization/cleanup errors for 15 cases; Phase 3 remains IN PROGRESS pending runtime verification |
 | 2026-11-15 | Native Apple Silicon follow-up compiled successfully; one migration probe still blocked by initdb shared-memory denial. Source snapshot and run instructions prepared | Native probe: 2 initialization/cleanup errors, no passing integration assertions; normal-terminal verification required |
 | 2026-11-15 | Added Codex project instructions to preserve the approved plan and verification discipline across coding sessions | User asked to begin using Codex to automate project work |
+
+| 2026-11-15 | Reconciled team handoff, GitHub completion, stale schedule text and unverified local work; began Phase 3 runtime verification | User requested plan-first verification and ongoing team visibility |
+| 2026-11-15 | User reported foundation works and authorized next phases; implementing approved P01–P10 incident workflow, automation, AI and reporting | User: "works till here do the next ones"; user report is distinct from assistant-verified test results |
+
+| 2026-11-15 | Foundation suite passed 15/15 after mapping/dashboard/template fixes; actual HTTP employee registration/login succeeded. Restart blocked by changed applied migration checksum during concurrent edits; persistence and visual QA remain outstanding | `target/surefire-reports/edu.bits.itsm.FoundationIntegrationTest.txt`; session logs in `/private/tmp/csf213-runtime-elevated.log` and `/private/tmp/csf213-app-restart.log` |

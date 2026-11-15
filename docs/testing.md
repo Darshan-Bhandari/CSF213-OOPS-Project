@@ -35,3 +35,11 @@ Scope: Phase 3 accounts, security, migrations and role-specific pages. These are
 Initial normal Maven downloads failed because Java network connections were denied by this environment. Dependencies were downloaded through the supported transfer route and compilation performed offline. These temporary cache tools are not application dependencies or required project files.
 
 Native Apple Silicon follow-up: matching ARM64 PostgreSQL binaries were selected and source compilation remained successful. A one-case migration probe again failed during `initdb` with the same shared-memory denial (2 errors including class cleanup). This confirms the portability adjustment does not remove the environment restriction. No application assertions ran.
+
+## Codex runtime follow-up — 15 November 2026
+
+Elevated execution resolves the sandbox socket/shared-memory restriction. `./mvnw -o test -Dtest=FoundationIntegrationTest` passed **15 tests, zero failures/errors** against real PostgreSQL after correcting incident column mappings, dashboard model attributes and priority option values. Both V1 and V2 migrations executed. This result applies to that snapshot; shared files continued changing afterward.
+
+The application started on 127.0.0.1:8080 against persistent `.local/postgres-data`. Actual HTTP registration and login reached the authenticated employee dashboard (200). A restart attempt then failed Flyway checksum validation for an applied migration changed during concurrent local work. No repair/reset was performed. Restart persistence and visual browser inspection remain unverified. Do not mark Phase 3 complete yet.
+
+Evidence: `target/surefire-reports/edu.bits.itsm.FoundationIntegrationTest.txt`; temporary session logs `/private/tmp/csf213-runtime-elevated.log`, `/private/tmp/csf213-app.log`, `/private/tmp/csf213-app-restart.log`. These local logs/build outputs are not committed. The development database process is left running for follow-up; the application restart failed.

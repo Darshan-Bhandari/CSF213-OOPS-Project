@@ -92,7 +92,7 @@ At the AI phase, set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env`. No m
 
 ## Version control
 
-The project includes `.gitignore`; remote repository choice is deferred. This workspace currently blocks creating `.git`. In a normal terminal you can initialize it with `git init` when ready. Do not commit `.env`, `.local`, database files or build output.
+Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `main`. Initial project upload is complete. Check `plan.md` for uncommitted work and current verification status. Do not commit `.env`, `.local`, database files or build output.
 
 ## Current verification limitation
 
