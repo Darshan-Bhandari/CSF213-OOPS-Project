@@ -1,6 +1,6 @@
 # Architecture and implementation contracts
 
-Reviewed against the implemented Phase 1–4 scope on 16 November 2026. Final submission UML/ER/report artifacts remain Phase 8 deliverables.
+Reviewed against Phases 1–5 and the controlled AI/reporting scope on 17 November 2026. Final submission UML/ER/report artifacts remain Phase 8 deliverables.
 
 ## Runtime and boundaries
 
@@ -21,12 +21,12 @@ flowchart LR
   Notifications --> Store
 ```
 
-Pinned/verified setup: Java target 21, actual tested JDK 25.0.1; Spring Boot 3.5.16; Maven Wrapper 3.3.4 and Maven 3.9.11; PostgreSQL test tooling Zonky 2.1.0 with native Apple Silicon PostgreSQL 14.15.0; Surefire/Failsafe 3.5.6. JDK 21 execution and other OS/browser combinations have not been independently run here.
+Pinned/verified setup: Java target 21, tested JDKs 25.0.1 (earlier macOS acceptance) and 21.0.13 (Linux acceptance); Spring Boot 3.5.16; Maven Wrapper 3.3.4 and Maven 3.9.11; PostgreSQL test tooling Zonky 2.1.0 with native Apple Silicon PostgreSQL 14.15.0; Surefire/Failsafe 3.5.6. Windows execution, other browsers and production deployment remain unverified. Embedded PostgreSQL uses TCP without Unix sockets; the development helper binds loopback. Surefire loads Mockito as a startup agent, including when dynamic JVM attachment is unavailable.
 
 ## Domain contracts and patterns
 
 - **State:** `IncidentState` owns explicit allowed edges; enum declaration order cannot silently change them. `Incident` guards lifecycle mutations. Service-level role, assignment and version checks precede commands.
-- **Strategy:** `AssignmentStrategy` has skill-based and load-based implementations. Eligibility and capacity are checked before selecting a candidate. Existing strategy tests demonstrate different outcomes; full Phase 5 acceptance is still separate.
+- **Strategy:** `AssignmentStrategy` has skill-based and load-based implementations. Eligibility and capacity are checked before selecting a candidate. Committed PostgreSQL tests cover both strategies, eligibility, capacity, stable ties, concurrent reports and unchanged existing assignments.
 - **Inheritance/polymorphism:** `BaseNotificationChannel` implements shared persistence behavior; in-app and simulated-email subclasses supply channel/status behavior through the notification contract. No actual external email is sent.
 - **Composition:** incidents embed a `PriorityAssessment`; the incident service composes catalog, assignment, audit, SLA and notification services. Framework repositories support these contracts rather than replacing business rules.
 
@@ -68,8 +68,14 @@ Incident mutations combine JPA entity changes with JDBC child records under one 
 
 Audit records carry incident reference, actor/System identity, timestamp, action, prior/new lifecycle state and context. Priority before/after values are descriptions rather than lifecycle states. Histories order by persisted IDs because several events may share a transaction timestamp. Earlier published audit records are not rewritten. There is no claim of tamper resistance against a direct database writer.
 
-Rejection retains old resolution/cycle/breach records and first response/resolution timestamps; a new cycle starts with stored targets. Failed commands roll back state, child rows, audits and simulated notification rows together. Future real external notification delivery needs separate failure handling in Phase 5; no external calls occur in these transactions today.
+Rejection retains old resolution/cycle/breach records and first response/resolution timestamps; a new cycle starts with stored targets. Failed commands roll back state, child rows, audits and simulated notification rows together. Both notification channels are local persisted records, and delivery failure rolls back the command/monitor transaction. Real external email delivery is outside the approved scope.
+
+## AI and reporting contracts
+
+`AiAdvisor` composes incident authorization, a transport contract and transactional suggestion storage. `OpenRouterAdapter` fixes the production HTTPS endpoint, keeps credentials backend-only, caps the complete request at 25 seconds and cancels response bodies above 64 KiB. Requests happen outside the save transaction; saving and applying recheck the incident version. Category IDs must be integral and active, and application must retain eligible skills. Resolution advice creates an editable draft only. The server labels retrieved final accepted resolutions separately from generated advice; it selects at most three relevant closed-ticket examples, 500 characters each, and accepts at most 6,000 characters of generated resolution advice. Tests use a mock transport or a loopback fake provider, never a live paid request.
+
+Reporting builds parameterized AND predicates shared by list/count/metrics/category totals. Current account activity/role and reporter/assignee/admin scope are checked in the service. Dates are inclusive Asia/Kolkata calendar days with an exclusive next-midnight upper bound. Pages contain 20 rows, ordered by creation time then stable ID. Averages include only qualifying timestamps and expose sample counts; missing averages remain N/A. Compliance uses eligible first-cycle incidents without recorded first-cycle breaches, as defined in P09; recorded alerts can lag a deadline by the scan interval.
 
 ## Remaining phase gates
 
-Phase 5: complete assignment/SLA/notification acceptance, concurrency/capacity and restart catch-up scenarios. Phase 6: AI adapter/failure cases and reporting acceptance; live AI model/key/budget remain pending. Phase 7: broader stabilization/security/performance cases. Phase 8: final diagrams/report/member responsibility/video/submission evidence.
+See `docs/phase-5-6-acceptance.md` and `plan.md` for execution evidence/status. Phase 6 still needs the user's live AI model/key/budget and separate provider verification; approved repeated-report correlation/escalation remains unimplemented. Phase 7 broader stabilization and the final three demonstration workflows remain open. Phase 8 covers final diagrams/report/member responsibility/video/submission evidence.

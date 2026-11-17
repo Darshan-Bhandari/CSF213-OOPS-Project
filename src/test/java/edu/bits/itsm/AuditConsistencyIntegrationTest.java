@@ -31,7 +31,7 @@ import org.springframework.transaction.IllegalTransactionStateException;
 class AuditConsistencyIntegrationTest {
   static final EmbeddedPostgres POSTGRES = start();
   static EmbeddedPostgres start() {
-    try { return EmbeddedPostgres.builder().setPort(0).start(); }
+    try { return EmbeddedPostgres.builder().setServerConfig("unix_socket_directories", "").setPort(0).start(); }
     catch (Exception e) { throw new ExceptionInInitializerError(e); }
   }
   @AfterAll static void close() throws Exception { POSTGRES.close(); }

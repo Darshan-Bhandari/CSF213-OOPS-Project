@@ -42,7 +42,7 @@ public class IncidentAiAdvisor implements AiAdvisor {
     if (!i.getStatus().isActive())
       throw new BusinessException("AI suggestions are for active incidents.");
     if (i.getVersion() != version) throw new ConflictException();
-    if (!Set.of("CATEGORY", "RESOLUTION").contains(kind))
+    if (kind == null || !Set.of("CATEGORY", "RESOLUTION").contains(kind))
       throw new BusinessException("Unknown suggestion type.");
     if (!config.isConfigured())
       throw new BusinessException(
@@ -55,15 +55,15 @@ public class IncidentAiAdvisor implements AiAdvisor {
     var history =
         jdbc
             .queryForList(
-                "SELECT r.details FROM resolutions r JOIN incidents h ON h.id=r.incident_id WHERE"
-                    + " h.id<>? AND h.service_id=? AND h.category_id=? AND h.status='CLOSED' ORDER"
+                "SELECT h.id incident_id,r.details FROM resolutions r JOIN incidents h ON h.id=r.incident_id WHERE"
+                    + " h.id<>? AND h.service_id=? AND h.category_id=? AND h.status='CLOSED' AND r.cycle=h.cycle ORDER"
                     + " BY r.id DESC LIMIT 3",
                 id,
                 i.getServiceId(),
                 i.getCategoryId())
             .stream()
-            .map(r -> r.get("details").toString())
-            .map(s -> s.substring(0, Math.min(1500, s.length())))
+            .map(r -> "INC-" + r.get("incident_id") + ": " + r.get("details").toString()
+                .substring(0, Math.min(500, r.get("details").toString().length())))
             .toList();
     var input =
         Map.of(
@@ -110,7 +110,8 @@ public class IncidentAiAdvisor implements AiAdvisor {
       Long category = null;
       if (kind.equals("CATEGORY")) {
         var parsed = json.readTree(answer);
-        if (!parsed.path("categoryId").canConvertToLong()
+        if (!parsed.path("categoryId").isIntegralNumber()
+            || !parsed.path("categoryId").canConvertToLong()
             || !parsed.path("explanation").isTextual())
           throw new BusinessException("AI category response is invalid.");
         category = parsed.path("categoryId").longValue();
@@ -119,6 +120,14 @@ public class IncidentAiAdvisor implements AiAdvisor {
       }
       if (answer.isBlank() || answer.length() > 8000)
         throw new BusinessException("AI response is empty or too long.");
+      if (kind.equals("RESOLUTION")) {
+        if (answer.length() > 6000) throw new BusinessException("AI resolution advice is too long.");
+        // These labels and retrieved facts are server-authored, rather than trusting the model
+        // to distinguish historical records from its own unverified advice.
+        answer = "Historical records (retrieved; not verification of this incident):\n"
+            + (history.isEmpty() ? "No matching closed incident records." : String.join("\n", history))
+            + "\n\nGenerated advice (unverified; review before use):\n" + answer;
+      }
       store.save(id, version, actor, kind, category, answer, config.model());
     } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
       throw new BusinessException("AI returned invalid structured content; no change was applied.");

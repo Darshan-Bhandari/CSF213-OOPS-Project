@@ -1,14 +1,14 @@
 # Campus IT Service Management
 
-Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. AI integration is planned through OpenRouter, with a user-supplied key and model.
+Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRouter integration is implemented with user-supplied local key/model configuration and remains optional for startup.
 
-**Phases 1–4 are accepted in the tested environment.** The current source supports role authentication/admin catalog, incident reporting and priority, guarded lifecycle, private/public investigation, requests/replies, resolution/rejection, closure, feedback and protected history. Clean verification passed **143 regression tests + 1 packaged restart test**, with **4 launcher tests** and desktop/mobile Chromium browser acceptance. See [acceptance scope](docs/phase-1-4-acceptance.md), [architecture](docs/architecture.md), and [current plan](plan.md).
+**Phases 1–5 are accepted for the documented automated/backend and packaged HTTP scope.** Core AI category/resolution suggestions and reporting pass controlled-provider acceptance. The latest clean verification passed **198 regression tests + 2 packaged restart cases**, and **4 launcher tests** passed. See [Phase 5–6 evidence and demo steps](docs/phase-5-6-acceptance.md), [architecture](docs/architecture.md), [test history](docs/testing.md), and [current plan](plan.md).
 
-Supporting assignment/SLA/notification/reporting and AI code exists; Phase 5–6 acceptance remains open. No live AI request or public deployment is verified. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
+Live AI verification awaits the user's model/key/budget; approved repeated-report correlation and final stabilization/submission work remain open. Earlier Chromium desktop/mobile acceptance covers Phases 1–4; the extended browser run is blocked in the current workspace before navigation. No live provider request or public deployment is claimed. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
 
 ## Requirements
 
-- JDK 21 or 25. Code targets Java 21; Spring Boot 3.5.16 supports the installed JDK 25.
+- Full JDK 21 or 25 (including compiler and release metadata). Code targets Java 21; both JDK versions have been exercised in the recorded environments.
 - Maven 3.9.11 is downloaded by the included Apache Maven Wrapper on first use.
 - Python 3 for the optional `.env` launcher.
 - PostgreSQL. Use an existing local database or the optional portable development database below.
@@ -85,7 +85,7 @@ Seeding is idempotent: existing accounts and passwords are retained on restart. 
 python3 -m unittest discover -s src/test/python -v
 ```
 
-Tests start an isolated PostgreSQL process on a random port, run real migrations, and roll back each test's data. No demo passwords, real user data or AI keys are required. Regression results appear in `target/surefire-reports`; packaged restart results appear in `target/failsafe-reports`. See `docs/testing.md` for cases and actual execution status.
+Tests start isolated PostgreSQL processes on random ports and run real migrations. Most fixtures roll back; concurrency/atomicity cases deliberately commit and reset only their test-owned database. Embedded PostgreSQL uses TCP without Unix sockets. No demo passwords, real user data or AI keys are required. Regression results appear in `target/surefire-reports`; packaged restart results appear in `target/failsafe-reports`. See `docs/testing.md` for cases and actual execution status.
 
 Package output: `target/campus-itsm-0.1.0-SNAPSHOT.jar`. Running the jar directly uses exported environment variables; `.env` is loaded only by the provided launcher.
 
@@ -99,7 +99,9 @@ Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `mai
 
 ## Current verification status
 
-Elevated execution permits PostgreSQL and local sockets in this managed workspace. The latest clean `verify` passed 143 regression cases plus packaged JAR acceptance that restarts both Java and PostgreSQL and checks all related records. Four launcher tests passed. Three-role browser workflows/screenshots were checked at 1440×1000 and 390×844 in Chromium; other browsers/OSs, full accessibility, performance and production hardening remain outside this acceptance pass. Historical failed runs are retained in `docs/testing.md` with later outcomes.
+On 17 November 2026, Linux/JDK 21.0.13/PostgreSQL 14.15 passed 198 regression tests and two real packaged HTTP/app/database restart cases, including startup SLA catch-up and durable deduplication. The strengthened restart suite was recompiled and rerun successfully. Four launcher tests passed. Surefire loads Mockito as a startup agent, avoiding dynamic attach requirements. V1–V4 migrations are unchanged.
+
+Desktop/mobile Chromium acceptance from 16 November covers Phases 1–4. The extended Phase 5 browser runner below is syntax-checked but blocked before navigation in the current environment by Chromium's Unix-socket startup restriction; compatible headless-shell downloads were unavailable. It must still run on a browser-capable environment. Windows, other browsers, production load/security and final submission remain separate gates. See `docs/testing.md` for historical failures and actual results.
 
 ## Optional browser acceptance
 
@@ -125,7 +127,7 @@ PLAYWRIGHT_BROWSERS_PATH="$PWD/.local/playwright-browsers" node .local/browser-t
 NODE_PATH="$PWD/.local/browser-tools/node_modules" PLAYWRIGHT_BROWSERS_PATH="$PWD/.local/playwright-browsers" BROWSER_BASE_URL=http://127.0.0.1:8081 node scripts/browser_acceptance.cjs
 ```
 
-`DEMO_PASSWORD` must already be exported for these runner commands. Alternatively set `DEMO_CREDENTIALS_FILE` to an ignored local JSON file with a `password` field. Passwords are not printed. Screenshots and results default to ignored `.local/acceptance-screenshots/`. The runner accepts only localhost targets. See the acceptance summary for what is tested and what is deferred.
+`DEMO_PASSWORD` must already be exported for these runner commands. Alternatively set `DEMO_CREDENTIALS_FILE` to an ignored local JSON file with a `password` field. Passwords are not printed. Screenshots and results default to ignored `.local/acceptance-screenshots/`. The runner accepts only localhost targets. For the extended Phase 5 scenario, start with profiles `demo,sla-demo` and also set `BROWSER_AUTOMATION=true`. It exercises the labelled 10/30-second SLA service, strategy selection, disabled AI buttons, notifications, simulated email and combined dashboard filters. `BROWSER_EXECUTABLE` optionally selects an installed Chromium executable. This extension has not passed browser execution in the current restricted workspace; see the acceptance records for tested scope and deferred checks.
 
 ## Third-party wrapper
 

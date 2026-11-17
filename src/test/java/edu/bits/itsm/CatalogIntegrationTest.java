@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 class CatalogIntegrationTest {
   static final EmbeddedPostgres POSTGRES = start();
   static EmbeddedPostgres start() {
-    try { return EmbeddedPostgres.builder().setPort(0).start(); }
+    try { return EmbeddedPostgres.builder().setServerConfig("unix_socket_directories", "").setPort(0).start(); }
     catch (Exception ex) { throw new ExceptionInInitializerError(ex); }
   }
   @AfterAll static void close() throws Exception { POSTGRES.close(); }

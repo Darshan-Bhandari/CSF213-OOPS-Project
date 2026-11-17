@@ -361,7 +361,11 @@ public class IncidentService {
     long oldCategory = i.getCategoryId();
     var oldPriority = oldAssessment.getPriority();
     var score = new PriorityAssessment(impact, urgency, i.getAssessment().getCriticality());
-    var policy = catalog.policy(i.getServiceId(), score.getPriority());
+    // Catalog edits apply to new incidents. A correction within the same priority
+    // must retain this incident's snapshot; only reprioritization selects a new policy.
+    var policy = oldPriority.equals(score.getPriority())
+        ? new CatalogService.Policy(i.getResponseSeconds(), i.getResolutionSeconds())
+        : catalog.policy(i.getServiceId(), score.getPriority());
     i.correct(
         category,
         impact,

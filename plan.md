@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-16 (Asia/Kolkata)
+Last updated: 2026-11-17 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -17,7 +17,17 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
-## Team handoff — current session, 16 November 2026
+## Team handoff — current session, 17 November 2026
+
+- **Phase 5 DONE for automated/backend and packaged HTTP acceptance.** Both assignment strategies, capacity/eligibility, manual reassignment, SLA snapshots, warnings/breaches, startup catch-up and both notification channels are verified. No browser acceptance is claimed for the new extended Phase 5 checks.
+- **Phase 6 core AI/reporting implementation is verified with controlled provider fixtures.** Active integer category validation, explicit human application, editable resolution drafts, bounded final accepted historical examples, timeout/error/oversized-response handling, stale versions and permissions are covered. All eight combined filters, IST date boundaries, pagination and known dashboard totals/averages are checked. Live AI activation remains deferred as the user requested; no key/model/budget was selected and no provider call was made.
+- `./mvnw clean verify` passed **198 regression tests + 2 packaged restart cases**, zero failures/errors/skips, on Linux/JDK 21.0.13/PostgreSQL 14.15. A strengthened restart test was then compiled and both packaged cases reran successfully. Four Python launcher tests passed. Exact environment-specific Maven arguments and execution history are in `docs/testing.md`.
+- Fixed same-priority corrections inadvertently adopting edited SLA policies; non-technician skill configuration errors; fractional AI category IDs; rejected historical fixes entering context; whole-response timeouts; and reporting-service current-account checks. V1–V4 remain unchanged; no existing user database was reset or repaired.
+- Local verification portability: test PostgreSQL uses TCP without Unix sockets and Mockito uses a startup agent. Browser attempt was blocked before navigation by Chromium Unix-socket creation restrictions. Compatible headless-shell downloads returned an unavailable-site page; the extended browser script was syntax-checked but not executed successfully. Earlier 16 November browser acceptance remains historical evidence for Phases 1–4 only.
+- **Next:** design/implement the approved repeated-report correlation with documented threshold rationale, then finish Phase 7 stabilization and three presentation workflows. Phase 6 remains IN PROGRESS for that addition and the separate live-AI gate. Phase 8 final report/UML/ER/member script/video/submission is open. Member/group details, model/key/budget and upload instructions remain deferred.
+- Current changes belong to branch `codex/phase5-acceptance` in `Darshan-Bhandari/CSF213-OOPS-Project`. The old Phase 3 ZIP remains historical. See `docs/phase-5-6-acceptance.md` for test mappings and manual demonstration steps.
+
+## Historical handoff — 16 November 2026
 
 - **Phases 1–4 accepted for the tested scope/environment.** Requirements/design gates remain approved; foundation and all eight core-workflow steps now pass automated, real packaged HTTP/restart and representative desktop/mobile browser acceptance. Final course submission is not complete.
 - Latest clean build: `./mvnw clean verify` passed **143 regression tests + 1 packaged restart integration test**, zero failures/errors/skips (16 November, 02:04 IST). Four independent Python launcher tests also passed. Counts are separated rather than treating a whole browser workflow as dozens of invented test cases.
@@ -47,10 +57,10 @@ Priority rationale: use the approved product of impact × urgency × criticality
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phase 4 — core incident workflow, `DONE` for tested acceptance scope. Phases 1–3 gates also accepted; Phase 5 is next. Supporting Phase 5–6 code exists but those gates remain open. P01–P10 approved; team/submission administration deferred.
+- Current phase: Phase 6 — core AI/reporting verified with controlled fixtures; live AI and approved repeated-report correlation remain open. Phases 1–5 accepted for their documented tested scopes. Phase 7 stabilization is in progress; Phase 8 final deliverables remain open. P01–P10 approved; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
-- Implementation status: foundation and all Phase 4 steps accepted; clean build, 143 regression + 1 packaged restart test, 4 launcher tests and Chromium desktop/mobile acceptance passed. Elevated execution resolves earlier sandbox restrictions. Remaining phases and tested-environment limits are in the team handoff above.
+- Implementation status: 198 regression + 2 packaged restart tests and 4 launcher tests passed on 17 November. Earlier desktop/mobile browser acceptance covers Phases 1–4; new extended browser checks are blocked in the current environment. See current handoff and acceptance records for limits.
 - Approved application format: web application (2026-11-15). Current stack is in section 4B; supporting tools approved in section 4C. Public hosting deferred; exact versions will be checked during foundation setup.
 
 ## 3. Requirements register
@@ -401,44 +411,44 @@ Exit: employee-to-technician-to-closure workflow works with complete persisted h
 
 ### Phase 5 — Assignment, SLAs and notifications
 
-Status: NOT STARTED for Phase 5 acceptance; supporting code exists. Dependencies: Phase 4 and D09/D13/D15.
+Status: DONE for automated/backend and packaged HTTP acceptance, 17 November 2026. Extended browser/manual presentation acceptance remains Phase 7. Dependencies: Phase 4 and D09/D13/D15.
 
-- [ ] Implement two interchangeable assignment strategies and selection/configuration.
-- [ ] Handle availability, workload limits, ties and no eligible technician.
-- [ ] Implement applicable SLA selection and response/resolution deadlines.
-- [ ] Implement monitoring, warnings and durable violation recording.
-- [ ] Implement two notification mechanisms behind extensible contracts.
-- [ ] Verify event triggers, recipients and avoidance of repeated warning/violation spam.
-- [ ] Prepare deterministic time-based demo/test scenarios without misrepresenting real production timing.
+- [x] Implement two interchangeable assignment strategies and selection/configuration.
+- [x] Handle availability, workload limits, ties and no eligible technician.
+- [x] Implement applicable SLA selection and response/resolution deadlines.
+- [x] Implement monitoring, warnings and durable violation recording.
+- [x] Implement two notification mechanisms behind extensible contracts.
+- [x] Verify event triggers, recipients and avoidance of repeated warning/violation spam.
+- [x] Prepare deterministic time-based demo/test scenarios without misrepresenting real production timing.
 
 Exit: both strategies, SLA warnings/breaches and both notification channels are independently demonstrable and tested.
 
 ### Phase 6 — Intelligence and reporting
 
-Status: NOT STARTED for Phase 6 acceptance; supporting code exists. Dependencies: core data and approved D07/D18/D20.
+Status: IN PROGRESS — core controlled-provider AI/reporting acceptance passed; live AI and approved repeat-report addition remain open. Dependencies: core data and approved D07/D18/D20.
 
-- [ ] Build OpenRouter integration for the approved AI feature(s), with configurable key/model, validation and failure handling; user adds their own key at the end. Do not choose a model or spend budget implicitly.
-- [ ] Verify startup and non-AI workflows with the key absent; clearly identify unavailable AI and test controlled success/failure responses.
+- [x] Build OpenRouter integration for the approved AI feature(s), with configurable key/model, validation and failure handling; user adds their own key at the end. Do not choose a model or spend budget implicitly.
+- [x] Verify startup and non-AI workflows with the key absent; clearly identify unavailable AI and test controlled success/failure responses.
 - [ ] After user configuration, verify a real AI request separately from mock tests and document its outcome.
-- [ ] Implement selected intelligent feature 1; document behavior and limitations.
-- [ ] Implement selected intelligent feature 2; document behavior and limitations.
-- [ ] Implement at least five approved search/filter criteria and combined filtering.
-- [ ] Implement agreed dashboards/reports with precise metric definitions.
-- [ ] Implement optional innovation only if approved and core scope remains achievable.
-- [ ] Add realistic positive, negative and boundary sample scenarios.
+- [x] Implement selected intelligent feature 1; document behavior and limitations.
+- [x] Implement selected intelligent feature 2; document behavior and limitations.
+- [x] Implement at least five approved search/filter criteria and combined filtering.
+- [x] Implement agreed dashboards/reports with precise metric definitions.
+- [ ] Complete approved repeated-report correlation/escalation: document matching evidence, independent reporters, thresholds/rationale, corrections and SLA effects before implementation. This addition remains unimplemented.
+- [x] Add realistic positive, negative and boundary sample scenarios.
 
 Exit: two intelligent features and required filters work; dashboard values match underlying data.
 
 ### Phase 7 — Verification and stabilization
 
-Status: NOT STARTED. Dependencies: Phases 3–6; tests also developed during those phases.
+Status: IN PROGRESS — regression, transaction/concurrency and packaged acceptance advanced on 17 November; final presentation/browser and scope reconciliation remain open. Dependencies: Phases 3–6; tests also developed during those phases.
 
-- [ ] Maintain at least 15 meaningful documented cases with inputs, expected result, actual result and evidence.
-- [ ] Cover normal flows, boundaries, invalid input, exceptions, permissions and business rules.
+- [x] Maintain at least 15 meaningful documented cases with inputs, expected result, actual result and evidence.
+- [x] Cover normal flows, boundaries, invalid input, exceptions, permissions and business rules.
 - [ ] Verify missing SLA/service, unavailable/overloaded technicians, duplicate behavior and relevant database/network failures.
-- [ ] Verify audit completeness, persistence, assignment behavior and SLA timing.
+- [x] Verify audit completeness, persistence, assignment behavior and SLA timing.
 - [ ] Run all three end-to-end demonstration workflows from repeatable seed data.
-- [ ] Fix failures, rerun affected checks and record residual limitations honestly.
+- [x] Fix failures, rerun affected checks and record residual limitations honestly.
 - [ ] Reconcile implementation against every requirement in section 3.
 
 Exit: acceptance checks pass, at least 15 documented tests pass, no unresolved mandatory-feature blocker remains.
@@ -475,7 +485,7 @@ First round:
 6. FEATURES ANSWERED — Category and resolution suggestions, reviewed by technicians. Key added later; model and budget pending before live calls.
 7. RUNTIME ANSWERED — Local first, public hosting deferred; no spending approved.
 8. CHANNELS ANSWERED — In-app plus simulated email; polished reference-based dashboard approved. Detailed screens approved in P01.
-9. ANSWERED — Execute the assigned sequential step thoroughly; do not stop inside approved work to reapprove settled rules. Current next gate is Phase 5.
+9. ANSWERED — Execute the assigned sequential step thoroughly; do not stop inside approved work to reapprove settled rules. Current next work is approved repeated-report correlation, then remaining Phase 6/7 gates.
 10. Additional professor instructions, templates, links, naming corrections or interim deadlines?
 
 P01–P10 (D12–D18) approved. Exact AI model/budget and deferred administration are not foundation blockers. Ask only about new material decisions.
@@ -493,15 +503,15 @@ P01–P10 (D12–D18) approved. Exact AI model/budget and deferred administratio
 | 21 | Report completion and rehearsal/recording |
 | 22 | Submission buffer and final verification |
 
-As of 16 November, Phases 1–4 acceptance is complete in the tested environment; Phase 5 is next. Original targets above remain historical/provisional; estimate remaining phase work while protecting the recording/submission buffer. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
+As of 17 November, Phases 1–5 acceptance and controlled-provider Phase 6 core checks are complete for the documented scope; correlation, live AI and final stabilization/submission gates remain open. Original targets above remain historical/provisional; estimate remaining phase work while protecting the recording/submission buffer. Dates are targets, not promises. Preserve recording and submission buffer when adjusting scope.
 
 ## 8. Risks, ambiguities and blockers
 
 | Item | Current state / action |
 |---|---|
 | Detailed business rules | P01–P10 approved; implement against recorded policies |
-| Build environment | Resolved for tested macOS/JDK environment: elevated Maven/network/socket/native execution permits clean verify, packaged restart and browser checks. Historical sandbox and checksum failures are retained in the change log. V1–V4 validate; no current migration blocker. |
-| Short deadline | Six calendar days until 22 November; prioritize mandatory functionality and protect final-day buffer |
+| Build environment | Linux/JDK 21 regression and packaged restart checks pass with TCP-only embedded PostgreSQL and a Mockito startup agent. Current extended browser run is blocked by Unix-socket restrictions; browser downloads were unavailable. Historical macOS/browser and migration results are retained. V1–V4 unchanged. |
+| Short deadline | Five calendar days until 22 November; prioritize mandatory functionality and protect final-day buffer |
 | Video filename | PDF's example uses `1_OOP_S1_2025-2026_Project` despite 2026–2027 course year; seek clarification before final naming |
 | Submission destinations | Shared-folder and spreadsheet links not supplied in the PDF |
 | Submission cutoff | Date given, exact time unspecified; obtain course instructions if available |
@@ -519,7 +529,7 @@ As of 16 November, Phases 1–4 acceptance is complete in the tested environment
 | 2026-11-15 | Updated core stack and dashboard reference recorded | Latest screenshots select Thymeleaf and OpenRouter; sections 4B and D21/D22 supersede earlier choices |
 | 2026-11-15 | Added root `AGENTS.md` for Codex project workflow | User asked to begin using Codex to automate project work; instructions preserve approved scope and verified status |
 
-Next action: Phase 5 acceptance of assignment strategies, eligibility/capacity/concurrency, SLA warnings/breaches/restart catch-up and both notification channels. Phases 1–4 acceptance summary is in `docs/phase-1-4-acceptance.md`. Credentials/model/team details remain deferred as recorded.
+Next action: approved repeated-report correlation design/implementation, followed by final Phase 7 stabilization and presentation workflows. Live AI awaits the user's model/key/budget. See `docs/phase-5-6-acceptance.md` and `docs/testing.md`; Phase 8 member/report/video/submission details remain deferred.
 
 ## 10. Change log
 
@@ -570,3 +580,5 @@ Next action: Phase 5 acceptance of assignment strategies, eligibility/capacity/c
 | 2026-11-16 | Packaged app/database restart workflow preserved records; real HTTP CSRF rejection exposed GET-only access-denied page returning 405 on POST. Changed denial page to handle forwarded methods | Step 8 acceptance caught a defect not exposed by MockMvc forwarding; rerun pending |
 
 | 2026-11-16 | Completed Step 8 and Phases 1–4 acceptance review; reconciled stale checklists, documented architecture/contracts and final evidence, fixed security/UI gaps found during real packaged/browser checks | `mvnw clean verify`: 143 regression + 1 packaged restart test passed; 4 launcher tests; Chromium full workflow at desktop/mobile with reviewed screenshots; later-phase and cross-environment limits retained |
+
+| 2026-11-17 | Accepted Phase 5 automation/backend and packaged restart scope; advanced controlled-provider Phase 6 AI/reporting and Phase 7 regression coverage; corrected SLA snapshots, AI transport/history/validation and reporting authorization | 198 regression + 2 packaged cases passed; strengthened restart rerun 2/2; 4 launcher tests. New extended browser run blocked before navigation; no live AI/spending. Details in `docs/phase-5-6-acceptance.md` and `docs/testing.md` |

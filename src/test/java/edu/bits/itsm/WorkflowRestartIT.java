@@ -26,6 +26,7 @@ class WorkflowRestartIT {
   Path databaseDirectory;
   Process application;
   URI base;
+  boolean monitorEnabled;
 
   class Session {
     final HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager())
@@ -74,7 +75,7 @@ class WorkflowRestartIT {
     assertEquals(200,r.statusCode());
   }
   EmbeddedPostgres database() throws Exception {
-    return EmbeddedPostgres.builder().setPort(0).setDataDirectory(databaseDirectory.toFile())
+    return EmbeddedPostgres.builder().setServerConfig("unix_socket_directories", "").setPort(0).setDataDirectory(databaseDirectory.toFile())
         .setCleanDataDirectory(false).setServerConfig("listen_addresses","127.0.0.1").start();
   }
   void startApplication(EmbeddedPostgres pg,String suppliedPassword,int iteration) throws Exception {
@@ -88,7 +89,9 @@ class WorkflowRestartIT {
     env.put("SPRING_DATASOURCE_USERNAME","postgres");env.put("SPRING_DATASOURCE_PASSWORD","");
     env.put("SPRING_PROFILES_ACTIVE","demo");env.put("DEMO_PASSWORD",suppliedPassword);
     env.put("OPENROUTER_API_KEY","");env.put("OPENROUTER_MODEL","");env.put("SERVER_ADDRESS","127.0.0.1");
-    env.put("SERVER_PORT",""+port);env.put("APP_SLA_MONITOR_ENABLED","false");
+    env.put("SERVER_PORT",""+port);env.put("APP_SLA_MONITOR_ENABLED",Boolean.toString(monitorEnabled));
+    // A long periodic delay isolates ApplicationReadyEvent catch-up in the restart test.
+    env.put("APP_SLA_SCAN_DELAY_MS","3600000");
     Path log=directory.resolve("application-"+iteration+".log");
     application=command.redirectErrorStream(true).redirectOutput(log.toFile()).start();
     var guest=new Session();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(45);
@@ -190,6 +193,76 @@ class WorkflowRestartIT {
         assertEquals(403,employee.post("/incidents/"+id+"/feedback",Map.of("rating","1"),null).statusCode());
         var logout=employee.post("/logout",Map.of(),employee.get("/incidents/"+id).body());
         assertEquals("/login",logout.uri().getPath());assertEquals("/login",employee.get("/employee/dashboard").uri().getPath());
+      } finally { stopApplication(); }
+    }
+  }
+
+  @Test @Timeout(value=3,unit=TimeUnit.MINUTES)
+  void startupCatchesUpOverdueTargetsAndNextRestartDoesNotDuplicateDeliveries() throws Exception {
+    databaseDirectory=directory.resolve("postgres");
+    long id, sentinel;
+    try(var pg=database()) {
+      try {
+        startApplication(pg,password,1);
+        var employee=new Session();employee.login("employee@campus.test");
+        var form=employee.get("/employee/incidents/new").body();
+        var report=employee.post("/employee/incidents",Map.of("title","Startup SLA catch-up fixture",
+            "description","Test-owned ticket aged while the application is stopped",
+            "service",option(form,"Campus Wi-Fi"),"category",option(form,"Network"),
+            "impact","3","urgency","3","affected","10"),form);
+        assertEquals(200,report.statusCode());id=Long.parseLong(report.uri().getPath().replace("/incidents/",""));
+        stopApplication();
+        var jdbc=new JdbcTemplate(pg.getPostgresDatabase());
+        // Simulate downtime without waiting 30 minutes or changing a real policy.
+        jdbc.update("UPDATE incidents SET created_at=now()-interval '2 hours',cycle_started_at=now()-interval '2 hours',"
+            +"response_due=now()-interval '115 minutes',resolution_due=now()-interval '90 minutes' WHERE id=?",id);
+        jdbc.update("UPDATE resolution_cycles SET started_at=now()-interval '2 hours',deadline=now()-interval '90 minutes' WHERE incident_id=?",id);
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM sla_events",Integer.class));
+      } finally { stopApplication(); }
+    }
+    monitorEnabled=true;
+    List<Map<String,Object>> events,deliveries,audits;
+    try(var pg=database()) {
+      try {
+        startApplication(pg,password,2);
+        var jdbc=new JdbcTemplate(pg.getPostgresDatabase());
+        long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);
+        while(jdbc.queryForObject("SELECT count(*) FROM sla_events",Integer.class)<2 && System.nanoTime()<deadline) Thread.sleep(100);
+        events=jdbc.queryForList("SELECT * FROM sla_events ORDER BY id");
+        assertEquals(Set.of("RESPONSE_BREACH","RESOLUTION_BREACH"),events.stream().map(r->r.get("kind")).collect(java.util.stream.Collectors.toSet()));
+        assertEquals(2,events.size(),"No backfilled warnings on the first already-overdue scan");
+        deliveries=jdbc.queryForList("SELECT * FROM notifications WHERE subject IN ('RESPONSE BREACH','RESOLUTION BREACH') ORDER BY id");
+        assertEquals(12,deliveries.size(),"Two targets, three relevant recipients and two channels");
+        audits=jdbc.queryForList("SELECT * FROM audit_entries WHERE action LIKE '%BREACH' ORDER BY id");
+        assertEquals(2,audits.size());
+        var employee=new Session();employee.login("employee@campus.test");
+        assertTrue(employee.get("/incidents/"+id).body().contains("RESPONSE_BREACH"));
+        var admin=new Session();admin.login("admin@campus.test");
+        assertTrue(admin.get("/admin/email").body().contains("SIMULATED"));
+        var form=employee.get("/employee/incidents/new").body();
+        var report=employee.post("/employee/incidents",Map.of("title","Next-startup sentinel fixture",
+            "description","Proves the third startup scan really completed",
+            "service",option(form,"Campus Wi-Fi"),"category",option(form,"Network"),
+            "impact","3","urgency","3","affected","10"),form);
+        assertEquals(200,report.statusCode());sentinel=Long.parseLong(report.uri().getPath().replace("/incidents/",""));
+        stopApplication();
+        jdbc.update("UPDATE incidents SET created_at=now()-interval '2 hours',cycle_started_at=now()-interval '2 hours',"
+            +"response_due=now()-interval '115 minutes',resolution_due=now()-interval '90 minutes' WHERE id=?",sentinel);
+        jdbc.update("UPDATE resolution_cycles SET started_at=now()-interval '2 hours',deadline=now()-interval '90 minutes' WHERE incident_id=?",sentinel);
+      } finally { stopApplication(); }
+    }
+    try(var pg=database()) {
+      try {
+        startApplication(pg,password,3);
+        var employee=new Session();employee.login("employee@campus.test");
+        var jdbc=new JdbcTemplate(pg.getPostgresDatabase());
+        long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);
+        while(jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=?",Integer.class,sentinel)<2
+            && System.nanoTime()<deadline) Thread.sleep(100);
+        assertEquals(2,jdbc.queryForObject("SELECT count(*) FROM sla_events WHERE incident_id=?",Integer.class,sentinel));
+        assertEquals(events,jdbc.queryForList("SELECT * FROM sla_events WHERE incident_id=? ORDER BY id",id));
+        assertEquals(deliveries,jdbc.queryForList("SELECT * FROM notifications WHERE incident_id=? AND subject IN ('RESPONSE BREACH','RESOLUTION BREACH') ORDER BY id",id));
+        assertEquals(audits,jdbc.queryForList("SELECT * FROM audit_entries WHERE incident_id=? AND action LIKE '%BREACH' ORDER BY id",id));
       } finally { stopApplication(); }
     }
   }

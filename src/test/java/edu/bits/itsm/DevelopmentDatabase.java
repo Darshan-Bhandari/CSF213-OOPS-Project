@@ -14,7 +14,7 @@ public class DevelopmentDatabase {
       throw new IllegalArgumentException("Development database port must be between 1024 and 65535.");
     directory.mkdirs();
     var database =
-        EmbeddedPostgres.builder()
+        EmbeddedPostgres.builder().setServerConfig("unix_socket_directories", "")
             .setPort(port)
             .setDataDirectory(directory)
             .setCleanDataDirectory(false)

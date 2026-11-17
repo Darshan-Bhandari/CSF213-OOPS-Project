@@ -19,6 +19,10 @@ public class IncidentQueryService {
   }
 
   private Query query(AccountPrincipal actor, IncidentFilter f) {
+    if (actor == null || !Boolean.TRUE.equals(jdbc.getJdbcTemplate().queryForObject(
+        "SELECT EXISTS(SELECT 1 FROM user_accounts WHERE id=? AND active AND role=?)",
+        Boolean.class, actor.getAccountId(), actor.getRole().name())))
+      throw new org.springframework.security.access.AccessDeniedException("An active account with the current role is required.");
     StringBuilder w = new StringBuilder(" WHERE 1=1 ");
     var p = new MapSqlParameterSource().addValue("now", Timestamp.from(clock.instant()));
     if (actor.getRole() == Role.EMPLOYEE) {
