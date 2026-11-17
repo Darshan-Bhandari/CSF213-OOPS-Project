@@ -17,6 +17,14 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Phase 7 follow-up — 17 November 2026, local macOS workspace
+
+- Synchronized 21 source/documentation files from reviewed commit `2ab44213cf314f28a68ca0e6380c74003009e557` into the clean older local workspace. Local Git remains based on `main`; these synchronized and follow-up changes are visible as local changes. Ignored `.env`, caches and saved database files were retained.
+- Continuing Phase 7 stabilization: fixed Windows Maven wrapper selection, added `scripts/run-local.cmd`, and accepted UTF-8 BOM/CRLF configuration files. Added a real launcher BOM/Unicode regression; **5 Python cases passed on macOS**. Native Windows execution remains unverified.
+- **74 Java rules/template cases passed on macOS/JDK 25.0.1**. Full regression attempt failed before database/provider assertions: PostgreSQL `shmget` and loopback fake-provider socket binding were denied by this sandbox. Raw Surefire total is 204 (including six initialization/cleanup error cases), 74 passed and 130 errors; this is not a passing integration run. It does not replace the earlier successful Linux 198 + 2 acceptance result.
+- Prepared `docs/windows-demo.md` and `docs/phase-7-checklist.md` with executable setup steps, expected results and all three workflows. Browser/full restart/native Windows/live AI demonstrations remain unchecked; no user database was reset and no live AI call was made.
+- OpenRouter remains the chosen provider, reconfirmed by the user. Live key/model/budget and approved repeated-report correlation remain Phase 6 gates; final browser/demonstration and requirements reconciliation remain Phase 7 gates. Phase 8 is not complete.
+
 ## Team handoff — current session, 17 November 2026
 
 - **Phase 5 DONE for automated/backend and packaged HTTP acceptance.** Both assignment strategies, capacity/eligibility, manual reassignment, SLA snapshots, warnings/breaches, startup catch-up and both notification channels are verified. No browser acceptance is claimed for the new extended Phase 5 checks.
@@ -582,3 +590,5 @@ Next action: approved repeated-report correlation design/implementation, followe
 | 2026-11-16 | Completed Step 8 and Phases 1–4 acceptance review; reconciled stale checklists, documented architecture/contracts and final evidence, fixed security/UI gaps found during real packaged/browser checks | `mvnw clean verify`: 143 regression + 1 packaged restart test passed; 4 launcher tests; Chromium full workflow at desktop/mobile with reviewed screenshots; later-phase and cross-environment limits retained |
 
 | 2026-11-17 | Accepted Phase 5 automation/backend and packaged restart scope; advanced controlled-provider Phase 6 AI/reporting and Phase 7 regression coverage; corrected SLA snapshots, AI transport/history/validation and reporting authorization | 198 regression + 2 packaged cases passed; strengthened restart rerun 2/2; 4 launcher tests. New extended browser run blocked before navigation; no live AI/spending. Details in `docs/phase-5-6-acceptance.md` and `docs/testing.md` |
+
+| 2026-11-17 | Continued Phase 7 stabilization in the local macOS workspace: synchronized verified source, fixed Windows wrapper selection and BOM/Unicode config parsing, added Windows/demo checklists | 74 Java rules/views + 5 Python launcher cases passed. Full database/fake-provider run blocked by sandbox shared-memory/socket restrictions; native Windows, live AI, correlation and full browser/demo acceptance remain open |

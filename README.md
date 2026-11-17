@@ -129,6 +129,10 @@ NODE_PATH="$PWD/.local/browser-tools/node_modules" PLAYWRIGHT_BROWSERS_PATH="$PW
 
 `DEMO_PASSWORD` must already be exported for these runner commands. Alternatively set `DEMO_CREDENTIALS_FILE` to an ignored local JSON file with a `password` field. Passwords are not printed. Screenshots and results default to ignored `.local/acceptance-screenshots/`. The runner accepts only localhost targets. For the extended Phase 5 scenario, start with profiles `demo,sla-demo` and also set `BROWSER_AUTOMATION=true`. It exercises the labelled 10/30-second SLA service, strategy selection, disabled AI buttons, notifications, simulated email and combined dashboard filters. `BROWSER_EXECUTABLE` optionally selects an installed Chromium executable. This extension has not passed browser execution in the current restricted workspace; see the acceptance records for tested scope and deferred checks.
 
+## Windows and final demonstration checks
+
+See [Windows setup](docs/windows-demo.md) for PowerShell commands and the `.env`-loading `scripts/run-local.cmd` launcher. [Phase 7 checklist](docs/phase-7-checklist.md) contains the three repeatable demonstrations and remaining verification gates. Windows wrapper selection and UTF-8 BOM handling are implemented; native Windows execution remains unverified.
+
 ## Third-party wrapper
 
 `mvnw` and `mvnw.cmd` come from Apache Maven Wrapper 3.3.4 (Apache License 2.0). The template version marker is replaced with the pinned release. Source: https://github.com/apache/maven-wrapper/tree/maven-wrapper-3.3.4. PostgreSQL test tooling: https://github.com/zonkyio/embedded-postgres.
