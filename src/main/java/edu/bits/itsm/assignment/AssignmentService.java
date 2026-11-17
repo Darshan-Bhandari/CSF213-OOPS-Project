@@ -118,6 +118,10 @@ public class AssignmentService {
     requireAdmin(actor);
     catalog.lock();
     catalog.requireCategory(category);
+    if (!Boolean.TRUE.equals(jdbc.queryForObject(
+        "SELECT EXISTS(SELECT 1 FROM technician_profiles t JOIN user_accounts u ON u.id=t.user_id"
+            + " WHERE t.user_id=? AND u.role='TECHNICIAN')", Boolean.class, user)))
+      throw new BusinessException("Technician not found.");
     if (proficiency < 0 || proficiency > 3)
       throw new BusinessException("Proficiency must be 0–3 (0 removes a skill).");
     if (proficiency == 0) {

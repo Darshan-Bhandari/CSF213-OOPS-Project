@@ -16,7 +16,8 @@ async function screen(page,name) {
   assert(width.document<=width.viewport+1, `${name} has horizontal page overflow: ${JSON.stringify(width)}`);
 }
 (async()=>{
-  const browser=await chromium.launch({headless:true});
+  const browser=await chromium.launch({headless:true,
+    ...(process.env.BROWSER_EXECUTABLE ? {executablePath:process.env.BROWSER_EXECUTABLE} : {})});
   try {
     const pages={};
     for(const role of ['employee','technician','admin']) {
@@ -94,6 +95,59 @@ async function screen(page,name) {
     await employee.getByRole('button',{name:'Submit feedback',exact:true}).click();
     assert.equal((await detail(employee)).status,'CLOSED');
     await screen(employee,'employee-desktop-closed-incident');
+    if(process.env.BROWSER_AUTOMATION==='true') {
+      // Run only on a disposable demo,sla-demo instance; normal SLA policies stay unchanged.
+      await admin.goto(base+'/admin/catalog');
+      const strategy=admin.locator('form').filter({has:admin.locator('select[name=strategy]')});
+      await strategy.locator('[name=strategy]').selectOption('LOAD');
+      await strategy.locator('button').click();
+      assert.equal(await admin.locator('[name=strategy]').inputValue(),'LOAD');
+      await employee.goto(base+'/employee/incidents/new');
+      await employee.locator('[name=title]').fill('Browser SLA training fixture');
+      await employee.locator('[name=description]').fill('Explicit short-target demonstration. Leave unacknowledged.');
+      await employee.locator('[name=service]').selectOption({label:'Demo SLA training — short targets'});
+      await employee.locator('[name=category]').selectOption({label:'Network'});
+      await employee.locator('[name=impact]').selectOption('3');
+      await employee.locator('[name=urgency]').selectOption('3');
+      await employee.locator('[name=affected]').fill('10');
+      await employee.getByRole('button',{name:/Submit incident/}).click();
+      await employee.waitForURL(/\/incidents\/\d+$/);
+      const training=employee.url();const trainingId=new URL(training).pathname.split('/').pop();
+      await technician.goto(training);
+      assert(await technician.getByRole('button',{name:'Suggest category',exact:true}).isDisabled());
+      assert(await technician.getByRole('button',{name:'Suggest resolution',exact:true}).isDisabled());
+      const limit=Date.now()+45000;
+      while(Date.now()<limit) {
+        await employee.reload();
+        if(await employee.getByText('RESOLUTION_BREACH',{exact:true}).count()) break;
+        await new Promise(resolve=>setTimeout(resolve,1000));
+      }
+      for(const kind of ['RESPONSE_WARNING','RESPONSE_BREACH','RESOLUTION_WARNING','RESOLUTION_BREACH'])
+        assert.equal(await employee.locator('.timeline-entry strong').filter({hasText:new RegExp('^'+kind+'$')}).count(),2,'SLA event plus its audit entry: '+kind);
+      await screen(employee,'employee-desktop-sla-events');
+      await employee.goto(base+'/notifications');
+      const unread=await employee.getByText('Unread',{exact:true}).count();
+      await employee.getByRole('button',{name:'Mark read',exact:true}).first().click();
+      assert.equal(await employee.getByText('Unread',{exact:true}).count(),unread-1);
+      await screen(employee,'employee-desktop-notifications');
+      await admin.goto(base+'/admin/email');
+      assert((await admin.getByText('SIMULATED',{exact:true}).count())>0);
+      assert((await admin.getByText('RESOLUTION BREACH',{exact:true}).count())>0);
+      await screen(admin,'admin-desktop-sla-simulated-email');
+      await admin.goto(base+'/admin/dashboard');
+      await admin.locator('[name=query]').fill('INC-'+trainingId);
+      await admin.locator('[name=status]').selectOption('ASSIGNED');
+      await admin.locator('[name=priority]').selectOption('P1');
+      await admin.locator('[name=category]').selectOption({label:'Network'});
+      await admin.locator('[name=service]').selectOption({label:'Demo SLA training — short targets'});
+      await admin.locator('[name=technician]').selectOption({label:'Demo technician'});
+      await admin.locator('[name=sla]').selectOption('BREACHED');
+      await admin.getByRole('button',{name:'Apply filters',exact:true}).click();
+      for(const label of ['Total incidents','Open backlog','Critical backlog','Recorded SLA violations'])
+        assert.equal(await admin.locator('.metric').filter({hasText:label}).locator('strong').innerText(),'1');
+      await screen(admin,'admin-desktop-filtered-sla-metrics');
+      console.log('PASS strategy selection, optional-AI controls, SLA warning/breach, inbox, simulated email and filtered metrics');
+    }
     for(const [role,page] of Object.entries(pages)) {
       await page.setViewportSize({width:390,height:844});
       await page.goto(base+'/'+role+'/dashboard');

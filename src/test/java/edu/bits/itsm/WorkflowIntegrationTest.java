@@ -35,7 +35,7 @@ class WorkflowIntegrationTest {
 
   static EmbeddedPostgres start() {
     try {
-      return EmbeddedPostgres.builder().setPort(0).start();
+      return EmbeddedPostgres.builder().setServerConfig("unix_socket_directories", "").setPort(0).start();
     } catch (Exception ex) {
       throw new ExceptionInInitializerError(ex);
     }
