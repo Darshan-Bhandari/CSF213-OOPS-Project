@@ -6,6 +6,8 @@ Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRoute
 
 Live AI verification awaits the user's model/key/budget; approved repeated-report correlation and final stabilization/submission work remain open. Earlier Chromium desktop/mobile acceptance covers Phases 1–4; the extended browser run is blocked in the current workspace before navigation. No live provider request or public deployment is claimed. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
 
+The interface now follows the supplied lavender **BITSOps Assistant** reference, with a responsive shared shell and real ticket highlights. See [UI refresh scope and asset credits](docs/ui-refresh.md). Campus crest/photo require internet; visual browser acceptance remains pending.
+
 ## Requirements
 
 - Full JDK 21 or 25 (including compiler and release metadata). Code targets Java 21; both JDK versions have been exercised in the recorded environments.

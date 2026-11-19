@@ -17,6 +17,12 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Approved UI reference — 19 November 2026
+
+- User supplied a lavender BITS Pilani / BITSOps Assistant reference and requested this appearance. This replaces the earlier teal design direction. Applied the visual identity to shared navigation/header/forms and a branded sign-in page; Campus Community, Technician and Admin remain the same roles.
+- Added purple/lavender cards, SVG line icons, responsive sidebar, functional ticket search, password visibility control and real role-scoped Recent Highlights. Existing metric definitions, account access and complaint workflow remain intact. New screenshots' example counts, trends, SSO and unimplemented modules are not represented as working functionality.
+- Main implementation compiled and 77 rules/template checks passed; all 22 template cases passed after adding populated-dashboard escaping coverage. Together those runs cover 56 unchanged rule cases and 22 templates. Browser preview was blocked by the local-file URL policy, so visual/interaction acceptance remains open. See `docs/ui-refresh.md` for assets, network requirements and exact scope.
+
 ## Approved role name — 19 November 2026
 
 User decision: rename the complaint-reporting role to **Campus Community**. **Admin** and **Technician** keep their existing names and responsibilities. Campus Community covers the people requesting campus IT support, including students; there is no new separate Student role.
@@ -600,3 +606,5 @@ Next action: approved repeated-report correlation design/implementation, followe
 | 2026-11-17 | Continued Phase 7 stabilization in the local macOS workspace: synchronized verified source, fixed Windows wrapper selection and BOM/Unicode config parsing, added Windows/demo checklists | 74 Java rules/views + 5 Python launcher cases passed. Full database/fake-provider run blocked by sandbox shared-memory/socket restrictions; native Windows, live AI, correlation and full browser/demo acceptance remain open |
 
 | 2026-11-19 | Renamed the complaint-reporting display role from Employee to Campus Community; retained Admin/Technician, authorization and existing account compatibility | Explicit user decision; UI/display labels and active documentation updated; verification recorded in `docs/testing.md` |
+
+| 2026-11-19 | Applied user-supplied lavender BITSOps UI reference to shared shell, sign-in and data-driven dashboard; added search/nav/password controls and recent ticket highlights | Main build: 77 rules/views passed; expanded views: 22 passed. Visual browser preview blocked by local-file URL policy; no browser pass claimed. Details in `docs/ui-refresh.md` |

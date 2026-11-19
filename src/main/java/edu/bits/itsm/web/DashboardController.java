@@ -45,6 +45,7 @@ public class DashboardController {
     model.addAttribute("statuses", edu.bits.itsm.incident.IncidentStatus.values());
     model.addAttribute("stats", queries.metrics(actor, filter));
     model.addAttribute("categoryAnalysis", queries.byCategory(actor, filter));
+    model.addAttribute("recentIncidents", queries.list(actor, filter).stream().limit(4).toList());
     model.addAttribute(
         "serviceCount",
         jdbc.queryForObject("SELECT COUNT(*) FROM it_services WHERE active", Long.class));

@@ -63,6 +63,11 @@ class WorkflowViewsTest {
   void pagesRenderForAdministrator(String view) throws Exception {
     String html = mvc.perform(get("/fixture").param("view", view).param("role", "ADMIN"))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    if (System.getProperty("app.visual-export") != null) {
+      var directory = java.nio.file.Path.of(".local", "ui-preview");
+      java.nio.file.Files.createDirectories(directory);
+      java.nio.file.Files.writeString(directory.resolve(view.replace('/', '-') + ".html"), html);
+    }
     if (view.equals("admin/users")) {
       org.junit.jupiter.api.Assertions.assertTrue(html.contains(">Campus Community</option>"));
       org.junit.jupiter.api.Assertions.assertTrue(html.contains("value=\"EMPLOYEE\""));
@@ -89,6 +94,7 @@ class WorkflowViewsTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
+        "dashboard",
         "incidents/list",
         "incidents/detail",
         "notifications",
@@ -211,6 +217,7 @@ class WorkflowViewsTest {
       model.addAttribute("statuses", IncidentStatus.values());
       model.addAttribute("total", 0L);
       model.addAttribute("rows", List.of());
+      model.addAttribute("recentIncidents", List.of());
       model.addAttribute("messages", List.of());
       model.addAttribute("audit", List.of());
       model.addAttribute("events", List.of());
@@ -249,6 +256,7 @@ class WorkflowViewsTest {
         row.put("category_id", 1L);
         row.put("applied_at", null);
         model.addAttribute("rows", List.of(row));
+        model.addAttribute("recentIncidents", List.of(row));
         model.addAttribute("messages", List.of(row));
         model.addAttribute("audit", List.of(row));
         model.addAttribute("events", List.of(row));
