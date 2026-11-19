@@ -1,5 +1,5 @@
 <!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/layout :: head('Create account')}"></head>
-<body class="auth-page"><main class="auth-card"><p class="eyebrow">EMPLOYEE REGISTRATION</p><h1>Get support.</h1><p class="muted">Create your campus IT account.</p>
+<body class="auth-page"><main class="auth-card"><p class="eyebrow">CAMPUS COMMUNITY REGISTRATION</p><h1>Get support.</h1><p class="muted">Create your Campus Community account to request IT support.</p>
 <form th:action="@{/register}" th:object="${form}" method="post"><div class="alert error" th:if="${#fields.hasErrors('*')}"><p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p></div>
 <label>Full name<input th:field="*{displayName}" maxlength="100" autocomplete="name" required></label><label>Email<input th:field="*{email}" type="email" maxlength="254" autocomplete="username" required></label>
 <label>Password<input name="password" type="password" minlength="8" maxlength="64" autocomplete="new-password" required><small>8–64 characters</small></label>

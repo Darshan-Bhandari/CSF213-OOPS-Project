@@ -5,4 +5,4 @@
 <div class="alert" th:if="${param.logout}">You have signed out.</div><div class="alert" th:if="${param.expired}">Please sign in again.</div>
 <form th:action="@{/login}" method="post"><label>Email<input name="email" type="email" autocomplete="username" required autofocus></label>
 <label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="button wide" type="submit">Sign in →</button></form>
-<p class="muted">New here? <a th:href="@{/register}">Create an employee account</a></p></main></body></html>
+<p class="muted">New here? <a th:href="@{/register}">Create a Campus Community account</a></p></main></body></html>

@@ -47,11 +47,13 @@ classDiagram
 
 Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3–7, P2=8–17, P1=18–27. Affected-user count is context. Reporter inputs cannot directly set priority, reporter identity, assignment or status. Reasoned administrator corrections audit old/new factors. Repeat-report correlation/escalation is approved follow-up scope, not implemented.
 
+Campus Community is the displayed complainant role (historically `EMPLOYEE` internally). The stored identifier, authorities, demo email and route paths remain compatible; Admin and Technician labels are unchanged.
+
 ## Interfaces and access
 
 | Interface | Contract |
 |---|---|
-| `/register`, `/login`, POST `/logout` | Employee registration; role cannot be injected; hashed passwords; sessions; CSRF-protected mutations |
+| `/register`, `/login`, POST `/logout` | Campus Community registration; role cannot be injected; hashed passwords; sessions; CSRF-protected mutations |
 | `/employee/incidents/new`, POST `/employee/incidents` | Validated title/description/catalog/impact/urgency/affected count; retain invalid input |
 | `/incidents`, `/incidents/{id}` | Lists/details scoped to reporter, assigned technician or active administrator |
 | POST `/incidents/{id}/action` | Versioned acknowledgment/start/resolve/verify/close/reject; invalid edges and roles rejected |
@@ -60,7 +62,7 @@ Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3
 | `/admin/users`, `/admin/catalog`, `/admin/audit`, `/admin/email` | Active administrator only; sensitive configuration writes check actor at service boundary too |
 | `/api/incidents`, `/api/incidents/{id}`, `/api/metrics` | Authenticated read-only projections; ownership/role scope; no entity/password serialization |
 
-Incident history services recheck current actor access. Staff-only suggestions and private investigation events are omitted from employee history. Account deactivation/role changes invalidate session access on the next request. Forbidden POST forwards now return 403 through the error page. Input/output escaping is verified; this is not a penetration-test or production-hardening claim.
+Incident history services recheck current actor access. Staff-only suggestions and private investigation events are omitted from Campus Community history. Account deactivation/role changes invalidate session access on the next request. Forbidden POST forwards now return 403 through the error page. Input/output escaping is verified; this is not a penetration-test or production-hardening claim.
 
 ## Transactions, history and concurrency
 

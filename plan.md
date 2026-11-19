@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-17 (Asia/Kolkata)
+Last updated: 2026-11-19 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -16,6 +16,12 @@ This file is the project's working source of truth for scope, decisions, impleme
 - Keep this file synchronized with actual implementation and final documentation. Do not claim background or automatic updates outside active work sessions.
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
+
+## Approved role name — 19 November 2026
+
+User decision: rename the complaint-reporting role to **Campus Community**. **Admin** and **Technician** keep their existing names and responsibilities. Campus Community covers the people requesting campus IT support, including students; there is no new separate Student role.
+
+Implemented as a display-label change: registration/sign-in copy, sidebar badges, administrator role choices/directory and reporting-denial wording use Campus Community. Persisted `EMPLOYEE`, form values, authorities and `/employee/...` routes stay compatible with existing accounts and complaints. The demo login remains `employee@campus.test`; only newly seeded demo display names use the new wording. Existing people's display names/passwords are preserved. Previous test names and historical evidence retain their original terminology. No database migration or permission change is required.
 
 ## Phase 7 follow-up — 17 November 2026, local macOS workspace
 
@@ -245,7 +251,7 @@ Suggested source layout: `src/main/java/.../{identity,catalog,incident,assignmen
 
 ### P01 — Accounts, screens and permissions
 
-- Roles: EMPLOYEE, TECHNICIAN, ADMIN. Employee registration is allowed; public registration cannot select a privileged role. Admin creates/deactivates technicians/admins and manages users. Demo accounts are seeded only in the demo environment. Deactivation preserves incident/audit history.
+- Display roles: Campus Community, Technician, Admin. Campus Community registration is allowed; public registration cannot select a privileged role. Admin creates/deactivates technicians/admins and manages users. Demo accounts are seeded only in the demo environment. Deactivation preserves incident/audit history.
 - Use protected session cookies and CSRF-protected mutations; hash passwords. Check both role and incident ownership/assignment on the backend. Administrator permissions do not eliminate required lifecycle guards.
 - Employee: own incidents, public conversation, information requests, resolution, verification, rating/feedback. Cannot see internal investigation notes, unrelated tickets or technician-only AI suggestions.
 - Technician: assigned incidents, own workload, internal notes, public replies, information requests, resolve actions and AI suggestions. Cannot alter another technician's incident or close on behalf of the reporter.
@@ -592,3 +598,5 @@ Next action: approved repeated-report correlation design/implementation, followe
 | 2026-11-17 | Accepted Phase 5 automation/backend and packaged restart scope; advanced controlled-provider Phase 6 AI/reporting and Phase 7 regression coverage; corrected SLA snapshots, AI transport/history/validation and reporting authorization | 198 regression + 2 packaged cases passed; strengthened restart rerun 2/2; 4 launcher tests. New extended browser run blocked before navigation; no live AI/spending. Details in `docs/phase-5-6-acceptance.md` and `docs/testing.md` |
 
 | 2026-11-17 | Continued Phase 7 stabilization in the local macOS workspace: synchronized verified source, fixed Windows wrapper selection and BOM/Unicode config parsing, added Windows/demo checklists | 74 Java rules/views + 5 Python launcher cases passed. Full database/fake-provider run blocked by sandbox shared-memory/socket restrictions; native Windows, live AI, correlation and full browser/demo acceptance remain open |
+
+| 2026-11-19 | Renamed the complaint-reporting display role from Employee to Campus Community; retained Admin/Technician, authorization and existing account compatibility | Explicit user decision; UI/display labels and active documentation updated; verification recorded in `docs/testing.md` |

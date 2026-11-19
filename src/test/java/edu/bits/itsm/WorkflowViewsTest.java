@@ -54,19 +54,34 @@ class WorkflowViewsTest {
         "incidents/detail",
         "notifications",
         "admin/catalog",
+        "admin/users",
+        "login",
+        "register",
         "admin/audit",
         "admin/email"
       })
   void pagesRenderForAdministrator(String view) throws Exception {
-    mvc.perform(get("/fixture").param("view", view).param("role", "ADMIN"))
-        .andExpect(status().isOk());
+    String html = mvc.perform(get("/fixture").param("view", view).param("role", "ADMIN"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    if (view.equals("admin/users")) {
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains(">Campus Community</option>"));
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("value=\"EMPLOYEE\""));
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains(">Campus Community</span>"));
+    }
+    if (view.equals("login"))
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("Create a Campus Community account"));
+    if (view.equals("register"))
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("CAMPUS COMMUNITY REGISTRATION"));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"EMPLOYEE", "TECHNICIAN"})
   void dashboardsAndDetailsRenderForOtherRoles(String role) throws Exception {
     mvc.perform(get("/fixture").param("view", "dashboard").param("role", role))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+            .string(org.hamcrest.Matchers.containsString(">" +
+                (role.equals("EMPLOYEE") ? "Campus Community" : "TECHNICIAN") + "</span>")));
     mvc.perform(get("/fixture").param("view", "incidents/detail").param("role", role))
         .andExpect(status().isOk());
   }
@@ -161,6 +176,13 @@ class WorkflowViewsTest {
       ReflectionTestUtils.setField(account, "id", 2L);
       model.addAttribute("viewer", new AccountPrincipal(account));
       model.addAttribute("form", new IncidentReportForm());
+      if (view.equals("register")) model.addAttribute("form", new RegistrationForm());
+      if (view.equals("admin/users")) {
+        model.addAttribute("form", new AdminAccountForm());
+        var community = new UserAccount("Community fixture", "community@example.test", "hash", Role.EMPLOYEE);
+        ReflectionTestUtils.setField(community, "id", 3L);
+        model.addAttribute("accounts", List.of(community));
+      }
       model.addAttribute("messageForm", new IncidentMessageForm());
       model.addAttribute("actionForm", new IncidentActionForm());
       model.addAttribute("feedbackForm", new IncidentFeedbackForm());

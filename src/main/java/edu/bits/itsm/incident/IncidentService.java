@@ -112,7 +112,7 @@ public class IncidentService {
       int affected) {
     requireCurrentAccount(actor);
     if (actor.getRole() != Role.EMPLOYEE)
-      throw new AccessDeniedException("Employees report incidents.");
+      throw new AccessDeniedException("Campus Community members report incidents.");
     catalog.lock();
     var configured = catalog.service(service);
     catalog.requireCategory(category);

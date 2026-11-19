@@ -59,15 +59,17 @@ Open **http://localhost:8080**. Demo accounts all use the password you supplied:
 
 | Account | Role |
 |---|---|
-| `employee@campus.test` | Employee |
+| `employee@campus.test` | Campus Community |
 | `technician@campus.test` | Technician |
 | `admin@campus.test` | Administrator |
+
+Campus Community is the complaint-reporting role, including students and other campus members. The demo email `employee@campus.test` remains valid; its historical name and internal role/URLs are retained for compatibility. Admin and Technician responsibilities are unchanged.
 
 Seeding is idempotent: existing accounts and passwords are retained on restart. Changing `DEMO_PASSWORD` does not reset an existing account. No privileged accounts are seeded unless the `demo` profile is explicitly enabled. Run `./scripts/run-local.sh` without the profile to disable demo provisioning.
 
 ## What works in the foundation
 
-- Public employee registration, normalized unique email and hashed passwords.
+- Public Campus Community registration, normalized unique email and hashed passwords.
 - Login/logout with server-side sessions and CSRF protection.
 - Backend role restrictions and role-specific dashboard routing.
 - Administrator directory, account creation and activation/deactivation; technician account creation includes a technician profile.
