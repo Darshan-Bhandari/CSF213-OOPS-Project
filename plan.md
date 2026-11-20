@@ -17,6 +17,15 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Phase 8 report refinement — 20 November 2026
+
+- User requested a more refined and detailed report of about 45 pages. Prepared a 45-page edition with approximately 11,800 words, PDF bookmarks and eight project-authored vector diagrams.
+- Expanded scope: stakeholder/functional/nonfunctional analysis, architecture and module interfaces, UML use cases/state/classes, OOP/pattern rationale, worked priority/assignment/SLA/rejection/metrics examples, separate ER views, three data dictionaries, migration/sample data, all nine technology questions, security/error/concurrency/UX/operations, 24 documented test scenarios, demonstration and release checklists.
+- Corrected the earlier report's ID-only account-association description: Incident has ID fields plus read-only lazy ManyToOne reporter/assignee mappings. Explained that resolution/event cycle links are not declared composite foreign keys.
+- Editable report and reproducible PDF builder are under `docs/report/refined/`. Local deliverable: `artifacts/BITSOps_Project_Report_Refined.pdf`. Replaces the earlier report edition while preserving its version history.
+- Verified 45 pages, expected section on each page, contents pagination, text bounds and all rendered pages; revised diagram routing for readability. This is document verification only: no new application test run, live AI/email call, schema modification or data reset.
+- Phase 8 remains IN PROGRESS pending group/member identity, actual contributions, final source/acceptance reconciliation and recording/submission. Existing live AI, correlation, latest browser and native Windows gates are not marked complete.
+
 ## Phase 8 report drafting — 20 November 2026
 
 - User requested the report phase. Phase 8 is IN PROGRESS for documentation; earlier open implementation and acceptance gates remain open.
