@@ -1,0 +1,14 @@
+digraph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helvetica",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f4f1ff",color="#71618d"]; edge [fontname="Helvetica",fontsize=9,color="#444444"];node [shape=record,style=filled];rankdir=TB;
+ Incident [label="{Incident|id : Long\lversion : long\lstatus : IncidentStatus\lreporterId : long\lassigneeId : Long\l|transition(next, now)\lassign(userId, now)\lreject(now)\lcorrect(...)\l}"];
+ Priority [label="{PriorityAssessment|impact : int\lurgency : int\lcriticality : int\lscore : int\lpriority : String\l|getScore()\lgetPriority()\l}"];
+ State [label="{IncidentState|interface|checkTransition(next)\lforStatus(status)\l}"];
+ Workflow [label="{WorkflowState|current : IncidentStatus\lallowed : Set\l|checkTransition(next)\l}"];
+ User [label="{UserAccount|id : Long\lemail : String\lpasswordHash : String\lrole : Role\lactive : boolean\l|changeActive(active)\lisActive()\l}"];
+ Service [label="{IncidentService|accounts catalog assignment\laudit SLA notifications\l|create(...)\ltransition(...)\lmessage(...)\lfeedback(...)\l}"];
+ Incident -> Priority [dir=both,arrowtail=diamond,arrowhead=none,label="1 embedded value"];
+ Incident -> State [label="validates through"];
+ Workflow -> State [arrowhead=empty,style=dashed,label="implements"];
+ Service -> Incident [label="commands"];
+ Incident -> User [label="reporter 1 / assignee 0..1
+ID backed association",style=dashed];
+ }

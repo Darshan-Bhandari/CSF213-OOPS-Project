@@ -1,0 +1,25 @@
+graph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helvetica",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f4f1ff",color="#71618d"]; edge [fontname="Helvetica",fontsize=9,color="#444444"];rankdir=LR;
+ node [shape=plaintext,style=""];
+ community [label="Campus Community
+<<actor>>"]; technician [label="Technician
+<<actor>>"];admin [label="Admin
+<<actor>>"];
+ subgraph cluster_system {label="BITSOps Assistant";color="#cccccc";node [shape=ellipse,style=filled,fillcolor="#f4f1ff"];
+ login [label="Authenticate and view
+role scoped dashboard"];
+ report [label="Report and track
+own incidents"];
+ reply [label="Reply verify reject
+close and give feedback"];
+ work [label="Acknowledge investigate
+and resolve assigned work"];
+ advice [label="Request and review
+AI suggestions"];
+ configure [label="Manage accounts catalog
+SLAs skills and strategy"];
+ oversee [label="Monitor incidents reports
+audit and notifications"];
+ }
+ community -- login;technician -- login;admin -- login;
+ community -- report;community -- reply;technician -- work;technician -- advice;admin -- advice;admin -- configure;admin -- oversee;
+ }

@@ -1,0 +1,14 @@
+digraph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helvetica",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f4f1ff",color="#71618d"]; edge [fontname="Helvetica",fontsize=9,color="#444444"];rankdir=TB;node [fontsize=12];
+ i [label="incidents | PK id"];
+ msg [label="incident_messages\nPK id | FK incident author\nself FK response_to"];
+ cyc [label="resolution_cycles\nPK incident_id + cycle"];
+ res [label="resolutions\nPK id | FK incident technician\nUNIQUE incident + cycle"];
+ f [label="feedback\nPK FK incident_id | FK reporter"];
+ ev [label="sla_events\nPK id | FK incident\nUNIQUE incident cycle kind"];
+ n [label="notifications\nPK id | FK user incident"];
+ a [label="audit_entries\nPK id | FK actor incident nullable"];
+ ai [label="ai_suggestions\nPK id | FK incident\nrequester category"];
+ {rank=same;i;msg;cyc;} {rank=same;res;f;ev;} {rank=same;n;a;ai;}
+ i -> msg;i -> cyc;i -> res;i -> f [label="1 : 0..1"];i -> ev;i -> n;i -> a;i -> ai;
+ msg -> ev [style=invis];cyc -> ev [style=invis];res -> n [style=invis];ev -> ai [style=invis];
+ }

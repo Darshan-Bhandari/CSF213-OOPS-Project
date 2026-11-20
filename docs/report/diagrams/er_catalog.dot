@@ -1,0 +1,11 @@
+digraph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helvetica",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f4f1ff",color="#71618d"]; edge [fontname="Helvetica",fontsize=9,color="#444444"];rankdir=TB;node [fontsize=12];
+ u [label="user_accounts\nPK id | UNIQUE email"];
+ t [label="technician_profiles\nPK id | UNIQUE FK user_id"];
+ sk [label="technician_skills\nPK FK user_id + category_id"];
+ c [label="categories\nPK id"];
+ svc [label="it_services\nPK id"];
+ pol [label="sla_policies\nPK id | FK service_id nullable"];
+ i [label="incidents\nPK id | FK reporter assignee\nFK category service | version"];
+ u -> t [label="1 : 0..1"];t -> sk [label="1 : many"];c -> sk [label="1 : many"];
+ u -> i [label="reporter / assignee"];c -> i;svc -> i;svc -> pol [label="0..1 : many"];
+ }

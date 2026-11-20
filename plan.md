@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-19 (Asia/Kolkata)
+Last updated: 2026-11-20 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -16,6 +16,15 @@ This file is the project's working source of truth for scope, decisions, impleme
 - Keep this file synchronized with actual implementation and final documentation. Do not claim background or automatic updates outside active work sessions.
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
+
+## Phase 8 report drafting — 20 November 2026
+
+- User requested the report phase. Phase 8 is IN PROGRESS for documentation; earlier open implementation and acceptance gates remain open.
+- Created and visually reviewed a 17-page report draft grounded in source cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50. Editable source: `docs/report/report.md`; diagram DOT/SVG sources: `docs/report/diagrams/`.
+- Draft covers problem/stakeholders/assumptions, requirements, architecture, UML use cases and classes, ER relationships, schema/sample data, priority/assignment/SLA rules, all nine technology questions, security, historical test outcomes for 20 meaningful scenarios, local setup, limitations and three recording workflows.
+- Report distinguishes historical Linux 198 + 2 acceptance from later 56 rules/22 templates and five launcher checks. No tests or live AI/email were run for report preparation. Current browser/Windows/provider acceptance and approved correlation remain pending.
+- Password recovery and real email were discussed, not implemented or selected for delivery. They are not claimed as working features.
+- Group number, three member names/IDs and actual contributions are deliberately unfilled. Final report readiness depends on these details, reconciliation of pending work and team review. No recording or submission is claimed.
 
 ## Approved UI reference — 19 November 2026
 
@@ -475,7 +484,7 @@ Exit: acceptance checks pass, at least 15 documented tests pass, no unresolved m
 
 ### Phase 8 — Report, recording and submission
 
-Status: NOT STARTED. Dependencies: verified application; documentation drafted throughout earlier phases.
+Status: IN PROGRESS. A 17-page review draft and editable diagram/report sources were prepared on 20 November. Finalization still depends on team details and remaining acceptance gates. Dependencies: verified application; documentation drafted throughout earlier phases.
 
 - [ ] Finalize problem analysis, stakeholders, assumptions and requirements.
 - [ ] Synchronize architecture, UML, schema/ER diagram and technology inventory with actual code.
@@ -555,6 +564,7 @@ Next action: approved repeated-report correlation design/implementation, followe
 
 | Date | Change | Basis |
 |---|---|---|
+| 2026-11-20 | Started Phase 8 report; prepared 17-page draft, UML/ER/architecture and 20 documented test scenarios; retained implementation/validation blockers and pending team identities | User requested next phase report |
 | 2026-11-14 | Created initial living plan with requirements, phase checklists, decision register, schedule, risks and completion criteria | User explicitly requested an evolving `plan.md` project backbone |
 | 2026-11-15 | Approved web application format; updated current state, Phase 1 checklist, questions and schedule status | User selection: "web application" |
 | 2026-11-15 | Recorded user-selected baseline stack and end-to-end review; supporting choices remain proposals | User supplied stack screenshot and requested critical analysis |
@@ -608,3 +618,4 @@ Next action: approved repeated-report correlation design/implementation, followe
 | 2026-11-19 | Renamed the complaint-reporting display role from Employee to Campus Community; retained Admin/Technician, authorization and existing account compatibility | Explicit user decision; UI/display labels and active documentation updated; verification recorded in `docs/testing.md` |
 
 | 2026-11-19 | Applied user-supplied lavender BITSOps UI reference to shared shell, sign-in and data-driven dashboard; added search/nav/password controls and recent ticket highlights | Main build: 77 rules/views passed; expanded views: 22 passed. Visual browser preview blocked by local-file URL policy; no browser pass claimed. Details in `docs/ui-refresh.md` |
+

@@ -1,0 +1,11 @@
+digraph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helvetica",fontsize=11,shape=box,style="rounded,filled",fillcolor="#f4f1ff",color="#71618d"]; edge [fontname="Helvetica",fontsize=9,color="#444444"];rankdir=TB;node [shape=record,style=filled];
+ Strategy [label="{AssignmentStrategy|interface|key() : String\lselect(List Candidate) : Optional\l}"];
+ Skill [label="{SkillBasedAssignment||select(candidates)\l}"];Load [label="{LoadBasedAssignment||select(candidates)\l}"];
+ Assign [label="{AssignmentService||candidates(category)\lchoose(category)\lconfigure(key, actor)\l}"];
+ Channel [label="{NotificationChannel|interface|deliver(user, incident, subject, body)\l}"];
+ Base [label="{BaseNotificationChannel|abstract|final deliver(...)\lchannel()\ldeliveryStatus()\l}"];
+ InApp [label="{InAppNotificationChannel||channel()\ldeliveryStatus()\l}"];Email [label="{SimulatedEmailChannel||channel()\ldeliveryStatus()\l}"];
+ Assign -> Strategy [arrowtail=odiamond,arrowhead=none,dir=both,label="injected strategies"];
+ Skill -> Strategy [arrowhead=empty,style=dashed];Load -> Strategy [arrowhead=empty,style=dashed];
+ Base -> Channel [arrowhead=empty,style=dashed];InApp -> Base [arrowhead=empty];Email -> Base [arrowhead=empty];
+ }
