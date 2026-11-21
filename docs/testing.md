@@ -1,6 +1,6 @@
 # Verification record
 
-Latest acceptance (21 November 2026, Linux/JDK 21.0.13/PostgreSQL 14.15): **220 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Includes 14 recovery integration and 4 delivery cases, and 22 template cases. Claude performed static review only and did not rerun these tests. Native Mac clean verify, latest visual/browser, live AI and real SMTP remain unverified. Prior dated runs below are historical.
+Latest acceptance (21 November 2026 simplified edition, Linux): **202 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Forgot password was removed; its 18 tests are no longer part of the suite. JavaScript syntax passed; native Mac/latest browser/live AI remain unverified. Prior dated recovery-edition runs below are historical.
 
 ## Foundation verification
 
@@ -200,3 +200,8 @@ New V5 migration preserves existing users/tickets and leaves V1–V4 unchanged. 
 Mac instructions: MAC_START_HERE.md. Recovery design/report addendum: docs/password-recovery.md. Claude independently reviews original requirements PDF, plan, source and tests using CLAUDE_REVIEW.md. Source ZIP excludes credentials, local tokens/mail files, databases, caches, build outputs and Git metadata. The 45-page report predates recovery; consult its dated addendum. Phase 8 remains in progress and earlier correlation/live AI/final submission gates remain open.
 
 Command used in this workspace: full JDK at ../project/.local/jdk, inherited proxy settings and shared ignored Maven cache; ordinary Macs use `./mvnw clean verify`. Recovery test SMTP was mocked and local delivery used test-owned temporary files. Real SMTP inbox delivery, latest-page browser interaction and native Mac execution remain unverified.
+
+
+## Simplified edition verification 21 November 2026
+
+After removing recovery and adding the account dropdown, clean verify passed **202 regression + 2 packaged restart tests**, zero failures/errors/skips, on Linux/full JDK 21.0.13/PostgreSQL 14.15. Five Python launcher tests and `node --check src/main/resources/static/js/app.js` passed. The reduction from 220 is exactly the 14 recovery integration and 4 recovery delivery tests removed with that feature; no hidden failing/skipped tests are counted as success. Existing 22 template cases render the shared account menu for the role fixtures. No live visual/browser/native Mac or provider check is claimed. V1–V5 remain unchanged; existing user data and credentials were not reset. Full log in this workspace: /tmp/no-recovery-verify.log.

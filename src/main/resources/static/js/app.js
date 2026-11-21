@@ -51,3 +51,14 @@ navigationMedia.addEventListener('change', () => {
   syncNavigationState();
 });
 syncNavigationState();
+
+const accountDropdown = document.querySelector('[data-account-dropdown]');
+document.addEventListener('click', event => {
+  if (accountDropdown?.open && !accountDropdown.contains(event.target)) accountDropdown.open = false;
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && accountDropdown?.open) {
+    accountDropdown.open = false;
+    accountDropdown.querySelector('summary').focus();
+  }
+});

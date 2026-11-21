@@ -1,3 +1,5 @@
+> Current product change 21 November 2026: Forgot password has been REMOVED at user request. The existing PDF/earlier recovery discussions are historical and need final reconciliation; preserved V5 schema is inactive compatibility data. See current plan.md and MAC_START_HERE.md.
+
 > Updated 21 November 2026 after independent static review: the current PDF includes V5 support schema, credential_revision, current Linux result ledger and known limitations. No application behavior changed. Team identities and Mac verification remain pending.
 
 # Detailed report source

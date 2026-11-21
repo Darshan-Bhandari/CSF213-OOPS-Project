@@ -17,6 +17,14 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Simplification and account avatar — 21 November 2026
+
+User explicitly approved an account dropdown and then instructed removing Forgot password. Implemented native details/summary account menu with current name/email/role and POST Sign out; outside-click and Escape close behavior. Removed recovery runtime services/controllers/delivery/forms, SMTP dependency/properties/example settings and 18 recovery-specific tests. No change to incident permissions, priorities, assignment, SLA, simulated incident email or AI behavior. Optional fixes from Claude's review remain unapproved.
+
+Published V5 remains immutable because real installations have applied it. Unused recovery tables and credential_revision are preserved; no user password/data reset, table drop or Flyway repair. Existing credentials remain unchanged. Package a complete fresh source folder so removed Java files cannot survive an overlay update. MAC_START_HERE.md, review/UI docs and README identify the simplified scope. Prior reports/220-test counts are historical; reconcile final PDF before submission.
+
+Current clean verify passed 202 regression + 2 packaged restart cases; five Python launcher tests and JavaScript syntax passed. No native Mac/browser or live provider pass is claimed. Group/member/contribution details and the instructor year/cutoff reply remain pending.
+
 ## Independent static review reconciliation — 21 November 2026
 
 User explicitly prohibited application-code changes without approval. Claude's review was STATIC ONLY and did not rerun the recorded 220 + 2 tests. No live AI/SMTP or new browser/Mac acceptance is claimed. Runtime src/main, src/test and pom.xml remain byte-for-byte as published in 8292045fc1841e6d6dabbce847ba339d737b1aa0.

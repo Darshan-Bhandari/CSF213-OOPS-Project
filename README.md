@@ -1,18 +1,12 @@
-# Current update 21 November 2026
+# BITSOps Assistant simplified edition
 
-Forgot password is implemented. Start with [Mac instructions](MAC_START_HERE.md), [recovery design and configuration](docs/password-recovery.md), and [Claude review instructions](CLAUDE_REVIEW.md). Latest full Linux verification: **220 regression + 2 packaged restart tests passed**, plus **5 Python launcher tests**. SMTP needs your own sender configuration; explicit local demo capture works without one. Incident email notifications remain simulated. Prior report/verification descriptions below are historical.
+Forgot password and recovery/SMTP setup have been removed at the user’s request. The avatar opens name, email, role and Sign out. Incident email remains simulated. Follow [Mac start instructions](MAC_START_HERE.md) and extract into a NEW folder; do not overlay old source or reset the user database. V1–V5 remain unchanged for database compatibility.
 
-# Campus IT Service Management
+Current Linux verification (21 November): **202 regression + 2 packaged restart cases passed**, plus **5 launcher tests** and JavaScript syntax. Native Mac/latest visual acceptance remains pending. The earlier 220-case recovery edition is historical.
 
-Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRouter integration is implemented with user-supplied local key/model configuration and remains optional for startup.
+[Verification](VERIFICATION_SUMMARY.md) · [Living plan](plan.md) · [Demo script](docs/demo-script.md) · [Independent review instructions](CLAUDE_REVIEW.md)
 
-**Phases 1–5 are accepted for the documented automated/backend and packaged HTTP scope.** Core AI category/resolution suggestions and reporting pass controlled-provider acceptance. The latest clean verification on 21 November 2026 passed **220 regression tests + 2 packaged restart cases**, and **5 launcher tests** passed (Linux; not a new Mac run). See [Phase 5–6 evidence and demo steps](docs/phase-5-6-acceptance.md), [architecture](docs/architecture.md), [test history](docs/testing.md), and [current plan](plan.md).
-
-Live AI verification awaits the user's model/key/budget; approved repeated-report correlation and final stabilization/submission work remain open. Earlier Chromium desktop/mobile acceptance covers Phases 1–4; the extended browser run is blocked in the current workspace before navigation. No live provider request or public deployment is claimed. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
-
-The interface now follows the supplied lavender **BITSOps Assistant** reference, with a responsive shared shell and real ticket highlights. See [UI refresh scope and asset credits](docs/ui-refresh.md). Campus crest/photo require internet; visual browser acceptance remains pending.
-
-## Requirements
+## Requirements## Requirements
 
 - Full JDK 21 or 25 (including compiler and release metadata). Code targets Java 21; both JDK versions have been exercised in the recorded environments.
 - Maven 3.9.11 is downloaded by the included Apache Maven Wrapper on first use.

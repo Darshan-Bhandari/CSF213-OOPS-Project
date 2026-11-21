@@ -23,3 +23,8 @@ Compilation plus 77 existing rules/template cases passed after the main implemen
 The optional `-Dapp.visual-export=true` test flag exports actual rendered administrator fixtures under ignored `.local/ui-preview/` for manual preview. Fixtures contain test data, not a signed-in live application. Browser preview was blocked by the browser's URL policy rejecting the local file protocol. No workaround was attempted; no screenshot or successful visual/interaction inspection is claimed. Existing database/shared-memory/socket restrictions remain documented in `docs/testing.md`.
 
 Review actual desktop/mobile rendering in a browser-capable normal development environment before marking visual acceptance complete. Native Windows/Safari/Firefox/full accessibility/live AI/full final demonstration gates remain separate.
+
+
+## Account dropdown 21 November 2026
+
+User approved making the avatar interactive. Native details/summary opens a panel with escaped current account display name, email and displayed role, plus the existing POST logout/CSRF integration. Keyboard activation is native; Escape restores focus to the summary and outside click closes the panel. Mobile styles retain avatar access and bound panel width. The existing sidebar/mobile logout remains available. Forgot password was subsequently removed by explicit user instruction. Current verification is in docs/testing.md; no live browser pass is implied.

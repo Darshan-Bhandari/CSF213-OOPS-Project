@@ -1,3 +1,11 @@
+# Current review scope — simplified edition 21 November 2026
+
+Forgot password has now been removed at the user's explicit request. Review the current source rather than expecting the historical recovery implementation below. Its runtime classes/forms, SMTP dependency/settings and 18 recovery tests are absent. V5 remains immutable for database compatibility, including unused recovery tables and credential_revision. The account avatar now uses a native details/summary disclosure with name, email, role and POST Sign out; test keyboard/outside-click behavior independently.
+
+No optional audit privacy, login throttling, correlation or AI fallback fix has been authorized. In particular the audit denylist remains an open issue. Preserve secrets and real databases. Current results are in VERIFICATION_SUMMARY.md; the former 220-case result applies to the prior recovery edition. The old report and recovery design remain historical until final report reconciliation.
+
+## Historical review request for context
+
 # Independent review request
 
 Review the entire project critically against `OOP_S1_2026-2027_Project.pdf` (original course requirements, 17 pages). Read AGENTS.md, plan.md and docs/testing.md, then inspect actual source rather than accepting report/test claims at face value.

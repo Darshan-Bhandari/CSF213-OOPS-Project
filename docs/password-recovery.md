@@ -1,3 +1,11 @@
+# Archived recovery design — feature removed 21 November 2026
+
+The user explicitly requested removing Forgot password. Runtime recovery controllers, services, delivery classes, forms, SMTP dependency/configuration and recovery tests have been removed. The text below describes the PREVIOUS implementation only; it is not a current setup guide. Use MAC_START_HERE.md.
+
+V5 is deliberately preserved unchanged for existing databases. Its unused recovery tables and credential_revision field are not an active recovery service. Existing passwords and data remain intact. There is no new migration or destructive cleanup.
+
+---
+
 # Password recovery implementation 21 November 2026
 
 ## Scope

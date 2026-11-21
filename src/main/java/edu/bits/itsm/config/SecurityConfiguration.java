@@ -22,7 +22,7 @@ public class SecurityConfiguration {
       throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/error")
+                auth.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/error")
                     .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole("ADMIN")
