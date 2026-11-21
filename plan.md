@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-20 (Asia/Kolkata)
+Last updated: 2026-11-21 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -16,6 +16,14 @@ This file is the project's working source of truth for scope, decisions, impleme
 - Keep this file synchronized with actual implementation and final documentation. Do not claim background or automatic updates outside active work sessions.
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
+
+## Password recovery and Mac review bundle — 21 November 2026
+
+User approved implementing forgot password. Added anonymous CSRF-protected recovery/reset forms, 15-minute single-use cryptographic links with hashes stored in PostgreSQL, persisted cooldown/global request limits, atomic consumption/password/audit, and next-request revocation of existing sessions. SMTP sender is user-configured; an explicit loopback-only private local mailbox supports Mac demos without sender credentials. Default delivery is disabled. No real email, provider account, subscription, key or spending was used.
+
+New V5 migration preserves existing users/tickets and leaves V1–V4 unchanged. Full Linux/JDK 21.0.13/PostgreSQL 14.15 clean verify passed **220 regression + 2 packaged restart cases**, zero failures/errors/skips. This includes 14 recovery integration and 4 delivery tests; five Python launcher tests also passed. The initial targeted run passed 92 cases after correcting a test import ambiguity. No new visual browser/native Mac/Windows/real SMTP acceptance is claimed.
+
+Mac instructions: MAC_START_HERE.md. Recovery design/report addendum: docs/password-recovery.md. Claude independently reviews original requirements PDF, plan, source and tests using CLAUDE_REVIEW.md. Source ZIP excludes credentials, local tokens/mail files, databases, caches, build outputs and Git metadata. The 45-page report predates recovery; consult its dated addendum. Phase 8 remains in progress and earlier correlation/live AI/final submission gates remain open.
 
 ## Phase 8 report refinement — 20 November 2026
 

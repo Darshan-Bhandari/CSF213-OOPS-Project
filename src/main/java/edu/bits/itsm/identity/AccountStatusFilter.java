@@ -22,6 +22,7 @@ public class AccountStatusFilter extends OncePerRequestFilter {
         && authentication.getPrincipal() instanceof AccountPrincipal principal) {
       var current = accounts.findById(principal.getAccountId());
       if (current.isEmpty()
+          || current.get().getCredentialRevision() != principal.getCredentialRevision()
           || !current.get().isActive()
           || current.get().getRole() != principal.getRole()) {
         SecurityContextHolder.clearContext();

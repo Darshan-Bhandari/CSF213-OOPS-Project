@@ -1,3 +1,5 @@
+> Update 21 November 2026: password recovery was added after this report edition. Read [the recovery addendum](../../password-recovery.md) and current testing/plan before treating the report as current implementation status.
+
 # Detailed report source
 
 This edition supersedes the initial 17-page draft. It contains 45 pages, eight vector diagrams and 24 documented test scenarios. Group identity and actual contribution fields remain deliberately unfilled.

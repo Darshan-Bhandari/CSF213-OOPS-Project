@@ -1,3 +1,7 @@
+# Current update 21 November 2026
+
+Forgot password is implemented. Start with [Mac instructions](MAC_START_HERE.md), [recovery design and configuration](docs/password-recovery.md), and [Claude review instructions](CLAUDE_REVIEW.md). Latest full Linux verification: **220 regression + 2 packaged restart tests passed**, plus **5 Python launcher tests**. SMTP needs your own sender configuration; explicit local demo capture works without one. Incident email notifications remain simulated. Prior report/verification descriptions below are historical.
+
 # Campus IT Service Management
 
 Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRouter integration is implemented with user-supplied local key/model configuration and remains optional for startup.

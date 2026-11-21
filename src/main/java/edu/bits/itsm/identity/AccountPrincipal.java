@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.User;
 
 public class AccountPrincipal extends User {
   private final long accountId;
+  private final long credentialRevision;
+  public long getCredentialRevision() { return credentialRevision; }
   private final String displayName;
   private final Role role;
 
@@ -19,6 +21,7 @@ public class AccountPrincipal extends User {
         true,
         List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole().name())));
     accountId = account.getId();
+    credentialRevision = account.getCredentialRevision();
     displayName = account.getDisplayName();
     role = account.getRole();
   }
