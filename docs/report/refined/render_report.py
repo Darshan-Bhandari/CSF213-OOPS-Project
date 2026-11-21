@@ -99,6 +99,14 @@ class Figure(Flowable):
    for x,y,t,ls in nodes:
     box(x,y,190,58,t,ls)
     edge(243,y+29,190 if x==0 else 297,y+29)
+  elif k=='ersupport':
+   box(5,195,225,65,'user_accounts',['PK id','credential_revision : BIGINT default 0'])
+   box(5,65,225,100,'password_reset_tokens',['PK token_hash : VARCHAR(64)','FK user_id -> user_accounts.id','expires_at : TIMESTAMPTZ','used : BOOLEAN default false'])
+   edge(117,195,117,165,'1 to many')
+   box(265,195,215,65,'password_reset_limits',['PK email_hash : VARCHAR(64)','requested_at : TIMESTAMPTZ'])
+   box(265,110,215,65,'password_reset_gate',['PK id = 1','window_start / requests'])
+   box(265,25,215,65,'assignment_configuration',['PK id = 1 / strategy'])
+   box(5,-5,225,50,'demo_seed_markers',['PK name : VARCHAR(100)'])
   elif k=='aiseq':
    xs=[48,180,310,440];names=['Staff browser','Advisor','OpenRouter','Suggestion store']
    for x,n in zip(xs,names):box(x-45,330,92,34,n);edge(x,328,x,10,dash=True,head='none')
@@ -110,7 +118,7 @@ class ReportDoc(SimpleDocTemplate):
    key='p'+str(self.page);self.canv.bookmarkPage(key);self.canv.addOutlineEntry(re.sub('<[^>]+>','',f.getPlainText()),key,0,False)
 def footer(c,d):
  c.setStrokeColor(colors.HexColor('#d9d4e1'));c.setLineWidth(.5);c.line(54,43,558,43)
- c.setFillColor(colors.HexColor('#55515b'));c.setFont('Helvetica',8);c.drawString(54,29,'BITSOps Assistant | Detailed review report | 20 November 2026');c.drawRightString(558,29,f'{d.page} / 45')
+ c.setFillColor(colors.HexColor('#55515b'));c.setFont('Helvetica',8);c.drawString(54,29,'BITSOps Assistant | Detailed review report | 21 November 2026');c.drawRightString(558,29,f'{d.page} / 45')
 def build():
  pages=json.loads((ROOT/'content.json').read_text());story=[];md=[]
  for i,page in enumerate(pages,1):

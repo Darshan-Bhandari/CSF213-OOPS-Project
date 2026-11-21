@@ -20,3 +20,15 @@ Anonymous GET/POST `/forgot-password` and `/reset-password`, a sign-in link, con
 V5 adds credential_revision, token hashes/expiry, hashed-address cooldown and a singleton global limit row. Published V1–V4 are unchanged. No existing database reset or repair is needed. Review PasswordRecovery, RecoveryMail, RecoveryController, AccountStatusFilter and PasswordRecoveryIntegrationTest. App registration is not email-verified in the existing product; mailbox control is therefore the recovery identity. No unverified change-email feature was added.
 
 See MAC_START_HERE.md for exact configuration and docs/testing.md for results and limits. The 45-page report predates this feature; use this file as its implementation addendum until final report reconciliation.
+
+
+## Exact V5 schema
+
+- `user_accounts.credential_revision BIGINT NOT NULL DEFAULT 0`: increments when a password is reset; AccountPrincipal snapshots it and AccountStatusFilter revokes older sessions on their next request.
+- `password_reset_tokens`: `token_hash VARCHAR(64) PRIMARY KEY`, `user_id BIGINT NOT NULL REFERENCES user_accounts(id)`, `expires_at TIMESTAMPTZ NOT NULL`, `used BOOLEAN NOT NULL DEFAULT FALSE`. The used field is not set in the current code: successful reset deletes all account token rows. Single-use behavior relies on locking and deletion, not flipping this flag.
+- `password_reset_limits`: `email_hash VARCHAR(64) PRIMARY KEY`, `requested_at TIMESTAMPTZ NOT NULL`. A hashed normalized address enforces a 60-second cooldown; this is not a per-IP limiter.
+- `password_reset_gate`: singleton `id INTEGER PRIMARY KEY CHECK(id=1)`, `window_start TIMESTAMPTZ NOT NULL`, `requests INTEGER NOT NULL`. Its row lock and global 20-per-minute window serialize recovery request processing, including the synchronous SMTP send.
+
+## Known limitations from independent static review
+
+SMTP is synchronous under the global gate transaction/lock and its timeouts can delay all recovery requests. Known and unknown addresses may have different response timings despite identical visible messages. The global cap has no per-IP fairness and can be exhausted to deny recovery. Login/registration throttling, lockout and email verification are absent; registration explicitly reports duplicate emails. Reset URLs contain bearer tokens in query strings, mitigated by no-store/no-referrer but still sensitive to copying, browser history or access logging. Delivery exceptions invalidate tokens but produce no operator log. POSIX local mode is Mac/Linux only; its sensitive files are not automatically deleted. These are documented issues, not approved fixes. No application behavior was changed in this documentation task.

@@ -1,8 +1,8 @@
-> Update 21 November 2026: password recovery was added after this report edition. Read [the recovery addendum](../../password-recovery.md) and current testing/plan before treating the report as current implementation status.
+> Updated 21 November 2026 after independent static review: the current PDF includes V5 support schema, credential_revision, current Linux result ledger and known limitations. No application behavior changed. Team identities and Mac verification remain pending.
 
 # Detailed report source
 
-This edition supersedes the initial 17-page draft. It contains 45 pages, eight vector diagrams and 24 documented test scenarios. Group identity and actual contribution fields remain deliberately unfilled.
+This edition supersedes the initial 17-page draft. It contains 45 pages, nine vector diagrams and 24 documented test scenarios. Group identity and actual contribution fields remain deliberately unfilled.
 
 The PDF is available as [BITSOps_Project_Report_Refined.pdf](https://chatgpt.com/library?file_id=libfile_1ec8ccca66e881918c2a72a70915e274&account_id=personal).
 

@@ -17,6 +17,14 @@ This file is the project's working source of truth for scope, decisions, impleme
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
 
+## Independent static review reconciliation — 21 November 2026
+
+User explicitly prohibited application-code changes without approval. Claude's review was STATIC ONLY and did not rerun the recorded 220 + 2 tests. No live AI/SMTP or new browser/Mac acceptance is claimed. Runtime src/main, src/test and pom.xml remain byte-for-byte as published in 8292045fc1841e6d6dabbce847ba339d737b1aa0.
+
+Completed documentation work: current README/testing headers use 21 November Linux 220 + 2 / Python 5; report now names all 20 ER tables including V5 recovery and credential_revision, removes nonexistent accounts dependency from the legacy class diagram, describes the table-driven state machine accurately, and records all reported limitations including reporter audit privacy. docs/demo-script.md gives three deterministic workflows and existing short-SLA training profile instructions. Filename question is drafted in docs/instructor-filename-question.md, NOT sent. docs/mac-final-verification.md provides the Mac command; Mac remains unavailable and NOT RUN.
+
+Source is already public on GitHub. Current submission source must point to the codex/phase7-stabilization branch until a separately approved merge; the default main is older. Group number, member names/IDs and actual contributions are still required to fill the cover. Recording, instructor reply and submission receipts remain pending. The denylist/privacy fix and all optional application changes remain unapproved and untouched.
+
 ## Password recovery and Mac review bundle — 21 November 2026
 
 User approved implementing forgot password. Added anonymous CSRF-protected recovery/reset forms, 15-minute single-use cryptographic links with hashes stored in PostgreSQL, persisted cooldown/global request limits, atomic consumption/password/audit, and next-request revocation of existing sessions. SMTP sender is user-configured; an explicit loopback-only private local mailbox supports Mac demos without sender credentials. Default delivery is disabled. No real email, provider account, subscription, key or spending was used.
@@ -357,7 +365,7 @@ Proposed persistence entities: UserAccount, TechnicianProfile, Category, Technic
 
 Relationships: UserAccount has optional TechnicianProfile; TechnicianProfile has many TechnicianSkills linking categories; Incident associates reporter, service, category, assignee and policy snapshot; Incident owns notes/conversation/resolution cycles and feedback. Retain immutable history when records are deactivated.
 
-OOP: Incident methods enforce transitions and encapsulated fields; AssignmentStrategy provides polymorphism with SkillBasedAssignment and LoadBasedAssignment; IncidentState implementations provide State pattern guards; NotificationChannel composes two channels. Abstract BaseNotificationChannel with shared delivery-record behavior and concrete in-app/simulated-email subclasses provides justified is-a inheritance. AiAdvisor with OpenRouter adapter isolates the provider. Repositories separate storage. Avoid artificial inheritance for categories or forcing account roles into incompatible entity subclasses.
+OOP: Incident methods enforce transitions and encapsulated fields; AssignmentStrategy provides polymorphism with SkillBasedAssignment and LoadBasedAssignment; IncidentState and one WorkflowState record type provide a table-driven state machine with transition guards; NotificationChannel composes two channels. Abstract BaseNotificationChannel with shared delivery-record behavior and concrete in-app/simulated-email subclasses provides justified is-a inheritance. AiAdvisor with OpenRouter adapter isolates the provider. Repositories separate storage. Avoid artificial inheritance for categories or forcing account roles into incompatible entity subclasses.
 
 Use case diagram specification: Employee reports/views/replies/verifies/closes/rates own incident; Technician acknowledges/investigates/requests info/views AI/resolves assigned incident; Admin manages accounts/catalog/SLA/assignment, reassigns and reports/audits; SYSTEM calculates priority/assigns/monitors/notifies. Produce final UML and ER diagrams alongside implemented classes/schema, using this specification.
 

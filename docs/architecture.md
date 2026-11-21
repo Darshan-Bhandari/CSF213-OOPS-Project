@@ -25,7 +25,7 @@ Pinned/verified setup: Java target 21, tested JDKs 25.0.1 (earlier macOS accepta
 
 ## Domain contracts and patterns
 
-- **State:** `IncidentState` owns explicit allowed edges; enum declaration order cannot silently change them. `Incident` guards lifecycle mutations. Service-level role, assignment and version checks precede commands.
+- **Table-driven state machine:** `IncidentState` owns explicit allowed edges; enum declaration order cannot silently change them. `Incident` guards lifecycle mutations. Service-level role, assignment and version checks precede commands.
 - **Strategy:** `AssignmentStrategy` has skill-based and load-based implementations. Eligibility and capacity are checked before selecting a candidate. Committed PostgreSQL tests cover both strategies, eligibility, capacity, stable ties, concurrent reports and unchanged existing assignments.
 - **Inheritance/polymorphism:** `BaseNotificationChannel` implements shared persistence behavior; in-app and simulated-email subclasses supply channel/status behavior through the notification contract. No actual external email is sent.
 - **Composition:** incidents embed a `PriorityAssessment`; the incident service composes catalog, assignment, audit, SLA and notification services. Framework repositories support these contracts rather than replacing business rules.

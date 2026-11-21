@@ -1,6 +1,6 @@
 # Verification record
 
-Latest acceptance (17 November 2026): **198 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **4 launcher tests**. Phase 5 automated/backend/packaged scope is accepted; Phase 6 core AI/reporting is verified with controlled fixtures. Live AI, repeated-report correlation and final stabilization/submission remain open. The extended browser attempt was blocked before navigation; earlier desktop/mobile acceptance applies to Phases 1–4. See the final section for exact current evidence. Earlier failures below are historical.
+Latest acceptance (21 November 2026, Linux/JDK 21.0.13/PostgreSQL 14.15): **220 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Includes 14 recovery integration and 4 delivery cases, and 22 template cases. Claude performed static review only and did not rerun these tests. Native Mac clean verify, latest visual/browser, live AI and real SMTP remain unverified. Prior dated runs below are historical.
 
 ## Foundation verification
 

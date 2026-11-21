@@ -6,7 +6,7 @@ Forgot password is implemented. Start with [Mac instructions](MAC_START_HERE.md)
 
 Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRouter integration is implemented with user-supplied local key/model configuration and remains optional for startup.
 
-**Phases 1–5 are accepted for the documented automated/backend and packaged HTTP scope.** Core AI category/resolution suggestions and reporting pass controlled-provider acceptance. The latest clean verification passed **198 regression tests + 2 packaged restart cases**, and **4 launcher tests** passed. See [Phase 5–6 evidence and demo steps](docs/phase-5-6-acceptance.md), [architecture](docs/architecture.md), [test history](docs/testing.md), and [current plan](plan.md).
+**Phases 1–5 are accepted for the documented automated/backend and packaged HTTP scope.** Core AI category/resolution suggestions and reporting pass controlled-provider acceptance. The latest clean verification on 21 November 2026 passed **220 regression tests + 2 packaged restart cases**, and **5 launcher tests** passed (Linux; not a new Mac run). See [Phase 5–6 evidence and demo steps](docs/phase-5-6-acceptance.md), [architecture](docs/architecture.md), [test history](docs/testing.md), and [current plan](plan.md).
 
 Live AI verification awaits the user's model/key/budget; approved repeated-report correlation and final stabilization/submission work remain open. Earlier Chromium desktop/mobile acceptance covers Phases 1–4; the extended browser run is blocked in the current workspace before navigation. No live provider request or public deployment is claimed. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
 

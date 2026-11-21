@@ -4,7 +4,7 @@ digraph G {graph [bgcolor="white",ranksep=.45,nodesep=.25]; node [fontname="Helv
  State [label="{IncidentState|interface|checkTransition(next)\lforStatus(status)\l}"];
  Workflow [label="{WorkflowState|current : IncidentStatus\lallowed : Set\l|checkTransition(next)\l}"];
  User [label="{UserAccount|id : Long\lemail : String\lpasswordHash : String\lrole : Role\lactive : boolean\l|changeActive(active)\lisActive()\l}"];
- Service [label="{IncidentService|accounts catalog assignment\laudit SLA notifications\l|create(...)\ltransition(...)\lmessage(...)\lfeedback(...)\l}"];
+ Service [label="{IncidentService|catalog assignment\laudit SLA notifications\l|create(...)\ltransition(...)\lmessage(...)\lfeedback(...)\l}"];
  Incident -> Priority [dir=both,arrowtail=diamond,arrowhead=none,label="1 embedded value"];
  Incident -> State [label="validates through"];
  Workflow -> State [arrowhead=empty,style=dashed,label="implements"];

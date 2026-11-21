@@ -12,11 +12,11 @@ Detailed group project reportCS F213 / MAC F212 Object Oriented ProgrammingBITS 
 | Member 3 name and student ID | To be supplied |
 | Actual individual contributions | To be confirmed by each member |
 
-Prepared 20 November 2026Version 2 detailed review draft
+Updated 21 November 2026Version 3 post review draft
 
 This report describes an implemented browser-based campus support system. Architecture, rules and schema are grounded in the reviewed source. Recorded verification is distinguished from unexecuted checks and planned features.
 
-Source baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50. The first report was published in documentation revision 945ae36225b46bc403f0a48d0f401c154300cec7. This document expands and corrects that draft; it does not declare final submission or production readiness.
+Current reviewed implementation: 8292045fc1841e6d6dabbce847ba339d737b1aa0, including V5 recovery. Original report baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50. The first report was published in documentation revision 945ae36225b46bc403f0a48d0f401c154300cec7. This document expands and corrects that draft; it does not declare final submission or production readiness.
 
 # 2 Abstract and document control
 
@@ -50,7 +50,7 @@ No member contribution, deployment, live AI interaction, external email delivery
 | 8 | Nonfunctional requirements | 29 | Identity and catalog dictionary |
 | 9 | System architecture | 30 | Incident data dictionary |
 | 10 | Modules and interfaces | 31 | History data dictionary |
-| 11 | UML use cases | 32 | Migrations and sample data |
+| 11 | UML use cases | 32 | Migrations and support schema |
 | 12 | Incident state model | 33 | Technology decisions |
 | 13 | UML domain classes | 34 | Alternatives and evolution |
 | 14 | UML extension contracts | 35 | Security design |
@@ -62,7 +62,7 @@ No member contribution, deployment, live AI interaction, external email delivery
 | 20 | Resolution and rejected fixes | 41 | Tests for automation and history |
 | 21 | Conversations and privacy | 42 | Tests for AI and reporting |
 | 22 | Audit and transactions | 43 | Demonstration and team preparation |
-| 23 | Intelligence architecture | 44 | Limitations and release checklist |
+| 23 | Intelligence architecture | 44 | Known limitations and release gates |
 | 24 | AI validation and failure handling | 45 | Conclusion and references |
 
 Use the PDF bookmarks for direct navigation. For evaluation, begin with requirements and OOP; for the viva, trace the worked examples; for local operation, see page 38. Team identity and final submission evidence remain pending.
@@ -210,7 +210,7 @@ Figure 2. Human actors and principal use cases inside the system boundary. Assoc
 
 Campus Community reporting and resolution review apply to the reporter’s own incidents. Technician investigation applies to assigned incidents. Admin monitoring has broader scope and configuration authority. All three roles authenticate and receive a role-appropriate dashboard, but a shared screen title does not imply identical data access.
 
-Automatic SLA scans are internal processing, not another human actor. AI is a provider dependency rather than a user with authority. No use case claims campus Google sign-in, real email delivery or password recovery because these are not implemented.
+Automatic SLA scans are internal processing, not another human actor. AI is a provider dependency rather than a user with authority. The diagram focuses on incident management. Forgot password now exists; SMTP is configurable but real delivery is unverified. Campus Google sign-in remains absent.
 
 # 12 Incident lifecycle and state model
 
@@ -275,7 +275,7 @@ The variable behavior is candidate ranking. AssignmentStrategy defines key() and
 
 ## State for lifecycle validation
 
-The variable behavior is which next state is legal. IncidentState.forStatus selects a WorkflowState that checks an explicit Set. This is a lightweight State implementation rather than a separate class for every state. It prevents incidental changes to enum ordering from becoming business rules. Role and version checks remain service responsibilities.
+The variable behavior is which next state is legal. IncidentState.forStatus selects a WorkflowState that checks an explicit Set. This is a table-driven state machine with one WorkflowState record type rather than separate per-state implementation classes. It prevents incidental changes to enum ordering from becoming business rules. Role and version checks remain service responsibilities.
 
 ## Adapter and repository boundaries
 
@@ -535,7 +535,7 @@ assignment_configuration is a singleton ranking configuration and demo_seed_mark
 
 | Table | Important fields | Integrity and purpose |
 | --- | --- | --- |
-| user_accounts | id BIGINT; display_name VARCHAR(100); email VARCHAR(254); password_hash VARCHAR(100); role VARCHAR(20); active; created_at; version | Identity PK; normalized unique email; allowed role constraint; preserved actors and optimistic account state. |
+| user_accounts | id BIGINT; display_name VARCHAR(100); email VARCHAR(254); password_hash VARCHAR(100); role VARCHAR(20); active; created_at; version; credential_revision BIGINT | Identity PK; normalized unique email; allowed role constraint; preserved actors and optimistic account state. Credential revision revokes sessions after reset. |
 | technician_profiles | id; user_id; available; capacity | Unique FK to user; capacity 1-100. Independent ID exists, while skills reference user_id. |
 | categories | id; name VARCHAR(80); active | Named category with retained historical identity; active catalog validation at service boundary. |
 | it_services | id; name VARCHAR(100); criticality; active | Criticality 1-3. Incident snapshots prevent later edits rewriting the original assessment. |
@@ -585,30 +585,25 @@ The table stores multiple timing perspectives intentionally. Care is needed to a
 
 Repeating messages, resolutions, alerts and suggestions are child records rather than ever-growing text fields. This preserves individual actors and times and allows visibility rules per kind. Feedback’s one-per-incident shape differs intentionally from the one-per-cycle resolution model.
 
-References: V1-V4 schema and current history readers [S3, S6]. The diagram omits no claimed external email server because none exists in this version.
+References: V1-V5 schema and current history readers [S3, S6]. The diagram omits no claimed external email server because none exists in this version.
 
-# 32 Migrations and sample data
+# 32 Migrations and support schema
 
-| Migration | Responsibility | Operational implication |
-| --- | --- | --- |
-| V1 foundation | Accounts, technician profiles, catalog, policies and initial audit table | Seeds five services, six categories and four default policies. |
-| V2 incident workflows | Incidents, skills/configuration, conversation, resolution, alerts, notifications and AI tables | Adds incident linkage/state context to audit and operational indexes. |
-| V3 demo seed markers | Persistent initialization marker table | Supports idempotent workflow demo setup. |
-| V4 conversation revision | Nonnegative revision field on incidents | Makes message mutations version-visible at identical times. |
+[Diagram ersupport]
 
-## Declared catalog examples
+Figure 9. Support schema completes the ER set. The reset-token user foreign key is enforced; hashed-address limits and the singleton gate have no account FK. Configuration and seed markers are independent.
 
-Services and criticality: Campus Wi-Fi 3; Campus login 3; Campus email 2; Lab computers 2; Printers 1. Categories: Network, Authentication, Hardware, Software, Email and Other. These are actual migration seed definitions, not records exported from a user’s current database.
+| Migration | Role |
+| --- | --- |
+| V1 | Identity, technician/catalog, SLA policies, audit and initial seeds. |
+| V2 | Incident workflow, configuration/skills, history, notifications and AI suggestions. |
+| V3 | demo_seed_markers initialization tracking. |
+| V4 | incidents.conversation_revision for fixed-clock versioning. |
+| V5 | user_accounts.credential_revision and all three password_reset_* tables. |
 
-## Illustrative linked data
+password_reset_tokens has a user index, expiry and unused used flag; consumption deletes rows. password_reset_limits records hashed-address cooldown timestamps. password_reset_gate stores id=1, window_start and requests. assignment_configuration stores id=1 and strategy; demo_seed_markers has name as primary key. Together Figures 7-9 cover all 20 tables.
 
-An example reporter raises “Lab Wi-Fi unavailable” against Campus Wi-Fi and Network with impact 3 and urgency 2. Criticality 3 gives score 18 and P1. An eligible technician receives the assignment. A public request asks which lab is affected; a reporter reply references that request. The technician’s final resolution is stored separately from the conversation and can later become relevant closed-ticket history.
-
-ID values are database-generated and should be resolved from the actual catalog. A report must not assume Network always has a particular numeric ID or that an illustrative technician exists. Demo account initialization requires a chosen password and retains existing passwords; changing the seed input is not account recovery.
-
-## Migration discipline
-
-Flyway owns ordered schema changes, while Hibernate validates the result. Published migrations must remain immutable. A changed checksum must be investigated against the source and actual database; deleting saved data or forcing a repair is not a routine fix. Existing development records should remain intact when applying this report update. [S6-S7]
+Migration seeds: Campus Wi-Fi 3; Campus login 3; Campus email 2; Lab computers 2; Printers 1. Categories: Network, Authentication, Hardware, Software, Email, Other. Default SLA rows are shown on page 19. Preserve published migrations and existing data; V5 adds recovery without reset/repair.
 
 # 33 Technology decisions and rationale
 
@@ -681,7 +676,7 @@ Local .env settings provide database and OpenRouter configuration through the la
 
 ## Limits and recovery status
 
-Forgot-password behavior was discussed, including single-use expiring links and a generic account-existence message, but no such flow is implemented. The current admin email page displays simulations. External TLS deployment, rate limits, recovery identity validation, stronger auditing operations and a tested backup strategy would be additional work. Demo .test identifiers are not working mailboxes. No penetration-test certification is claimed.
+Forgot password is implemented with expiring single-use links, hash storage, throttling and credential revision session revocation. SMTP is configurable; real inbox delivery remains unverified. The current admin email page displays simulations. External TLS deployment, rate limits, recovery identity validation, stronger auditing operations and a tested backup strategy would be additional work. Demo .test identifiers are not working mailboxes. No penetration-test certification is claimed.
 
 # 36 Errors and concurrent operations
 
@@ -716,7 +711,7 @@ The shared header provides actual incident search and notification navigation. T
 
 Sign-in retains email/password submission, CSRF and readable error/logout states; password visibility is a convenience control, not password storage. Invalid incident/actions preserve relevant input. The dashboard uses stored role-scoped totals and recent tickets rather than the sample percentages, fake trends and task/user counts shown in the design reference.
 
-Recent Highlights selects up to four scoped recent tickets through the same query rules as incident lists. Empty states communicate that no records exist. Tasks, assets, Google SSO, remember-me, password recovery and campus switching were not added as nonfunctional controls merely because they appeared in a reference image.
+Recent Highlights selects up to four scoped recent tickets through the same query rules as incident lists. Empty states communicate that no records exist. Tasks, assets, Google SSO, remember-me and campus switching were not added as nonfunctional controls merely because they appeared in a reference image.
 
 ## Assets and attribution
 
@@ -758,9 +753,11 @@ Run ./mvnw clean verify and python3 -m unittest discover -s src/test/python for 
 
 ## Dated result ledger
 
+21 November current Linux run: clean verify passed 220 regression and 2 packaged restart tests, plus 5 Python launcher cases. Count reconciliation: 198 + 4 extra template cases + 14 recovery integration + 4 delivery cases = 220. These are this project’s recorded results, not a Claude rerun or native Mac acceptance.
+
 16 November: 143 regression cases and one packaged restart case passed for Phases 1-4, with Chromium workflows at 1440 x 1000 and 390 x 844. 17 November Linux: 198 regression cases plus two packaged restart cases passed on JDK 21.0.13 / PostgreSQL 14.15; four launcher tests passed. A strengthened restart case was rerun without adding it again to the distinct count.
 
-Later macOS: five launcher tests passed; full database/provider execution was blocked by environment shared-memory/socket restrictions and is not counted as success. 19 November redesign: 56 rule and 22 template cases passed across targeted runs. Final visual browser acceptance remained blocked. There is no claimed latest-revision full-suite pass.
+Later macOS: five launcher tests passed; full database/provider execution was blocked by environment shared-memory/socket restrictions and is not counted as success. 19 November redesign: 56 rule and 22 template cases passed across targeted runs. Final visual browser acceptance remained blocked. That earlier UI run did not establish a full-suite pass; the current 21 November Linux backend/full-suite result is stated above, while final browser acceptance remains open.
 
 ## How to read the next test pages
 
@@ -893,28 +890,24 @@ Use a separate report to demonstrate a failed proposed fix. The reporter rejects
 
 This totals approximately 16-19 minutes within the required 15-20 minute range. It is timing guidance, not an allocation of team ownership. Use local credentials privately; avoid recording keys or configuration secrets. The recording and uploads must actually be completed before the project is marked submitted. [S1, pp. 15, 17]
 
-# 44 Limitations and release checklist
+# 44 Known limitations and release gates
 
-## Open implementation and evidence gates
+## Known limitations
 
-| Item | Current state | Needed before claiming completion |
-| --- | --- | --- |
-| Repeated report correlation | Approved but not implemented | Design matches/time window/reporter counting and priority relationship, implement and verify. |
-| Live OpenRouter | Adapter and controlled tests exist | Choose/configure model/key and usage; run an authorized live acceptance example. |
-| Latest UI acceptance | Templates pass; final visual run blocked | Review actual desktop/mobile rendering and interactions in a capable environment. |
-| Platform validation | Linux and targeted macOS evidence | Clean-device setup and native Windows verification remain separate checks. |
-| Report and team | Detailed draft prepared | Confirm group/member details, truthful contributions and updated feature status. |
-| Video and submission | Script prepared, not a finished upload | Record 15-20 minutes with all members; verify links, filename and destination receipt. |
+Recovery holds the password_reset_gate row lock during synchronous SMTP delivery; slow mail delays other requests and real/unknown addresses have different timing. The global 20/min cap has no per-IP fairness and can deny service. Login/registration throttling or lockout and registration email verification are absent; duplicate registration explicitly reveals an existing address. Reset tokens are in URL query strings despite no-store/no-referrer mitigations. Delivery failures invalidate tokens but have no operator log; POSIX local mode fails on Windows and files are not auto-deleted. catalog.lock serializes writes globally; SlaMonitor loads all incidents every 30 seconds in one transaction. password_reset_tokens.used is never set because consumption deletes rows. Feedback uses a positional INSERT. AI sends incident text and past resolutions externally without redaction. Repeated-report correlation is absent; live AI and SMTP are unverified, and incident email remains simulated.
 
-## Scope limits that must remain visible
+## Privacy issue needing separate code approval
 
-There is no real external email, forgot-password flow, campus Google SSO, duplicate grouping, production hosting, high-availability deployment or measured load benchmark in the reviewed version. An admin simulated-email page is not evidence of mailbox delivery. The proposed reset process should be added to the report only after its code, identity checks and tests exist.
+IncidentHistory.audit uses a denylist. Reporter-visible history can include free-text admin reasons and technician IDs. An explicit allowlist is a recommended follow-up, but was not implemented because this task authorizes documentation changes only. Review each reporter-visible event and field before approving that fix.
 
-## Final review sequence
+| Release gate | Required evidence |
+| --- | --- |
+| Team/report | Group number, member names/IDs and truthful contributions; team review. |
+| Mac/browser | Run clean verify on the Mac and inspect actual role workflows; record failures honestly. |
+| Recording | 15-20 minute video, all members, three deterministic workflows. |
+| Submission | Correct source link, instructor-confirmed filename year, upload destinations and receipts. |
 
-First reconcile source against the requirements and close or openly document mandatory blockers. Next rerun the appropriate checks for any changed code, update diagrams and replace historical-only assertions with exact new evidence where supported. Then fill team data, rehearse the recording and verify the final PDF and source link. Do not delete an existing database or rewrite migrations for a cleaner-looking demonstration.
-
-The source deadline is 22 November 2026; exact cutoff and upload destinations are not supplied here. The course video-name example uses 2025-2026 despite the current course year; confirm the required filename. Nothing has been uploaded to a course destination by this reporting task.
+Deadline: 22 November 2026; cutoff unknown. This report and the prepared demo script are not a recorded video or submission. The instructor filename question is drafted separately; no message was sent.
 
 # 45 Conclusion and source references
 
@@ -926,11 +919,11 @@ Recorded backend, HTTP and restart evidence supports substantial implemented fun
 
 ## Primary source register
 
-[S1] OOP_S1_2026-2027_Project.pdf, CS F213/MAC F212, 17 pages. Requirements pp. 3-10; technology questions p. 12; security/persistence pp. 13-14; report/testing/video pp. 14-17.[S2] plan.md, approved decisions P01-P10, role/UI updates and current gates.[S3] docs/architecture.md and application source under src/main/java/edu/bits/itsm.[S4] Incident, IncidentState, PriorityAssessment, IncidentService, AssignmentService, SlaService, IncidentQueryService, IncidentAiAdvisor and OpenRouterAdapter implementations.[S5] docs/testing.md; docs/phase-1-4-acceptance.md; docs/phase-5-6-acceptance.md; named test classes in src/test/java and launcher tests in src/test/python.[S6] src/main/resources/db/migration/V1__foundation.sql through V4__conversation_revision.sql.[S7] README.md, pom.xml, launcher scripts, .env.example and docs/windows-demo.md. No secret configuration file is a report source.[S8] docs/ui-refresh.md; shared templates, app.css and app.js; asset attribution on sign-in.
+[S1] OOP_S1_2026-2027_Project.pdf, CS F213/MAC F212, 17 pages. Requirements pp. 3-10; technology questions p. 12; security/persistence pp. 13-14; report/testing/video pp. 14-17.[S2] plan.md, approved decisions P01-P10, role/UI updates and current gates.[S3] docs/architecture.md and application source under src/main/java/edu/bits/itsm.[S4] Incident, IncidentState, PriorityAssessment, IncidentService, AssignmentService, SlaService, IncidentQueryService, IncidentAiAdvisor and OpenRouterAdapter implementations.[S5] docs/testing.md; docs/phase-1-4-acceptance.md; docs/phase-5-6-acceptance.md; named test classes in src/test/java and launcher tests in src/test/python.[S6] src/main/resources/db/migration/V1__foundation.sql through V5__password_recovery.sql.[S7] README.md, pom.xml, launcher scripts, .env.example and docs/windows-demo.md. No secret configuration file is a report source.[S8] docs/ui-refresh.md; shared templates, app.css and app.js; asset attribution on sign-in.
 
 ## Repository and revision
 
-Repository: github.com/Darshan-Bhandari/CSF213-OOPS-ProjectImplementation baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50First report documentation: 945ae36225b46bc403f0a48d0f401c154300cec7Refinement date: 20 November 2026. Local source contracts were inspected; no application tests or live-provider calls were executed solely to write this edition.
+Repository: github.com/Darshan-Bhandari/CSF213-OOPS-ProjectImplementation baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50First report documentation: 945ae36225b46bc403f0a48d0f401c154300cec7Documentation reconciliation: 21 November 2026. Claude reviewed source statically only and did not rerun tests. Local source contracts were inspected; no application tests or live-provider calls were executed solely to write this edition.
 
 ## Team sign off still required
 
