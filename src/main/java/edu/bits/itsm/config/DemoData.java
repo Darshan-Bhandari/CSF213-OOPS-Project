@@ -63,7 +63,7 @@ public class DemoData implements ApplicationRunner {
                   return user;
                 });
     if (!accounts.existsByEmail("employee@campus.test"))
-      service.register("Demo employee", "employee@campus.test", password);
+      service.register("Demo campus community member", "employee@campus.test", password);
     if (!accounts.existsByEmail("technician@campus.test"))
       service.createByAdmin(
           "Demo technician", "technician@campus.test", password, Role.TECHNICIAN, admin.getId());

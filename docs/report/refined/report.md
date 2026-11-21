@@ -1,0 +1,930 @@
+# 1 BITSOps Assistant
+
+Intelligent IT Service Managementand Incident Resolution System
+
+Detailed group project reportCS F213 / MAC F212 Object Oriented ProgrammingBITS Pilani Hyderabad CampusSemester I 2026-2027
+
+| Submission information | Team supplied value |
+| --- | --- |
+| Group number | To be supplied |
+| Member 1 name and student ID | To be supplied |
+| Member 2 name and student ID | To be supplied |
+| Member 3 name and student ID | To be supplied |
+| Actual individual contributions | To be confirmed by each member |
+
+Updated 21 November 2026Version 3 post review draft
+
+This report describes an implemented browser-based campus support system. Architecture, rules and schema are grounded in the reviewed source. Recorded verification is distinguished from unexecuted checks and planned features.
+
+Current reviewed implementation: 8292045fc1841e6d6dabbce847ba339d737b1aa0, including V5 recovery. Original report baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50. The first report was published in documentation revision 945ae36225b46bc403f0a48d0f401c154300cec7. This document expands and corrects that draft; it does not declare final submission or production readiness.
+
+# 2 Abstract and document control
+
+## Abstract
+
+Campus support teams must turn incomplete complaints into accountable work without losing the identity of the reporter, the reason for the priority, the assigned technician or the promised deadline. BITSOps Assistant addresses this coordination problem through a Java and Spring Boot website backed by PostgreSQL. Campus Community members report incidents, technicians investigate assigned work, and administrators maintain services, staff eligibility, policies and oversight.
+
+The application automatically derives priority from impact, urgency and service criticality, offers two interchangeable technician selection strategies, and monitors response and resolution targets. Explicit lifecycle guards prevent inappropriate shortcuts. Incident updates, history and local notifications share transaction boundaries, while optimistic versions reject stale edits. Optional OpenRouter integration supplies category suggestions and editable resolution advice, subject to staff review.
+
+The report explains the domain, OOP contracts, relational schema, operational algorithms, security controls and recorded test outcomes. It includes worked examples rather than relying on feature lists alone. It also identifies unfinished incident correlation, deferred live-provider verification and the latest interface acceptance limits.
+
+## How to interpret claims
+
+| Label | Meaning throughout this report |
+| --- | --- |
+| Implemented | Present in the reviewed source; not necessarily accepted on every platform. |
+| Recorded pass | Supported by a dated project verification record. Not a test newly executed while writing. |
+| Illustrative | An explanatory example, not a screenshot or exported production record. |
+| Pending or proposed | Not delivered or not yet verified; must not be presented as complete. |
+
+No member contribution, deployment, live AI interaction, external email delivery or submission receipt is invented. Team identity fields remain open because they have not been provided.
+
+# 3 Contents and navigation
+
+| Page | Section | Page | Section |
+| --- | --- | --- | --- |
+| 4 | Problem analysis | 25 | Search and filtering |
+| 5 | Stakeholders and responsibilities | 26 | Metrics and worked calculations |
+| 6 | Functional requirements | 27 | ER diagram for core records |
+| 7 | Requirements and acceptance | 28 | ER diagram for incident history |
+| 8 | Nonfunctional requirements | 29 | Identity and catalog dictionary |
+| 9 | System architecture | 30 | Incident data dictionary |
+| 10 | Modules and interfaces | 31 | History data dictionary |
+| 11 | UML use cases | 32 | Migrations and support schema |
+| 12 | Incident state model | 33 | Technology decisions |
+| 13 | UML domain classes | 34 | Alternatives and evolution |
+| 14 | UML extension contracts | 35 | Security design |
+| 15 | Object oriented principles | 36 | Errors and concurrency |
+| 16 | Design pattern justification | 37 | Interface design |
+| 17 | Priority algorithm | 38 | Build and operating guide |
+| 18 | Assignment algorithms | 39 | Verification strategy and results |
+| 19 | SLA timing and monitoring | 40 | Tests for identity and workflow |
+| 20 | Resolution and rejected fixes | 41 | Tests for automation and history |
+| 21 | Conversations and privacy | 42 | Tests for AI and reporting |
+| 22 | Audit and transactions | 43 | Demonstration and team preparation |
+| 23 | Intelligence architecture | 44 | Known limitations and release gates |
+| 24 | AI validation and failure handling | 45 | Conclusion and references |
+
+Use the PDF bookmarks for direct navigation. For evaluation, begin with requirements and OOP; for the viva, trace the worked examples; for local operation, see page 38. Team identity and final submission evidence remain pending.
+
+# 4 Problem analysis
+
+## The operational problem
+
+A campus depends on shared services such as Wi-Fi, login, email, laboratory computers and printers. A service disruption can affect teaching, lab work and ordinary administration. A complaint alone does not establish who should investigate, how urgent it is, or what evidence shows that the problem has been fixed. Informal messages make it easy to lose these decisions.
+
+Three coordination failures motivate the design. First, incomplete reports produce repeated clarification and inconsistent categories. Second, assigning work without checking skills and workload can overload one technician while another is available. Third, undocumented state changes make it difficult to explain delays, disputed fixes and SLA violations. These failures are organizational even when the technical fault is small.
+
+## Proposed solution
+
+The website creates a persistent incident that moves through an explicit lifecycle. It stores the reporter, affected service, category, priority factors, assignment, promised targets, messages and resolutions together with an ordered history. Rules automate repeatable decisions; human staff remain accountable for investigation and acceptance.
+
+Administrators can change catalog and policy data without editing the workflow code. Users see a role-specific view instead of every operational detail. Optional AI reduces drafting effort but does not verify the cause of a failure or execute a repair. The support team must check any suggested steps.
+
+## System boundary
+
+BITSOps manages support work; it does not directly monitor routers, patch computers or prove that a network has recovered. It relies on user reports and technician actions. There is no asset inventory, campus SSO, native mobile application or production monitoring integration in the reviewed scope. Similar incident grouping is approved follow-up work, not an implemented capability.
+
+Basis: course scenario and objectives [S1, pp. 1-5]; approved campus setting and scope [S2]. No campus-wide survey or measured response-time improvement has been conducted.
+
+# 5 Stakeholders and responsibilities
+
+| Stakeholder | Needs | Permitted responsibility |
+| --- | --- | --- |
+| Campus Community | Visibility and a usable reporting channel | Report and track their incidents; add public information; answer support requests; review fixes; verify/close or reject with a reason; give feedback. |
+| Technician | Relevant work and useful investigation context | Acknowledge and investigate assigned incidents; write staff notes; request information; provide a resolution; use approved suggestions. |
+| Admin | Control and accountable oversight | Provision staff, deactivate accounts, maintain catalog and SLA policies, configure technician skills/capacity and ranking, inspect incidents/reports/audits. |
+| Evaluators and project team | Understandable design and reproducible evidence | Review code, diagrams and tests; demonstrate three complete workflows; explain actual member contributions. |
+
+## Role naming and compatibility
+
+Campus Community is the public-facing name of the complaint-reporting role. Students and other campus members can belong to it. The persisted enum and authority remain EMPLOYEE, and existing routes and the demonstration email remain compatible. This label change does not grant new permissions or introduce a separate student role.
+
+## Responsibility is distinct from visibility
+
+A technician can see assigned work but cannot accept a fix on behalf of the reporter merely because they resolved it. An administrator can perform defined verification/closure overrides with a reason, which must appear in the audit trail. Deactivating an account preserves the original actor in old records rather than erasing their contribution.
+
+Project team responsibilities have a different meaning: they identify who actually built and can explain each module. They have not been supplied and are deliberately not assigned in this report. Every team member should still understand the overall request flow, database and operating rules.
+
+# 6 Functional requirements
+
+| ID | Required behavior | Implementation location |
+| --- | --- | --- |
+| FR01 | Authenticate users and enforce active role and ownership | identity, config and web packages |
+| FR02 | Register Campus Community and provision staff through Admin | AccountService and account forms |
+| FR03 | Report a validated incident with catalog and impact data | IncidentReportForm and IncidentService |
+| FR04 | Calculate priority and store factors/criticality | PriorityAssessment embedded in Incident |
+| FR05 | Classify and assign eligible technicians through two strategies | assignment package and configuration |
+| FR06 | Enforce acknowledgment, investigation, resolution and closure | IncidentState and guarded service commands |
+| FR07 | Retain public/internal/request messages and linked replies | IncidentService, IncidentHistory and message table |
+| FR08 | Support verification, reasoned rejection and one-time feedback | IncidentService and resolution-cycle tables |
+| FR09 | Calculate targets, warn before deadlines and retain breaches | sla package, scheduler and sla_events |
+| FR10 | Persist in-app and simulated-email notifications | NotificationChannel implementations |
+| FR11 | Store auditable actions with actor, timestamp and context | AuditService and audit_entries |
+| FR12 | Search/filter and calculate scoped dashboard metrics | IncidentQueryService and DashboardController |
+
+## Input authority
+
+The client supplies user-entered incident information, not server-controlled ownership, state or computed priority. Staff actions carry the incident version they observed. A request is accepted only if current role, resource scope, data validity and lifecycle rules all allow it. Hidden buttons alone are not an authorization mechanism.
+
+These functional requirements summarize implemented scope. They do not replace the full R01-R27 register in plan.md. [S2-S4]
+
+# 7 Requirements and acceptance boundaries
+
+## Intelligence and extension requirements
+
+The course requires at least two intelligent or automated features and permits rule-based designs. Automatic priority, skill/load-based recommendation and SLA warnings provide deterministic automation. The selected AI additions propose a category and a resolution draft. Their integration is implemented and tested with controlled providers, but live OpenRouter execution still depends on a chosen model, local credentials and approved usage.
+
+| Course requirement group | Evidence | Remaining qualification |
+| --- | --- | --- |
+| R01-R06 roles and workflow | Identity, catalog, incident and lifecycle code; workflow tests | Latest visual acceptance remains a separate gate. |
+| R07-R13 rules and operations | Priority, both rankings, SLA, channels, audit, eight filters | Email is simulated; SLA indicators reflect recorded scans. |
+| R14 intelligence | Deterministic automation and controlled-provider AI tests | Approved correlation absent; live AI unverified. |
+| R15-R19 OOP and reliability | Interfaces, state objects, composition, errors, transactions and restart tests | No production security/load certification. |
+| R20-R25 analysis and documentation | This report, diagrams, schema, repository and test catalog | Team review and final source reconciliation required. |
+| R26-R27 demonstration and team | Three workflow scripts and presentation checklist | Recording, identities and actual contributions pending. |
+
+## Acceptance is evidence-specific
+
+A service test that passes against PostgreSQL does not prove a mobile drawer works. A rendered template does not prove its JavaScript behavior. Likewise, fake-provider validation does not establish that an external account has a usable model or budget. Each result is attached to the exact scope and environment recorded in the testing documents.
+
+The final report must be refreshed if pending features are implemented or if the team changes the runtime configuration. The current document records the system as reviewed, including open work. It is not appropriate to remove a limitation solely to make the submission appear complete.
+
+# 8 Nonfunctional requirements
+
+| Quality attribute | Design response | Evaluation limit |
+| --- | --- | --- |
+| Maintainability | Modules and contracts keep workflow rules apart from controllers and provider details. | Coupling still exists through a shared schema and application. |
+| Integrity | Foreign keys, bounds, uniqueness, transactions and versions protect linked changes. | Database-admin tampering is outside application protection. |
+| Security | Sessions, current-account checks, CSRF, BCrypt, validation and escaped views. | No penetration-test or production-hardening certificate. |
+| Usability | Role views, readable form errors, preserved drafts and responsive navigation. | Lavender redesign needs final desktop/mobile interaction review. |
+| Availability | Ordinary workflow runs with AI unconfigured; state persists across verified restarts. | Database failure prevents writes; no high-availability cluster. |
+| Reproducibility | Maven wrapper, migrations, environment template and launch helper. | Initial downloads and platform prerequisites still matter. |
+| Performance | Paged lists, scoped queries and indexes for common incident access paths. | No measured concurrency/throughput or latency SLA. |
+
+## Time, configuration and retention assumptions
+
+Timestamps represent real instants and display using Asia/Kolkata where needed. SLA elapsed time is continuous rather than a campus business-hours calendar. Requests for more information do not pause it. Catalog deactivation prevents new use while preserving historical rows. Account deletion is not the normal administration model.
+
+Application data, local configuration and generated test fixtures have different lifetimes. A source ZIP should not include credentials, dependency caches or the saved local database. The launcher reads configuration from .env, while direct Maven or JAR launches require equivalent exported settings. Preserving these boundaries is necessary for reproducible demonstrations without accidental data resets.
+
+# 9 System architecture
+
+[Diagram architecture]
+
+Figure 1. Major runtime boundaries. Audit, notification and SLA services execute within the application-service layer; local operational records share the persistence boundary.
+
+A modular monolith is one deployable Spring Boot application with internal modules. Thymeleaf renders the browser interface; session security identifies the actor; services enforce business rules; JPA and JDBC use PostgreSQL. JSON endpoints offer scoped read projections, not a separate independently deployed frontend.
+
+The optional provider call is an external boundary with a bounded failure path. It cannot replace the database or the lifecycle authority. This arrangement keeps a local course demonstration manageable while retaining clear points for future extension.
+
+Diagram derived from the reviewed classes and architecture contracts [S3-S4].
+
+# 10 Modules and interface contracts
+
+| Module | Responsibility | Selected collaborators |
+| --- | --- | --- |
+| identity and config | Accounts, role interpretation, authentication and session activity checks | AccountService, UserAccount, AccountStatusFilter |
+| catalog and assignment | Active services/categories, policies, skills, capacity and ranking | CatalogService, AssignmentService, AssignmentStrategy |
+| incident | Entity lifecycle, forms, commands and scoped history | Incident, IncidentService, IncidentHistory |
+| sla | Targets, warning/breach decisions, event recording and scheduled scans | SlaTarget, SlaService, SlaMonitor, SlaScheduler |
+| notification and audit | Transactional evidence and local delivery records | AuditService, NotificationService, NotificationChannel |
+| ai | Provider request, validation and versioned suggestion storage | IncidentAiAdvisor, AiTransport, OpenRouterAdapter, AiSuggestionStore |
+| reporting and web | Scoped queries, metrics, controllers and rendering | IncidentQueryService, DashboardController, templates |
+
+## HTTP contracts
+
+Public /login and /register support authentication and Campus Community onboarding. /employee/incidents/new and its submission route create reports. /incidents and /incidents/{id} return role-scoped lists and detail views. Versioned POST actions handle investigation, messages and lifecycle changes. Admin routes cover user, catalog, audit and simulated-email oversight.
+
+The /api/incidents, /api/incidents/{id} and /api/metrics endpoints are authenticated read-only projections. They must not serialize password hashes or grant a broader incident scope than the website. Browser form submissions retain CSRF protection. Services independently check sensitive operations so permission is not dependent on a single route.
+
+Interfaces are summarized here; source remains authoritative for exact method signatures and validation paths. [S3-S4]
+
+# 11 UML use case model
+
+[Diagram usecase]
+
+Figure 2. Human actors and principal use cases inside the system boundary. Associations indicate participation; they do not remove resource-level authorization.
+
+## Interpreting the use cases
+
+Campus Community reporting and resolution review apply to the reporter’s own incidents. Technician investigation applies to assigned incidents. Admin monitoring has broader scope and configuration authority. All three roles authenticate and receive a role-appropriate dashboard, but a shared screen title does not imply identical data access.
+
+Automatic SLA scans are internal processing, not another human actor. AI is a provider dependency rather than a user with authority. The diagram focuses on incident management. Forgot password now exists; SMTP is configurable but real delivery is unverified. Campus Google sign-in remains absent.
+
+# 12 Incident lifecycle and state model
+
+[Diagram state]
+
+Figure 3. Normal lifecycle, with reporter rejection shown as a return to classification. NEW to CLOSED is not a permitted shortcut.
+
+IncidentState maps each status to a WorkflowState object containing an allowed destination Set. Additional reclassification edges exist from ASSIGNED, ACKNOWLEDGED and IN_PROGRESS, and from RESOLVED for rejection. These edges are guarded by different service commands; a permitted graph edge is not permission for every role to take it.
+
+An assignment command requires CLASSIFIED. A reassignment command records its reason and returns active work through classification. Reporter rejection is limited to RESOLVED and increments the cycle. VERIFIED can proceed only to CLOSED; CLOSED has no outgoing edge. Verification and closure are distinct events even when an administrator performs both as an override.
+
+The entity checks the graph and updates timestamps, while IncidentService checks identity, assignment, reasons, versions and related-row effects. Testing all 64 status pairs validates the graph without relying on enum order. [S3, S5]
+
+# 13 UML domain class design
+
+[Diagram domain]
+
+Figure 4. Selected fields and methods in the actual domain. Filled diamond denotes composition of the embedded priority value. Account associations have independent lifetimes.
+
+## Persistence mappings and business methods
+
+Incident stores reporterId and assigneeId for command/query work. It also declares read-only lazy ManyToOne mappings to UserAccount on those foreign-key columns, using insertable=false and updatable=false. The entity therefore has both ID-based access and mapped object associations. This corrects the first draft’s description of the relationships as ID-only.
+
+PriorityAssessment is an embedded value inside Incident. The incident owns that priority snapshot rather than sharing a mutable priority row with another ticket. UserAccount remains a separate entity: closing or retaining a ticket does not own or delete the reporter’s account. State validation is delegated through IncidentState, which is an interface, not a persisted database entity.
+
+# 14 UML extension contracts
+
+[Diagram contracts]
+
+Figure 5. Assignment implementation relationships and notification inheritance. Dashed open-triangle arrows realize an interface; solid open-triangle arrows extend an abstract class.
+
+AssignmentService receives the available AssignmentStrategy implementations and indexes them by key. The selected configuration chooses a ranking contract at runtime. The diagram abbreviates Candidate and Optional return details, which are explained in the assignment section. Changing strategy affects later choices rather than rewriting old assignments.
+
+BaseNotificationChannel implements NotificationChannel and shares final persistence behavior. Its subclasses supply channel and delivery-status values: in-app records are delivered locally, while simulated-email records are explicitly simulated. NotificationService holds a List of channels and invokes the same delivery contract for each recipient/channel combination.
+
+AiTransport and AiAdvisor are additional interfaces outside this compact diagram. OpenRouterAdapter realizes the transport boundary; IncidentAiAdvisor orchestrates authorized suggestion work. [S3-S4]
+
+# 15 Object oriented design principles
+
+| Principle | Implementation evidence | Why it matters |
+| --- | --- | --- |
+| Encapsulation | Incident.transition, assign, reject and correct; controlled account activity changes | State and timestamps change through meaningful operations instead of arbitrary field writes. |
+| Abstraction | IncidentState, AssignmentStrategy, AiTransport and NotificationChannel | Callers depend on behavior contracts rather than provider or ranking details. |
+| Inheritance | InAppNotificationChannel and SimulatedEmailChannel extend BaseNotificationChannel | Both are channels with shared persistence and specialized identity/status. |
+| Polymorphism | Strategy selection and channel iteration invoke common interfaces | The workflow can use different implementations without a new command path. |
+| Composition | Embedded PriorityAssessment and service collaborators | Rules and orchestration are combined without forcing an unsuitable class hierarchy. |
+| Association and aggregation | Incident references accounts; services receive shared injected collaborators | Accounts and services have lifetimes independent of an individual incident. |
+| Exceptions | BusinessException, ConflictException and authorization failures | Invalid commands are meaningful failures rather than silent partial success. |
+| Collections | EnumMap states, Set edges/recipients, List candidates/channels and Map strategies | Data structures express uniqueness, ordering and lookup requirements. |
+
+## Avoiding inheritance for role differences
+
+The role enum and authorization checks are preferable here to inventing separate EmployeeIncident and AdminIncident subclasses. A ticket is the same domain object across views; the actor determines which command is permitted. This keeps role policy distinct from persistent incident identity.
+
+Framework annotations support the implementation but do not by themselves demonstrate good OOP. The substantive evidence is the explicit contract, ownership and mutation behavior that can be traced from a request to a domain operation and a persisted result.
+
+# 16 Design pattern justification
+
+## Strategy for assignment
+
+The variable behavior is candidate ranking. AssignmentStrategy defines key() and select(List). SkillBasedAssignment and LoadBasedAssignment implement the same contract; AssignmentService obtains eligible candidates and delegates the choice. Eligibility remains common so changing a ranking does not bypass capacity or category skill requirements.
+
+## State for lifecycle validation
+
+The variable behavior is which next state is legal. IncidentState.forStatus selects a WorkflowState that checks an explicit Set. This is a table-driven state machine with one WorkflowState record type rather than separate per-state implementation classes. It prevents incidental changes to enum ordering from becoming business rules. Role and version checks remain service responsibilities.
+
+## Adapter and repository boundaries
+
+OpenRouterAdapter implements AiTransport, translating the internal completion request into the provider interaction and safe errors. The advisor can be tested with a controlled transport instead. IncidentRepository extends JpaRepository and separates entity retrieval from orchestration, while JDBC remains appropriate for reporting and child-record operations.
+
+## Notification template behavior
+
+BaseNotificationChannel’s final delivery method reuses persistence while overridable operations supply channel and status. This is template-style inheritance with a valid is-a relationship. The implementation is not described as an asynchronous Observer system: notifications are invoked synchronously within the business transaction and persisted locally.
+
+## Tradeoffs
+
+Each abstraction adds indirection and must justify its testing or extension value. The chosen patterns address different change points: ranking, transition legality, provider transport and delivery identity. They do not eliminate integration work. A third notification channel would still need a suitable persistence/delivery policy, and a new lifecycle state would need permissions, schema bounds, views and tests.
+
+# 17 Priority algorithm and worked examples
+
+Impact, urgency and service criticality each use an integer from 1 to 3. Criticality comes from the selected active service and is copied to the incident. The reporter cannot submit an authoritative priority or substitute another actor identity. PriorityAssessment validates the factors, calculates their product and maps it into a label.
+
+score = impact * urgency * criticalityscore >= 18 : P1score >= 8  : P2score >= 3  : P3otherwise   : P4
+
+| Impact | Urgency | Criticality | Score | Priority |
+| --- | --- | --- | --- | --- |
+| 1 | 1 | 1 | 1 | P4 |
+| 1 | 1 | 3 | 3 | P3 |
+| 2 | 2 | 2 | 8 | P2 |
+| 3 | 2 | 3 | 18 | P1 |
+| 3 | 3 | 3 | 27 | P1 |
+
+## Rationale and limitations
+
+Low combined inputs remain P4, moderate products P3, and multiple elevated factors P2. P1 requires a high combined value: products at least 18 have two factors of 3 and another of at least 2. This is a deliberate transparent course-project policy, not a learned model or an empirically validated campus risk scale.
+
+The product is monotonic: raising any valid factor cannot lower the score. Affected-user count is recorded as context and is not an additional multiplier. A large user count with low reported impact does not silently override the approved formula. Correlated-report escalation needs a separate explicit rule and has not been implemented.
+
+A reasoned administrator correction records old/new inputs and priority. It retains the service-criticality snapshot. If priority stays the same, changing unrelated factors does not adopt a newly edited SLA policy. When priority changes, applicable targets are calculated using original time anchors; elapsed time is not erased. [S2-S5]
+
+# 18 Technician assignment algorithms
+
+## Separate eligibility from ranking
+
+A candidate must have role TECHNICIAN, an active account, an available profile, the required category skill and active workload below capacity. Active workload excludes RESOLVED, VERIFIED and CLOSED. Default capacity is five; administration bounds capacity to 1-100. An ineligible candidate never wins merely because they have a strong score in a ranking.
+
+| Illustrative candidate | Proficiency | Active work | Capacity | Eligible |
+| --- | --- | --- | --- | --- |
+| T101 | 3 | 4 | 5 | Yes |
+| T102 | 2 | 1 | 5 | Yes |
+| T103 | 3 | 5 | 5 | No at capacity |
+
+Skill-based order is proficiency descending, workload ascending and ID ascending. It selects T101 in this example. Load-based order is workload ascending, proficiency descending and ID ascending, so it selects T102. IDs are illustrative; actual selection uses persisted candidate data. Empty eligible lists produce Optional.empty rather than an invented default technician.
+
+## Capacity and concurrency
+
+A configuration-row lock serializes capacity-sensitive workflow/configuration decisions. Candidate counting and selection must occur within that protected command boundary. Two simultaneous reports cannot both consume the same last slot in the recorded committed PostgreSQL tests. Changing the selected strategy affects subsequent assignments, not historical rows.
+
+When no candidate is eligible, classification and history persist, the incident is unassigned, and administrators receive notification records. The SLA continues while support is unavailable. Pending assignment can be retried after availability changes. Manual reassignment also requires eligibility and a nonempty reason, preserves elapsed targets and requires fresh acknowledgment.
+
+A simple sort costs approximately O(n log n) after candidate retrieval, but database workload aggregation and the global lock may dominate. No benchmark supports a throughput claim. [S3-S5]
+
+# 19 SLA timing and monitoring
+
+| Priority | Response | Resolution | 80 percent response warning |
+| --- | --- | --- | --- |
+| P1 | 5 minutes | 30 minutes | 4 minutes |
+| P2 | 15 minutes | 2 hours | 12 minutes |
+| P3 | 1 hour | 8 hours | 48 minutes |
+| P4 | 4 hours | 24 hours | 3 hours 12 minutes |
+
+## Targets and time anchors
+
+A service-specific policy takes precedence over a default policy of the same priority. Targets must be positive, with resolution at least response. At creation, responseDue = createdAt + responseSeconds and resolutionDue = cycleStartedAt + resolutionSeconds. The first cycle starts at creation. The incident retains these targets even if a catalog policy is edited later.
+
+## A worked P1 example
+
+A ticket created at 10:00 IST has response due at 10:05 and resolution due at 10:30. An unresolved response reaches its warning threshold at 10:04. Acknowledgment exactly at 10:05 is on time. Without acknowledgment, a scan strictly after 10:05 records a breach. The threshold uses elapsed time, not a new countdown from when a page is opened.
+
+SlaTarget evaluates completion and current time. A first scan already overdue records the breach without backfilling a warning. Unique incident/cycle/kind keys prevent repeated scans from adding duplicate events. Event, audit and notification writes share the monitor transaction; a delivery failure rolls them back so a later scan can retry.
+
+## Operational limits
+
+Startup and periodic scans provide catch-up, not exact-to-the-second notification. Normal scanning is periodic, so a displayed recorded-breach filter can lag the actual deadline. The current monitor scans all incidents under a shared configuration lock, which is straightforward for the project but needs measurement and narrowing before large-scale use. The system does not pause time overnight or while waiting for a reporter.
+
+# 20 Resolution rejection and acceptance
+
+## Resolution is not the end of the lifecycle
+
+The assigned technician records a nonempty resolution and marks the incident RESOLVED from IN_PROGRESS. A resolution row captures incident, cycle, technician, details and creation time. The entity retains firstResolvedAt for aggregate reporting and current resolvedAt for the active cycle. The reporter can then verify the fix and close the incident in distinct steps.
+
+## When the proposed fix fails
+
+Only the reporter may reject a resolved fix, with a reason. Rejection preserves the old resolution row, prior cycle timing and recorded breaches. It increments the cycle, clears the current resolution/draft, returns to CLASSIFIED and initiates assignment. The new cycle starts at rejection time with the stored resolution target. If no technician is eligible, the incident stays classified instead of losing its history.
+
+| Illustrative action | Time | Persistent consequence |
+| --- | --- | --- |
+| Create P2 incident | 09:00 | First resolution due 11:00 |
+| First resolution | 10:20 | Cycle 1 complete; firstResolvedAt retained |
+| Reporter rejects fix | 10:30 | Cycle 2 starts; new resolution due 12:30 |
+| Second resolution | 11:40 | Second resolution row; old fix remains |
+| Verify and close | 11:50 | Verification/closure history; closure timestamp |
+
+## Overrides and feedback
+
+Administrators may use defined verification/closure overrides with a reason; technicians cannot verify their own work as the reporter. A closed incident has no reopening edge. Feedback after resolution is reporter-only, optional, rated 1-5 and allowed once. Duplicate feedback cannot overwrite the first response. Closing without feedback remains valid.
+
+This distinction supports accountability: a fast first resolution and a later rejected fix are both visible, rather than retroactively rewriting the original record to make the support history look better. [S3-S5]
+
+# 21 Conversations and privacy
+
+## Three message kinds
+
+| Kind | Purpose | Visibility and rule |
+| --- | --- | --- |
+| PUBLIC | Ordinary support conversation or reporter information | Visible to permitted incident participants; role and ownership still apply. |
+| INTERNAL | Investigation notes for support staff | Hidden from the Campus Community reporter; internal-note creation does not notify them. |
+| REQUEST | Staff request for clarification | Reporter can reply publicly to the linked request on the same incident. |
+
+A request and reply are linked by incident_messages.response_to. The application rejects a reply targeting another incident, an internal note or an ordinary reply. Link integrity needs both the database foreign key and semantic service checks: the foreign key alone only proves that a referenced row exists.
+
+## Messages do not pause operational time
+
+Sending an investigation note or asking for more information does not change lifecycle state or SLA deadlines. Otherwise, an ordinary conversation action could conceal a slow response by continually restarting a deadline. The event still belongs in history with author and timestamp, subject to visibility rules.
+
+## Versions and draft preservation
+
+Messages carry the incident version from the form. A conversationRevision field ensures that a message changes the entity version even if the clock returns the same timestamp twice. Two users posting against one old version cannot both quietly overwrite the visible history state. The later stale submission receives a conflict and must refresh.
+
+Invalid or oversized message input should retain the user’s draft and show a readable error rather than losing typed work. Stored content is rendered with escaping. Staff-only history reads recheck actor privileges; keeping a note out of the template is insufficient if an alternate history/API path can still expose it.
+
+Verified behaviors are mapped in WorkflowIntegrationTest and AuditConsistencyIntegrationTest. This privacy model is application authorization, not encryption of individual database rows from the database administrator.
+
+# 22 Audit and transaction consistency
+
+## What is recorded
+
+Audit entries retain the actor or System identity, timestamp, action, subject, incident reference where relevant, previous/new lifecycle state and descriptive context. Priority changes record old/new priority inputs in the description rather than mislabelling them as lifecycle states. Histories are ordered by persisted IDs because several events can share a transaction timestamp.
+
+## One command one committed outcome
+
+A lifecycle action can modify the Incident entity, insert a resolution/cycle, write audit and generate both notification records. These changes use JPA and JDBC under one Spring transaction manager. AuditService and notification writes require the business transaction rather than independently committing a record that claims an action succeeded.
+
+| Failure point | Expected rollback scope |
+| --- | --- |
+| Audit insertion during creation | Incident and initial history are not committed. |
+| Message audit after row insertion | Message row and conversation revision change are rolled back. |
+| Resolution or closure failure | State, resolution/closure history and notification writes revert together. |
+| Notification failure during SLA scan | Event and associated audit/deliveries roll back; retry can reinsert once. |
+
+## Historical accuracy and limits
+
+A rejected resolution retains its earlier cycle and breach. Existing published audit rows are not rewritten to fit a newer formatting rule. Older records may therefore use earlier description conventions. PostgreSQL sequence gaps after a rollback are normal and do not indicate missing committed incidents.
+
+Application audit requirements do not make a tamper-proof ledger. A user with direct database write authority could alter records outside the application. Backups, restricted database access and operational monitoring would be necessary for a production environment. No cryptographic chaining or immutable external log is implemented. [S3-S5]
+
+# 23 Intelligence request architecture
+
+[Diagram aiseq]
+
+Figure 6. Authorized suggestion request followed by a separate human application step. The provider response is treated as untrusted data and does not directly mutate the workflow.
+
+IncidentAiAdvisor first checks that the actor is permitted staff, the incident is active and the supplied version is current. It builds a bounded request with incident text, active allowed categories and relevant historical resolutions. Optional OpenRouter configuration is checked before transport; an unconfigured website still supports ordinary incident management.
+
+The network call happens outside the suggestion-save transaction. When a response arrives, structured category validation or resolution-size validation occurs before AiSuggestionStore acquires the lock, rechecks access/version and persists advice. Applying advice later rechecks the incident again. A slow response therefore cannot silently replace newer technician work.
+
+No live AI request was made while preparing either report edition. Figure 6 explains implemented control flow, not evidence of a successful live provider account.
+
+# 24 AI validation and failure handling
+
+## Category advice
+
+The provider must return structured content containing an integral categoryId and textual explanation. Fractional, overflowing, missing, inactive or malformed categories are rejected rather than coerced. An accepted suggestion is stored for review; applying a category must still respect the active catalog and eligible skill requirements of the current assignment. Suggesting a category does not itself move lifecycle or priority.
+
+## Resolution advice and historical context
+
+The retrieval query selects at most three other CLOSED incidents with the same service and category, using only the final accepted resolution cycle. Each historical example is truncated to at most 500 characters. Previously rejected fixes from those tickets are excluded. This is bounded relevance filtering, not semantic vector search or a trained diagnosis model.
+
+Generated resolution advice is limited to 6,000 characters. The server adds separate labels for retrieved historical records and generated unverified advice; it does not trust the model to distinguish them. Staff may edit the resulting draft. Saving a draft does not verify a fix, resolve an incident or execute a command on campus equipment.
+
+| External risk | Implemented response |
+| --- | --- |
+| Unconfigured credentials/model | Readable unavailable message; transport not called. |
+| 401, 429 or server error | Safe application error; no partial suggestion. |
+| Stalled or oversized response | Whole request bounded to 25 seconds; body limited to 64 KiB. |
+| Malicious or misleading text | Treat incident/context as untrusted; validate output, escape rendering and require human action. |
+| Incident changes during provider wait | Version conflict on save or apply; newer work retained. |
+
+Prompt instructions reduce some misuse but cannot guarantee truth or prevent every prompt-injection attempt. The practical boundary is that advice is untrusted and has no execution authority. Sending incident descriptions to an external provider also raises data-handling questions before real deployment. [S3-S5]
+
+# 25 Search and filtering
+
+| Criterion group | Meaning | Example |
+| --- | --- | --- |
+| Text or incident ID | Match title/description and incident identifier within permitted scope | INC-21 or a symptom phrase |
+| Status | Current explicit lifecycle value | IN_PROGRESS |
+| Priority | Stored P1-P4 value | P1 |
+| Category | Selected category ID | Network |
+| Service | Selected IT service ID | Campus Wi-Fi |
+| Technician | Current assignee ID | An active staff member |
+| Date range | Creation dates using inclusive IST calendar days | 20 November only |
+| SLA status | Recorded breach/warning/clear event predicates | BREACHED |
+
+## Combined semantics
+
+Selected criteria combine with AND. For example, an administrator can ask for Network incidents affecting Campus Wi-Fi, assigned to a particular technician, created within an IST day and carrying recorded breaches. Campus Community or technician views apply their ownership/assignment predicate before the same filter criteria, so a clever query cannot widen the role scope.
+
+## Dates and pagination
+
+A start date maps to that day’s midnight in Asia/Kolkata. An end date uses an exclusive boundary at the next local midnight. This includes the whole selected day without brittle 23:59:59 assumptions. Instants remain stored as timestamps; display format does not redefine the underlying time.
+
+A page contains 20 rows ordered by creation time descending and then ID descending. The stable ID resolves equal-time ordering. Count is computed independently of page offset so moving to page two does not change the total. Queries bind values through parameters rather than concatenating raw user text into SQL.
+
+SLA filters describe recorded events and can lag clock deadlines until a scan runs. These filters are not duplicate-incident detection or a semantic search engine. [S4-S5]
+
+# 26 Metrics and worked calculations
+
+## Definitions before presentation
+
+Total is the number of incidents in the current role/filter scope. Backlog excludes RESOLVED, VERIFIED and CLOSED. Critical backlog is P1 within backlog. Resolved counts RESOLVED and VERIFIED while closed is separate. Recorded breach totals count incidents with any breach event, not the number of individual warning/breach rows.
+
+| Illustrative incident | State | First response | First resolution | First cycle result |
+| --- | --- | --- | --- | --- |
+| A | CLOSED | 4 min | 20 min | No breach |
+| B | IN_PROGRESS | 8 min | Not yet available | Recorded response breach |
+| C | CLASSIFIED | Not available | Not available | Not yet eligible |
+| D | RESOLVED | 6 min | 35 min | No breach |
+
+Assume A and B are P1 and D has a sufficiently long SLA. Total = 4. Backlog = 2 (B and C); critical backlog = 1 (B). Resolved = 1 (D), closed = 1 (A). Average first response = (4 + 8 + 6) / 3 = 6 minutes with 3 samples. Average first resolution = (20 + 35) / 2 = 27.5 minutes with 2 samples. Missing observations are excluded, not replaced with zero.
+
+## Compliance denominator
+
+Eligibility includes an incident with a first resolution or an overdue first response/first-cycle resolution deadline. Compliance uses eligible incidents without recorded first-cycle breaches. In this example A, B and D are eligible; two have no recorded breach, giving 2/3, or about 66.7 percent. C does not inflate compliance before its targets are due. This example is explanatory, not an exported dashboard fixture.
+
+Averages describe first response and first resolution, not every rejection cycle. A ticket that was initially resolved fast but rejected later retains both its first-resolution metric and its later cycle history. The report should show those complementary facts rather than interpreting the average alone as successful final repair. [S4-S5]
+
+# 27 ER diagram for core records
+
+[Diagram ercore]
+
+Figure 7. Account, technician, skill, service, policy and incident relationships. Incident-account links are reporter and optional assignee references. Default policies use a nullable service reference.
+
+Technician profiles have a unique user_id, forming an optional one-to-one extension of a user account. Technician skills use a composite user/category primary key, implementing many-to-many skill membership with proficiency as relationship data. Services and categories remain independent catalog records referenced by many incidents.
+
+Policy uniqueness differs for default and service overrides. Partial unique indexes allow one default per priority where service_id is null and one override per service/priority where it is not. They enforce the intended lookup shape without requiring a fictional default service row.
+
+Diagram depicts declared relational keys from V1-V2. Administration further enforces that profile/skill operations target technician-role accounts. [S6]
+
+# 28 ER diagram for incident history
+
+[Diagram erhistory]
+
+Figure 8. Incident-linked history. All outward incident relationships are one-to-many except optional one-to-one feedback. Additional actor/category foreign keys are named in each table.
+
+Resolution cycles use the composite primary key incident_id and cycle. Resolutions and SLA events also store a cycle number, but the schema does not declare a composite foreign key from those tables to resolution_cycles. Their cycle relationship is maintained by service logic. Showing that distinction avoids overstating database enforcement.
+
+Messages have an optional self-reference for information-request replies. Audit actor and incident references may be null for broader/system events. Notifications can be incident-linked and are separated by channel and recipient. AI suggestions preserve the version on which advice was requested as well as its eventual application time.
+
+assignment_configuration is a singleton ranking configuration and demo_seed_markers records initialization; neither is an operational incident-history entity. V4 adds conversation_revision to incidents. [S6]
+
+# 29 Identity and catalog data dictionary
+
+| Table | Important fields | Integrity and purpose |
+| --- | --- | --- |
+| user_accounts | id BIGINT; display_name VARCHAR(100); email VARCHAR(254); password_hash VARCHAR(100); role VARCHAR(20); active; created_at; version; credential_revision BIGINT | Identity PK; normalized unique email; allowed role constraint; preserved actors and optimistic account state. Credential revision revokes sessions after reset. |
+| technician_profiles | id; user_id; available; capacity | Unique FK to user; capacity 1-100. Independent ID exists, while skills reference user_id. |
+| categories | id; name VARCHAR(80); active | Named category with retained historical identity; active catalog validation at service boundary. |
+| it_services | id; name VARCHAR(100); criticality; active | Criticality 1-3. Incident snapshots prevent later edits rewriting the original assessment. |
+| sla_policies | id; service_id nullable; priority; response_seconds; resolution_seconds | Optional service FK; priority P1-P4; positive response; resolution at least response. Partial uniqueness for defaults/overrides. |
+| technician_skills | user_id; category_id; proficiency | Composite primary key and FKs; proficiency 1-3. Admin value 0 means remove the skill rather than persist zero. |
+| assignment_configuration | id; strategy | Singleton ID 1; SKILL or LOAD. Shared locking point for eligibility-sensitive operations. |
+
+## Logical rules beyond field types
+
+SQL types and checks cannot express every business meaning. A technician profile should correspond to the technician role, active incident skills cannot be casually removed, and deactivated categories must not be selected in new reports. These rules are enforced by application services as well as the declared relational constraints.
+
+Field inventory reflects migration definitions rather than an invented denormalized reporting database. No password values, real user rows or credentials are included. [S6]
+
+# 30 Incident data dictionary
+
+| Field group | Fields and representative types | Purpose |
+| --- | --- | --- |
+| Identity and concurrency | id BIGINT; version BIGINT; conversation_revision BIGINT | Persistent identity; optimistic mutation checks; nonnegative revision for fixed-clock messages. |
+| Report content | title VARCHAR(160); description VARCHAR(8000); affected_users INTEGER | Bounded description and positive affected count. Reporter supplied context. |
+| Relationships | reporter_id; assignee_id nullable; service_id; category_id | Foreign keys to accounts/catalog. Assignee absent while pending assignment. |
+| Priority snapshot | impact; urgency; criticality; score; priority VARCHAR(2) | Factors 1-3; score 1-27; P1-P4. Embedded in JPA but stored in the incident row. |
+| Lifecycle | status VARCHAR(20); created_at; updated_at; closed_at | Explicit allowed status values and event instants. No ordinal-based ordering. |
+| SLA snapshot | response_seconds; resolution_seconds; response_due; resolution_due | Positive target durations and stored deadlines independent of later policy edits. |
+| Completion and cycles | acknowledged_at; first_resolved_at; resolved_at; cycle; cycle_started_at | First response/first resolution history plus current resolution cycle and completion. |
+| Draft | resolution_draft VARCHAR(8000) | Editable working text; storing it does not resolve or verify the incident. |
+
+## Why retain both targets and deadlines
+
+Targets explain the promise, while deadlines establish the actual time boundary for a particular incident/cycle. Recomputing every old deadline from today’s policy would erase whether the original promise was met. Storing cycle start and first-resolution timestamps also supports rejection history without changing the first-response statistics.
+
+The table stores multiple timing perspectives intentionally. Care is needed to avoid interpreting current resolvedAt as firstResolvedAt after rejection. Domain methods and the SLA/cycle services coordinate updates; schema presence alone is not proof of a valid lifecycle. [S3, S6]
+
+# 31 History and communication dictionary
+
+| Table | Key fields | Constraints and interpretation |
+| --- | --- | --- |
+| incident_messages | id; incident_id; author_id; kind; body VARCHAR(4000); response_to; created_at | PUBLIC/INTERNAL/REQUEST; self FK for replies. Same-incident/type semantics checked in services. |
+| resolution_cycles | incident_id; cycle; started_at; deadline; resolved_at | Composite PK incident/cycle; retains timing of earlier attempts. |
+| resolutions | id; incident_id; cycle; technician_id; details VARCHAR(8000); created_at | Unique incident/cycle; nonempty resolution also validated by command/form. |
+| feedback | incident_id; reporter_id; rating; comment VARCHAR(2000); created_at | Incident PK allows once; rating 1-5; reporter authorization checked in service. |
+| sla_events | id; incident_id; cycle; kind; deadline; created_at | Unique incident/cycle/kind; four allowed warning/breach kinds. |
+| notifications | id; user_id; incident_id; channel; subject; body; delivery_status; created_at; read_at | IN_APP or SIMULATED_EMAIL; local status distinguishes delivered from simulated. |
+| audit_entries | id; actor_id; action; subject; description; created_at; incident_id; previous_state; new_state | Actor and incident may be null; supports both incident and administrative events. |
+| ai_suggestions | id; incident_id; incident_version; requested_by; kind; category_id; content; model; created_at; applied_at | CATEGORY or RESOLUTION; optional category; retains origin/version and explicit application. |
+
+## Normalization and retained evidence
+
+Repeating messages, resolutions, alerts and suggestions are child records rather than ever-growing text fields. This preserves individual actors and times and allows visibility rules per kind. Feedback’s one-per-incident shape differs intentionally from the one-per-cycle resolution model.
+
+References: V1-V5 schema and current history readers [S3, S6]. The diagram omits no claimed external email server because none exists in this version.
+
+# 32 Migrations and support schema
+
+[Diagram ersupport]
+
+Figure 9. Support schema completes the ER set. The reset-token user foreign key is enforced; hashed-address limits and the singleton gate have no account FK. Configuration and seed markers are independent.
+
+| Migration | Role |
+| --- | --- |
+| V1 | Identity, technician/catalog, SLA policies, audit and initial seeds. |
+| V2 | Incident workflow, configuration/skills, history, notifications and AI suggestions. |
+| V3 | demo_seed_markers initialization tracking. |
+| V4 | incidents.conversation_revision for fixed-clock versioning. |
+| V5 | user_accounts.credential_revision and all three password_reset_* tables. |
+
+password_reset_tokens has a user index, expiry and unused used flag; consumption deletes rows. password_reset_limits records hashed-address cooldown timestamps. password_reset_gate stores id=1, window_start and requests. assignment_configuration stores id=1 and strategy; demo_seed_markers has name as primary key. Together Figures 7-9 cover all 20 tables.
+
+Migration seeds: Campus Wi-Fi 3; Campus login 3; Campus email 2; Lab computers 2; Printers 1. Categories: Network, Authentication, Hardware, Software, Email, Other. Default SLA rows are shown on page 19. Preserve published migrations and existing data; V5 adds recovery without reset/repair.
+
+# 33 Technology decisions and rationale
+
+## 1 Why Java
+
+Java matches the project’s focus on explicit objects, types, interfaces, collections and exceptions. Compile-time contracts make assignment and transport implementations easy to compare, and the ecosystem supplies database, security and testing support. The costs are verbosity, dependency management and JVM resource/startup overhead. The project targets Java 21 and has documented runs with a full JDK rather than a runtime-only installation.
+
+## 2 Why this frontend
+
+Thymeleaf plus HTML, CSS and JavaScript fits the team’s chosen skills and the form-heavy workflow. Server rendering reuses session/CSRF integration and avoids a separate frontend dependency build. CSS and small JavaScript interactions support navigation, search focus and password visibility. The tradeoff is more manual client interaction work if the product later needs complex offline state or highly interactive editing.
+
+## 3 Why Spring Boot
+
+Spring Boot combines MVC, dependency injection, security and transactions in a familiar Java process. Constructor-injected services can be tested behind interfaces. The framework reduces repetitive wiring but introduces configuration conventions, a large dependency graph and behavior that the team must understand rather than treating annotations as magic.
+
+## 4 Why PostgreSQL
+
+Accounts, skills, catalog, incidents and history have strong relationships. PostgreSQL supplies foreign keys, checks, uniqueness, transactions and useful aggregates for the dashboard. JPA handles entity changes while JDBC suits child records and scoped reports. The cost is database installation/operation, migration discipline and careful coordination of locking and persistence boundaries.
+
+## 5 Why a modular monolith
+
+One application and database simplify local startup and preserve atomic operations across incident, audit and notification records. Internal modules still separate concerns. A microservice split would introduce deployment, network and transaction complexity without a demonstrated project need. The monolith shares process resources and a release cycle; these are accepted tradeoffs for the current scale.
+
+# 34 Alternatives limits and evolution
+
+## 6 Alternatives considered
+
+| Alternative | Potential benefit | Why not the current choice |
+| --- | --- | --- |
+| React plus a separate API | Richer client state and independent frontend releases | Adds a build/dependency/state layer for a team choosing plain web technologies. |
+| Django or FastAPI | Rapid development with Python | Would replace the approved Java backend and change the OOP demonstration emphasis. |
+| SQLite or a document store | Simpler local files or flexible document shapes | Changes concurrency, relational constraints and reporting tradeoffs already modeled in PostgreSQL. |
+| Microservices and broker | Independent deployment/scale of busy domains | Adds operational and consistency work before a measured need exists. |
+
+## 7 Advantages and limitations
+
+The chosen stack gives explicit domain contracts, mature security integration, SQL integrity and one reproducible deployment. Its limits include framework learning, JVM/database setup, manual frontend interaction work and contention around shared configuration. Optional AI adds latency and external data transfer rather than removing the need for a local workflow.
+
+## 8 How the stack supports OOP
+
+Java interfaces and injection support Strategy and Adapter; entity methods encapsulate state changes; abstract notification inheritance reuses appropriate behavior; composition connects collaborators. JPA mappings express persistent associations without requiring UI controllers to manipulate database joins directly. The quality comes from those decisions, not merely from selecting Java.
+
+## 9 Evolution under increased use
+
+Measure query time, lock wait and request latency first. Narrow the SLA scan to relevant work, tune indexes/connection pooling and bound inbox/history queries. Multiple application nodes need coordinated scheduling and a shared session strategy. Real email should use durable queued/outbox delivery with retries rather than pretending an external send can roll back with SQL. Only measured load or ownership needs should motivate a module split.
+
+## Toolchain inventory
+
+Java target 21; Spring Boot 3.5.16; Thymeleaf; Spring Security; Hibernate/JPA and JDBC; PostgreSQL; Flyway; Maven Wrapper 3.3.4 / Maven 3.9.11; Surefire/Failsafe 3.5.6; JUnit/Spring testing and Mockito. Zonky 2.1.0 supplies test PostgreSQL with a 14.15 native bundle. Python 3 supports the launcher; Git/GitHub holds source. OpenRouter is an optional service. HTML/CSS/JavaScript requires no separate frontend build. Postman can inspect APIs but is not a runtime prerequisite.
+
+Growth directions above are future work, not delivered infrastructure or benchmark results.
+
+# 35 Security design
+
+## Authentication and current identity
+
+Spring Security uses form login and server sessions. BCryptPasswordEncoder protects stored passwords with a one-way hash; the application cannot retrieve an old plaintext password. Login uses the email parameter. AccountStatusFilter rechecks activity and role so deactivation or role change affects an existing session on a subsequent request. Logout invalidates the session and removes its cookie.
+
+## Authorization at multiple boundaries
+
+Admin, technician and employee route families have role rules. Incident reads and commands also validate reporter/assignee/admin scope at the service boundary. History and reporting services enforce current account validity. Staff-only suggestions and internal notes are excluded from reporter projections. A JSON endpoint cannot be used as a bypass merely because the website hides a button.
+
+## Input output and request protection
+
+Forms validate lengths, bounds, required values and expected action kinds. CSRF protection covers state-changing browser requests. Parameter binding keeps search values separate from SQL structure. Thymeleaf escaping prevents stored HTML-like incident text, feedback or generated advice from becoming executable markup in its normal output path.
+
+## Secrets and provider access
+
+Local .env settings provide database and OpenRouter configuration through the launcher. Keys stay backend-only and out of source/ZIPs. AiConfiguration redacts the key in its representation, and safe provider errors avoid displaying raw credential-bearing responses. No approved AI model or real email credential is selected by this report.
+
+## Limits and recovery status
+
+Forgot password is implemented with expiring single-use links, hash storage, throttling and credential revision session revocation. SMTP is configurable; real inbox delivery remains unverified. The current admin email page displays simulations. External TLS deployment, rate limits, recovery identity validation, stronger auditing operations and a tested backup strategy would be additional work. Demo .test identifiers are not working mailboxes. No penetration-test certification is claimed.
+
+# 36 Errors and concurrent operations
+
+| Condition | Application behavior | Data consequence |
+| --- | --- | --- |
+| Invalid report or message | Readable validation; retain appropriate form draft | No successful incident/message history is written. |
+| Unauthorized actor | Deny protected operation or resource read | Other users’ incidents remain inaccessible. |
+| Illegal lifecycle shortcut | BusinessException from explicit rules | No unsupported state change. |
+| No eligible technician | Keep tracked classified incident and notify Admin | SLA and history continue; assignment can be retried. |
+| Missing SLA policy | Reject creation with a business error | No orphan incident/history succeeds. |
+| Stale incident version | Conflict rather than overwrite | Newer mutation retained; user refreshes/reviews. |
+| Database/audit/delivery failure | Transaction rollback | State and related evidence do not partially commit. |
+| Provider failure | Bounded safe AI error | Ordinary CRUD remains available. |
+
+## Two different concurrency protections
+
+Optimistic incident versions protect against stale user forms. The configuration lock serializes changes whose correctness depends on a shared capacity/policy view. These address different races: versioning alone cannot prevent two new tickets from choosing the same last capacity slot, and a global lock does not make an old browser form current.
+
+A conversation revision ensures same-clock messages still change the version. Concurrent committed integration tests check that one same-version message succeeds and one fails, with only one message/audit/notification outcome. Failure-injection cases use isolated test data and temporary constraints; they are not instructions to damage the user’s running database.
+
+Database failures may still require operator intervention. Atomic rollback prevents partial success; it does not make an unavailable database available. [S4-S5]
+
+# 37 Interface design and user experience
+
+## Visual identity and navigation
+
+The implemented interface follows the approved BITS campus reference: a fixed lavender/purple palette, white surfaces, rounded cards, selected navigation and SVG line icons. The theme does not randomly change across visits. Different priority/status highlights communicate meaning, while hover and active states alter controls in predictable ways.
+
+The shared header provides actual incident search and notification navigation. The sidebar adapts to role, collapses on desktop and opens as a drawer on narrow layouts. Keyboard search focus, Escape drawer close, visible focus styles and reduced-motion rules support interaction. These are implementation descriptions; final visual/interaction acceptance of the redesign remains open.
+
+## Forms and trustworthy dashboard data
+
+Sign-in retains email/password submission, CSRF and readable error/logout states; password visibility is a convenience control, not password storage. Invalid incident/actions preserve relevant input. The dashboard uses stored role-scoped totals and recent tickets rather than the sample percentages, fake trends and task/user counts shown in the design reference.
+
+Recent Highlights selects up to four scoped recent tickets through the same query rules as incident lists. Empty states communicate that no records exist. Tasks, assets, Google SSO, remember-me and campus switching were not added as nonfunctional controls merely because they appeared in a reference image.
+
+## Assets and attribution
+
+Local line icons are project-authored. The crest is externally linked from Wikimedia; the campus photo is by Muralikrishna m under CC BY-SA 4.0 with visible attribution/license links on sign-in. These assets require network access; text/monogram and lavender background fallbacks remain. No institutional endorsement or official campus SSO is claimed.
+
+No fabricated or unverified new screenshots are included. Earlier desktop/mobile browser acceptance covers the older interface; template tests cover rendering but not pixel layout, asset loading or JavaScript interaction. [S8]
+
+# 38 Build configuration and operating guide
+
+## Prerequisites and configuration
+
+Use a full compatible JDK (target Java 21), Python 3 and the Maven wrapper included in the source. Java 21 is the conservative target; JDK 25 has documented local runs. Initial Maven/database binary downloads need connectivity. No global Maven, frontend Node build or Docker deployment is required. Native platform caveats remain in README.md and docs/windows-demo.md.
+
+java -versionpython3 --versionchmod +x mvnw scripts/run-local.shtest -f .env || cp .env.example .env
+
+Edit .env locally. Set DEMO_PASSWORD to a chosen valid value before using the demo profile. Keep OpenRouter configuration blank unless deliberately activating it. Preserve an already working database URL/credentials; do not start another database or delete saved data just to follow an example.
+
+## Portable PostgreSQL option
+
+./mvnw test-compile exec:java \  -Dexec.mainClass=edu.bits.itsm.DevelopmentDatabase \  -Dexec.classpathScope=test
+
+Run the above as one command and keep the terminal open. The helper uses loopback port 54329, database/user postgres and .local/postgres-data by default. Configure the datasource to that instance. In a second terminal in the same project folder:
+
+./scripts/run-local.sh -Dspring-boot.run.profiles=demo
+
+Open http://127.0.0.1:8080. Newly seeded demo accounts use employee@campus.test, technician@campus.test and admin@campus.test with the chosen password. Existing passwords are retained. The launcher loads .env; a direct Maven/JAR launch needs exported equivalents. Stop each terminal with Ctrl+C when finished.
+
+Run ./mvnw clean verify and python3 -m unittest discover -s src/test/python for project checks in a capable environment. target contains generated reports/JARs. Windows has a .cmd launcher; native Windows execution is not certified by this report. [S7]
+
+# 39 Verification strategy and recorded results
+
+| Layer | Purpose | Recorded evidence |
+| --- | --- | --- |
+| Rules | Priority combinations, graph edges, ranking and time boundaries | WorkflowRulesTest; deterministic inputs and clocks. |
+| Database/service/HTTP | Authorization, constraints, linked history, rollback and scoped metrics | Integration classes use PostgreSQL and authenticated requests where applicable. |
+| Provider boundary | Malformed replies, status failures, size and whole-body timeout | Mock transport and loopback fake HTTP provider; no live OpenRouter. |
+| Packaged restart | Real app/database processes retain full workflow and startup SLA catch-up | WorkflowRestartIT snapshots and repeated process restarts. |
+| Templates and browser | Rendering/escaping versus actual user interaction | Current template evidence separate from historical Chromium run. |
+
+## Dated result ledger
+
+21 November current Linux run: clean verify passed 220 regression and 2 packaged restart tests, plus 5 Python launcher cases. Count reconciliation: 198 + 4 extra template cases + 14 recovery integration + 4 delivery cases = 220. These are this project’s recorded results, not a Claude rerun or native Mac acceptance.
+
+16 November: 143 regression cases and one packaged restart case passed for Phases 1-4, with Chromium workflows at 1440 x 1000 and 390 x 844. 17 November Linux: 198 regression cases plus two packaged restart cases passed on JDK 21.0.13 / PostgreSQL 14.15; four launcher tests passed. A strengthened restart case was rerun without adding it again to the distinct count.
+
+Later macOS: five launcher tests passed; full database/provider execution was blocked by environment shared-memory/socket restrictions and is not counted as success. 19 November redesign: 56 rule and 22 template cases passed across targeted runs. Final visual browser acceptance remained blocked. That earlier UI run did not establish a full-suite pass; the current 21 November Linux backend/full-suite result is stated above, while final browser acceptance remains open.
+
+## How to read the next test pages
+
+The catalog gives input/setup, expected behavior and actual recorded outcome with named source methods where practical. “Recorded pass” refers to docs/testing.md and the relevant acceptance record, not a new run while authoring. Parameterized invocations and looped state-pair assertions are not interchangeable case counts. Exact logs/generated outputs remain environment-specific. [S5]
+
+# 40 Tests for identity and workflow
+
+## T01 Registration and protected credentials
+
+Input and setup Create a valid Campus Community account and read its stored role/hash. Expected A persistent EMPLOYEE account; password not stored as plaintext. Recorded actual Pass in FoundationIntegrationTest.
+
+## T02 Privilege injection and unauthorized access
+
+Input and setup Submit staff-like role values through public registration and access protected routes without that role. Expected No public privilege elevation; protected operations denied. Recorded actual Pass in FoundationIntegrationTest.
+
+## T03 Invalid input and normalized duplicates
+
+Input and setup Try missing/malformed input and an already used email with case/space differences. Expected Validation error; duplicate identity not inserted. Recorded actual Pass in FoundationIntegrationTest.
+
+## T04 Cross reporter incident access
+
+Input and setup Use one reporter’s authenticated principal to read another reporter’s ticket. Expected Access denied without exposing incident details. Recorded actual Pass in WorkflowIntegrationTest.crossReporterAccessIsDenied.
+
+## T05 All priority combinations
+
+Input and setup Evaluate each combination of impact, urgency and criticality from 1 to 3. Expected All 27 scores/labels match the approved thresholds; invalid factors fail. Recorded actual Pass in WorkflowRulesTest.everyPriorityCombinationMatchesApprovedTable and invalidPriorityFactors.
+
+## T06 Lifecycle graph and illegal shortcut
+
+Input and setup Check all 64 state pairs and attempt NEW to CLOSED through service/HTTP paths. Expected Only graph edges accepted and actor rules still enforced; illegal shortcut leaves state unchanged. Recorded actual Pass in WorkflowRulesTest.everyLifecyclePairMatchesApprovedGraph and WorkflowIntegrationTest.
+
+## T07 Draft preserving validation
+
+Input and setup Submit an invalid incident form with typed content and select an inactive catalog value. Expected Readable form error and retained input; no incident/history commits. Recorded actual Pass in WorkflowIntegrationTest.invalidReportRetainsInputAndCreatesNothing and inactiveCatalogAndCsrfRejectReportWithoutPersisting.
+
+## T08 Conversation privacy and reply linkage
+
+Input and setup Add INTERNAL and REQUEST messages, then try reporter reads and replies to invalid targets. Expected Internal text hidden; only valid same-incident requests accept linked reporter replies. Recorded actual Pass in WorkflowIntegrationTest.internalNotesArePrivateAndDoNotNotifyReporter and repliesCannotTargetAnotherIncidentInternalNoteOrOrdinaryReply.
+
+Scope note: these cases include service and authenticated HTTP evidence where specified in source. They are not a new penetration test or a substitute for visual interaction review.
+
+# 41 Tests for automation and history
+
+## T09 Both assignment rankings
+
+Input and setup Persist candidates with different proficiency and active workload, including ties. Expected SKILL and LOAD choose the policy-correct eligible candidate; ties use stable ID. Recorded actual Pass in AutomationIntegrationTest.bothStrategiesUsePersistedWorkloadProficiencyAndStableTies.
+
+## T10 Last available capacity slot
+
+Input and setup Submit concurrent reports for a technician with one remaining slot, under each strategy. Expected No capacity overrun; remaining incident stays tracked without an assignment. Recorded actual Pass in AutomationIntegrationTest.concurrentReportsCannotExceedLastAvailableSlot.
+
+## T11 Eligibility exclusions
+
+Input and setup Independently make the technician unavailable, inactive, unskilled or full. Expected Incident remains CLASSIFIED, SLA tracked and relevant Admin notifications persisted. Recorded actual Pass in AutomationIntegrationTest.ineligibleTechnicianLeavesTrackedClassifiedIncident.
+
+## T12 SLA snapshot and missing policy
+
+Input and setup Edit a policy after one ticket; create another; separately remove applicable policy in an isolated fixture. Expected Old targets retained, new ticket uses new policy; missing policy creates no orphan. Recorded actual Pass in AutomationIntegrationTest.servicePolicyOverridesDefaultAndLaterPolicyEditsOnlyAffectNewTickets and absentPolicyRejectsCreationWithoutOrphanWrites.
+
+## T13 Timing boundaries and deduplication
+
+Input and setup Advance controlled time to warning, exact deadline, beyond deadline and repeated scans. Expected Warning at threshold; equality on time; later breach only once per incident/cycle/kind. Recorded actual Pass in WorkflowRulesTest.exactSlaBoundaries and AutomationIntegrationTest.warningAndBreachAreOncePerTargetWithRelevantRecipientsAndBothChannels.
+
+## T14 Rollback and retry
+
+Input and setup Force notification persistence failure during SLA processing, then remove the test-only failure. Expected Event/audit/deliveries roll back together; retry succeeds without loss or duplicate messages. Recorded actual Pass in AutomationIntegrationTest.failedSlaDeliveryRollsBackEventAndRetriesWithoutLossOrDuplicateMessages.
+
+## T15 Rejection preserves evidence
+
+Input and setup Reject a late first fix, change catalog policy, then resolve the next cycle. Expected Earlier resolution, cycle, breach and first timestamps retained; stored targets govern the new cycle. Recorded actual Pass in WorkflowIntegrationTest.rejectionAndSecondResolutionPreservePreviousCycleBreachAndSnapshot.
+
+## T16 Same version concurrent messages
+
+Input and setup Two committed threads submit messages against the same version and fixed clock. Expected Exactly one commits; one conflicts; only one message/revision/audit outcome persists. Recorded actual Pass in AuditConsistencyIntegrationTest.concurrentSameVersionMessagesCommitOneChangeAndOneAudit.
+
+# 42 Tests for AI reporting and persistence
+
+## T17 Invalid category suggestions
+
+Input and setup Return malformed, fractional, missing or overflowing category data from a controlled transport. Expected No suggestion accepted and no incident mutation; readable safe failure. Recorded actual Pass in IntelligenceReportingIntegrationTest.invalidCategoryOutputDoesNotSaveOrMutateIncident.
+
+## T18 Explicit application and stale advice
+
+Input and setup Generate a suggestion without applying it; then change the incident before saving/applying an old result. Expected Advice alone leaves workflow/priority unchanged; stale save/application rejected. Recorded actual Pass in IntelligenceReportingIntegrationTest.categorySuggestionRequiresExplicitApplicationAndNeverMovesLifecycleOrPriority and staleProviderResponseAndStaleApplicationAreRejected.
+
+## T19 Historical resolution selection
+
+Input and setup Create relevant closed tickets with rejected and final accepted fixes plus irrelevant history. Expected Only bounded final relevant fixes enter context; generated answer becomes an editable draft. Recorded actual Pass in IntelligenceReportingIntegrationTest.resolutionUsesOnlyFinalClosedRelevantHistoryAndProducesAnEditableDraft.
+
+## T20 Provider failure and body bounds
+
+Input and setup Use a loopback fake provider for 401/429/500, stalled body and oversized/malformed content. Expected Bounded safe errors; credentials not revealed; no partial business mutation. Recorded actual Pass in OpenRouterAdapterTest and IntelligenceReportingIntegrationTest.providerFailureLeavesCrudWorkingAndNoPartialSuggestion.
+
+## T21 Combined filters and role scope
+
+Input and setup Combine eight criteria over stored records under all role scopes. Expected AND semantics return only permitted matching rows. Recorded actual Pass in IntelligenceReportingIntegrationTest.eightCombinedFilterCriteriaAndRoleScopeMatchStoredRecords.
+
+## T22 IST dates pagination and metrics
+
+Input and setup Create boundary-time and 21-row fixtures with known completion intervals. Expected Correct local-day bounds; stable 20/1 pages; known means/denominators; sensible empty data. Recorded actual Pass in IntelligenceReportingIntegrationTest.dateFiltersUseInclusiveIndianCalendarDays, paginationIsStableScopedAndCountIsIndependentOfPage, and metricsHaveKnownAveragesDenominatorsAndZeroDataBehavior.
+
+## T23 Packaged persistence and catch up
+
+Input and setup Run the packaged app, complete workflow, stop/restart Java/PostgreSQL and trigger overdue startup scans. Expected Records persist and startup events are deduplicated across restarts. Recorded actual Pass in WorkflowRestartIT.
+
+## T24 Feedback boundary and one time rule
+
+Input and setup Submit ratings 1 and 5, invalid ratings and duplicate feedback after resolution. Expected Valid boundaries persist; invalid/duplicate writes fail and rendered comments are escaped. Recorded actual Pass in WorkflowIntegrationTest.reporterFeedbackPersistsOnceAndEscapesComment and feedbackRequiresResolutionAndValidRatingRetainsComment.
+
+# 43 Demonstration and team preparation
+
+## Workflow 1 report to assignment
+
+Admin first shows catalog, a technician’s category skill, availability and capacity. Campus Community reports an incident with explicit impact/urgency. Explain the server-derived criticality, score and priority. Open the assigned technician view, stored SLA deadlines and both channel records, then reconstruct the creation/assignment audit. End with a tracked assigned or correctly classified unassigned incident.
+
+## Workflow 2 investigation to accepted closure
+
+The assigned technician acknowledges, starts investigation, adds an internal note and requests information. The reporter answers the linked request and cannot see the private note. The technician records a resolution; the reporter verifies, closes and optionally rates it. Show that messages did not pause deadlines and that closure and feedback are distinct records.
+
+## Workflow 3 rejected fix to new resolution
+
+Use a separate report to demonstrate a failed proposed fix. The reporter rejects with a reason; inspect the preserved first resolution/cycle and the new cycle deadline. Reassign or re-resolve according to eligibility, then verify/close. Use combined filters and metrics to explain what changed and which first-resolution timestamps remain. Do not substitute unimplemented correlation for this workflow.
+
+| Segment | Suggested duration | Required presentation evidence |
+| --- | --- | --- |
+| Introductions and scope | 2 minutes | Every member introduces themselves; actual contributions stated. |
+| Architecture and OOP | 3 minutes | Trace an interface, entity rule and database relationship. |
+| Three complete workflows | 9-11 minutes | All actor changes and persisted outcomes visible. |
+| Tests and limitations | 2-3 minutes | Explain recorded evidence and remaining gates accurately. |
+
+This totals approximately 16-19 minutes within the required 15-20 minute range. It is timing guidance, not an allocation of team ownership. Use local credentials privately; avoid recording keys or configuration secrets. The recording and uploads must actually be completed before the project is marked submitted. [S1, pp. 15, 17]
+
+# 44 Known limitations and release gates
+
+## Known limitations
+
+Recovery holds the password_reset_gate row lock during synchronous SMTP delivery; slow mail delays other requests and real/unknown addresses have different timing. The global 20/min cap has no per-IP fairness and can deny service. Login/registration throttling or lockout and registration email verification are absent; duplicate registration explicitly reveals an existing address. Reset tokens are in URL query strings despite no-store/no-referrer mitigations. Delivery failures invalidate tokens but have no operator log; POSIX local mode fails on Windows and files are not auto-deleted. catalog.lock serializes writes globally; SlaMonitor loads all incidents every 30 seconds in one transaction. password_reset_tokens.used is never set because consumption deletes rows. Feedback uses a positional INSERT. AI sends incident text and past resolutions externally without redaction. Repeated-report correlation is absent; live AI and SMTP are unverified, and incident email remains simulated.
+
+## Privacy issue needing separate code approval
+
+IncidentHistory.audit uses a denylist. Reporter-visible history can include free-text admin reasons and technician IDs. An explicit allowlist is a recommended follow-up, but was not implemented because this task authorizes documentation changes only. Review each reporter-visible event and field before approving that fix.
+
+| Release gate | Required evidence |
+| --- | --- |
+| Team/report | Group number, member names/IDs and truthful contributions; team review. |
+| Mac/browser | Run clean verify on the Mac and inspect actual role workflows; record failures honestly. |
+| Recording | 15-20 minute video, all members, three deterministic workflows. |
+| Submission | Correct source link, instructor-confirmed filename year, upload destinations and receipts. |
+
+Deadline: 22 November 2026; cutoff unknown. This report and the prepared demo script are not a recorded video or submission. The instructor filename question is drafted separately; no message was sent.
+
+# 45 Conclusion and source references
+
+## Conclusion
+
+BITSOps Assistant applies object-oriented design to a concrete campus support workflow. Explicit state rules, interchangeable assignment strategies, retained timing snapshots and transactional history make decisions explainable. PostgreSQL persistence and role-scoped projections support continuity from complaint to verified closure. Optional advice assists staff without taking authority away from the workflow.
+
+Recorded backend, HTTP and restart evidence supports substantial implemented functionality, while later template checks support rendering of the redesign. These are different claims. The remaining correlation, live-provider and final visual gates, together with team/recording administration, prevent this review draft from being treated as an unconditional completion certificate.
+
+## Primary source register
+
+[S1] OOP_S1_2026-2027_Project.pdf, CS F213/MAC F212, 17 pages. Requirements pp. 3-10; technology questions p. 12; security/persistence pp. 13-14; report/testing/video pp. 14-17.[S2] plan.md, approved decisions P01-P10, role/UI updates and current gates.[S3] docs/architecture.md and application source under src/main/java/edu/bits/itsm.[S4] Incident, IncidentState, PriorityAssessment, IncidentService, AssignmentService, SlaService, IncidentQueryService, IncidentAiAdvisor and OpenRouterAdapter implementations.[S5] docs/testing.md; docs/phase-1-4-acceptance.md; docs/phase-5-6-acceptance.md; named test classes in src/test/java and launcher tests in src/test/python.[S6] src/main/resources/db/migration/V1__foundation.sql through V5__password_recovery.sql.[S7] README.md, pom.xml, launcher scripts, .env.example and docs/windows-demo.md. No secret configuration file is a report source.[S8] docs/ui-refresh.md; shared templates, app.css and app.js; asset attribution on sign-in.
+
+## Repository and revision
+
+Repository: github.com/Darshan-Bhandari/CSF213-OOPS-ProjectImplementation baseline: cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50First report documentation: 945ae36225b46bc403f0a48d0f401c154300cec7Documentation reconciliation: 21 November 2026. Claude reviewed source statically only and did not rerun tests. Local source contracts were inspected; no application tests or live-provider calls were executed solely to write this edition.
+
+## Team sign off still required
+
+Complete the cover with group number, all member names/IDs and actual contributions. Confirm every member can explain the full system and their module. Review the open gates against the final source, then finalize the PDF, recording and authorized submission. The report is prepared for that review, not submitted on the team’s behalf.

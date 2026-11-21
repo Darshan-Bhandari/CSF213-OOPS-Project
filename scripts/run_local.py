@@ -8,7 +8,7 @@ root = Path(__file__).resolve().parent.parent
 environment = os.environ.copy()
 dotenv = root / '.env'
 if dotenv.exists():
-    for number, line in enumerate(dotenv.read_text().splitlines(), 1):
+    for number, line in enumerate(dotenv.read_text(encoding='utf-8-sig').splitlines(), 1):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
@@ -22,5 +22,6 @@ if dotenv.exists():
             value = value[1:-1]
         environment.setdefault(key, value)
 environment.setdefault('MAVEN_USER_HOME', str(root / '.local' / 'maven-home'))
-command = [str(root / 'mvnw'), '-Dmaven.repo.local=.local/m2', 'spring-boot:run', *sys.argv[1:]]
+wrapper = 'mvnw.cmd' if os.name == 'nt' else 'mvnw'
+command = [str(root / wrapper), '-Dmaven.repo.local=.local/m2', 'spring-boot:run', *sys.argv[1:]]
 raise SystemExit(subprocess.call(command, cwd=root, env=environment))

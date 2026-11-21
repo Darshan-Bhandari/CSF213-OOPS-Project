@@ -1,6 +1,6 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-17 (Asia/Kolkata)
+Last updated: 2026-11-21 (Asia/Kolkata)
 
 ## 1. Purpose and working agreement
 
@@ -16,6 +16,68 @@ This file is the project's working source of truth for scope, decisions, impleme
 - Keep this file synchronized with actual implementation and final documentation. Do not claim background or automatic updates outside active work sessions.
 
 Status vocabulary: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `READY FOR REVIEW`, `DONE`.
+
+## Simplification and account avatar — 21 November 2026
+
+User explicitly approved an account dropdown and then instructed removing Forgot password. Implemented native details/summary account menu with current name/email/role and POST Sign out; outside-click and Escape close behavior. Removed recovery runtime services/controllers/delivery/forms, SMTP dependency/properties/example settings and 18 recovery-specific tests. No change to incident permissions, priorities, assignment, SLA, simulated incident email or AI behavior. Optional fixes from Claude's review remain unapproved.
+
+Published V5 remains immutable because real installations have applied it. Unused recovery tables and credential_revision are preserved; no user password/data reset, table drop or Flyway repair. Existing credentials remain unchanged. Package a complete fresh source folder so removed Java files cannot survive an overlay update. MAC_START_HERE.md, review/UI docs and README identify the simplified scope. Prior reports/220-test counts are historical; reconcile final PDF before submission.
+
+Current clean verify passed 202 regression + 2 packaged restart cases; five Python launcher tests and JavaScript syntax passed. No native Mac/browser or live provider pass is claimed. Group/member/contribution details and the instructor year/cutoff reply remain pending.
+
+## Independent static review reconciliation — 21 November 2026
+
+User explicitly prohibited application-code changes without approval. Claude's review was STATIC ONLY and did not rerun the recorded 220 + 2 tests. No live AI/SMTP or new browser/Mac acceptance is claimed. Runtime src/main, src/test and pom.xml remain byte-for-byte as published in 8292045fc1841e6d6dabbce847ba339d737b1aa0.
+
+Completed documentation work: current README/testing headers use 21 November Linux 220 + 2 / Python 5; report now names all 20 ER tables including V5 recovery and credential_revision, removes nonexistent accounts dependency from the legacy class diagram, describes the table-driven state machine accurately, and records all reported limitations including reporter audit privacy. docs/demo-script.md gives three deterministic workflows and existing short-SLA training profile instructions. Filename question is drafted in docs/instructor-filename-question.md, NOT sent. docs/mac-final-verification.md provides the Mac command; Mac remains unavailable and NOT RUN.
+
+Source is already public on GitHub. Current submission source must point to the codex/phase7-stabilization branch until a separately approved merge; the default main is older. Group number, member names/IDs and actual contributions are still required to fill the cover. Recording, instructor reply and submission receipts remain pending. The denylist/privacy fix and all optional application changes remain unapproved and untouched.
+
+## Password recovery and Mac review bundle — 21 November 2026
+
+User approved implementing forgot password. Added anonymous CSRF-protected recovery/reset forms, 15-minute single-use cryptographic links with hashes stored in PostgreSQL, persisted cooldown/global request limits, atomic consumption/password/audit, and next-request revocation of existing sessions. SMTP sender is user-configured; an explicit loopback-only private local mailbox supports Mac demos without sender credentials. Default delivery is disabled. No real email, provider account, subscription, key or spending was used.
+
+New V5 migration preserves existing users/tickets and leaves V1–V4 unchanged. Full Linux/JDK 21.0.13/PostgreSQL 14.15 clean verify passed **220 regression + 2 packaged restart cases**, zero failures/errors/skips. This includes 14 recovery integration and 4 delivery tests; five Python launcher tests also passed. The initial targeted run passed 92 cases after correcting a test import ambiguity. No new visual browser/native Mac/Windows/real SMTP acceptance is claimed.
+
+Mac instructions: MAC_START_HERE.md. Recovery design/report addendum: docs/password-recovery.md. Claude independently reviews original requirements PDF, plan, source and tests using CLAUDE_REVIEW.md. Source ZIP excludes credentials, local tokens/mail files, databases, caches, build outputs and Git metadata. The 45-page report predates recovery; consult its dated addendum. Phase 8 remains in progress and earlier correlation/live AI/final submission gates remain open.
+
+## Phase 8 report refinement — 20 November 2026
+
+- User requested a more refined and detailed report of about 45 pages. Prepared a 45-page edition with approximately 11,800 words, PDF bookmarks and eight project-authored vector diagrams.
+- Expanded scope: stakeholder/functional/nonfunctional analysis, architecture and module interfaces, UML use cases/state/classes, OOP/pattern rationale, worked priority/assignment/SLA/rejection/metrics examples, separate ER views, three data dictionaries, migration/sample data, all nine technology questions, security/error/concurrency/UX/operations, 24 documented test scenarios, demonstration and release checklists.
+- Corrected the earlier report's ID-only account-association description: Incident has ID fields plus read-only lazy ManyToOne reporter/assignee mappings. Explained that resolution/event cycle links are not declared composite foreign keys.
+- Editable report and reproducible PDF builder are under `docs/report/refined/`. Local deliverable: `artifacts/BITSOps_Project_Report_Refined.pdf`. Replaces the earlier report edition while preserving its version history.
+- Verified 45 pages, expected section on each page, contents pagination, text bounds and all rendered pages; revised diagram routing for readability. This is document verification only: no new application test run, live AI/email call, schema modification or data reset.
+- Phase 8 remains IN PROGRESS pending group/member identity, actual contributions, final source/acceptance reconciliation and recording/submission. Existing live AI, correlation, latest browser and native Windows gates are not marked complete.
+
+## Phase 8 report drafting — 20 November 2026
+
+- User requested the report phase. Phase 8 is IN PROGRESS for documentation; earlier open implementation and acceptance gates remain open.
+- Created and visually reviewed a 17-page report draft grounded in source cec3bcfed486c9ffbd5b4ee4c2c70f96269bcb50. Editable source: `docs/report/report.md`; diagram DOT/SVG sources: `docs/report/diagrams/`.
+- Draft covers problem/stakeholders/assumptions, requirements, architecture, UML use cases and classes, ER relationships, schema/sample data, priority/assignment/SLA rules, all nine technology questions, security, historical test outcomes for 20 meaningful scenarios, local setup, limitations and three recording workflows.
+- Report distinguishes historical Linux 198 + 2 acceptance from later 56 rules/22 templates and five launcher checks. No tests or live AI/email were run for report preparation. Current browser/Windows/provider acceptance and approved correlation remain pending.
+- Password recovery and real email were discussed, not implemented or selected for delivery. They are not claimed as working features.
+- Group number, three member names/IDs and actual contributions are deliberately unfilled. Final report readiness depends on these details, reconciliation of pending work and team review. No recording or submission is claimed.
+
+## Approved UI reference — 19 November 2026
+
+- User supplied a lavender BITS Pilani / BITSOps Assistant reference and requested this appearance. This replaces the earlier teal design direction. Applied the visual identity to shared navigation/header/forms and a branded sign-in page; Campus Community, Technician and Admin remain the same roles.
+- Added purple/lavender cards, SVG line icons, responsive sidebar, functional ticket search, password visibility control and real role-scoped Recent Highlights. Existing metric definitions, account access and complaint workflow remain intact. New screenshots' example counts, trends, SSO and unimplemented modules are not represented as working functionality.
+- Main implementation compiled and 77 rules/template checks passed; all 22 template cases passed after adding populated-dashboard escaping coverage. Together those runs cover 56 unchanged rule cases and 22 templates. Browser preview was blocked by the local-file URL policy, so visual/interaction acceptance remains open. See `docs/ui-refresh.md` for assets, network requirements and exact scope.
+
+## Approved role name — 19 November 2026
+
+User decision: rename the complaint-reporting role to **Campus Community**. **Admin** and **Technician** keep their existing names and responsibilities. Campus Community covers the people requesting campus IT support, including students; there is no new separate Student role.
+
+Implemented as a display-label change: registration/sign-in copy, sidebar badges, administrator role choices/directory and reporting-denial wording use Campus Community. Persisted `EMPLOYEE`, form values, authorities and `/employee/...` routes stay compatible with existing accounts and complaints. The demo login remains `employee@campus.test`; only newly seeded demo display names use the new wording. Existing people's display names/passwords are preserved. Previous test names and historical evidence retain their original terminology. No database migration or permission change is required.
+
+## Phase 7 follow-up — 17 November 2026, local macOS workspace
+
+- Synchronized 21 source/documentation files from reviewed commit `2ab44213cf314f28a68ca0e6380c74003009e557` into the clean older local workspace. Local Git remains based on `main`; these synchronized and follow-up changes are visible as local changes. Ignored `.env`, caches and saved database files were retained.
+- Continuing Phase 7 stabilization: fixed Windows Maven wrapper selection, added `scripts/run-local.cmd`, and accepted UTF-8 BOM/CRLF configuration files. Added a real launcher BOM/Unicode regression; **5 Python cases passed on macOS**. Native Windows execution remains unverified.
+- **74 Java rules/template cases passed on macOS/JDK 25.0.1**. Full regression attempt failed before database/provider assertions: PostgreSQL `shmget` and loopback fake-provider socket binding were denied by this sandbox. Raw Surefire total is 204 (including six initialization/cleanup error cases), 74 passed and 130 errors; this is not a passing integration run. It does not replace the earlier successful Linux 198 + 2 acceptance result.
+- Prepared `docs/windows-demo.md` and `docs/phase-7-checklist.md` with executable setup steps, expected results and all three workflows. Browser/full restart/native Windows/live AI demonstrations remain unchecked; no user database was reset and no live AI call was made.
+- OpenRouter remains the chosen provider, reconfirmed by the user. Live key/model/budget and approved repeated-report correlation remain Phase 6 gates; final browser/demonstration and requirements reconciliation remain Phase 7 gates. Phase 8 is not complete.
 
 ## Team handoff — current session, 17 November 2026
 
@@ -237,7 +299,7 @@ Suggested source layout: `src/main/java/.../{identity,catalog,incident,assignmen
 
 ### P01 — Accounts, screens and permissions
 
-- Roles: EMPLOYEE, TECHNICIAN, ADMIN. Employee registration is allowed; public registration cannot select a privileged role. Admin creates/deactivates technicians/admins and manages users. Demo accounts are seeded only in the demo environment. Deactivation preserves incident/audit history.
+- Display roles: Campus Community, Technician, Admin. Campus Community registration is allowed; public registration cannot select a privileged role. Admin creates/deactivates technicians/admins and manages users. Demo accounts are seeded only in the demo environment. Deactivation preserves incident/audit history.
 - Use protected session cookies and CSRF-protected mutations; hash passwords. Check both role and incident ownership/assignment on the backend. Administrator permissions do not eliminate required lifecycle guards.
 - Employee: own incidents, public conversation, information requests, resolution, verification, rating/feedback. Cannot see internal investigation notes, unrelated tickets or technician-only AI suggestions.
 - Technician: assigned incidents, own workload, internal notes, public replies, information requests, resolve actions and AI suggestions. Cannot alter another technician's incident or close on behalf of the reporter.
@@ -311,7 +373,7 @@ Proposed persistence entities: UserAccount, TechnicianProfile, Category, Technic
 
 Relationships: UserAccount has optional TechnicianProfile; TechnicianProfile has many TechnicianSkills linking categories; Incident associates reporter, service, category, assignee and policy snapshot; Incident owns notes/conversation/resolution cycles and feedback. Retain immutable history when records are deactivated.
 
-OOP: Incident methods enforce transitions and encapsulated fields; AssignmentStrategy provides polymorphism with SkillBasedAssignment and LoadBasedAssignment; IncidentState implementations provide State pattern guards; NotificationChannel composes two channels. Abstract BaseNotificationChannel with shared delivery-record behavior and concrete in-app/simulated-email subclasses provides justified is-a inheritance. AiAdvisor with OpenRouter adapter isolates the provider. Repositories separate storage. Avoid artificial inheritance for categories or forcing account roles into incompatible entity subclasses.
+OOP: Incident methods enforce transitions and encapsulated fields; AssignmentStrategy provides polymorphism with SkillBasedAssignment and LoadBasedAssignment; IncidentState and one WorkflowState record type provide a table-driven state machine with transition guards; NotificationChannel composes two channels. Abstract BaseNotificationChannel with shared delivery-record behavior and concrete in-app/simulated-email subclasses provides justified is-a inheritance. AiAdvisor with OpenRouter adapter isolates the provider. Repositories separate storage. Avoid artificial inheritance for categories or forcing account roles into incompatible entity subclasses.
 
 Use case diagram specification: Employee reports/views/replies/verifies/closes/rates own incident; Technician acknowledges/investigates/requests info/views AI/resolves assigned incident; Admin manages accounts/catalog/SLA/assignment, reassigns and reports/audits; SYSTEM calculates priority/assigns/monitors/notifies. Produce final UML and ER diagrams alongside implemented classes/schema, using this specification.
 
@@ -455,7 +517,7 @@ Exit: acceptance checks pass, at least 15 documented tests pass, no unresolved m
 
 ### Phase 8 — Report, recording and submission
 
-Status: NOT STARTED. Dependencies: verified application; documentation drafted throughout earlier phases.
+Status: IN PROGRESS. A 17-page review draft and editable diagram/report sources were prepared on 20 November. Finalization still depends on team details and remaining acceptance gates. Dependencies: verified application; documentation drafted throughout earlier phases.
 
 - [ ] Finalize problem analysis, stakeholders, assumptions and requirements.
 - [ ] Synchronize architecture, UML, schema/ER diagram and technology inventory with actual code.
@@ -535,6 +597,7 @@ Next action: approved repeated-report correlation design/implementation, followe
 
 | Date | Change | Basis |
 |---|---|---|
+| 2026-11-20 | Started Phase 8 report; prepared 17-page draft, UML/ER/architecture and 20 documented test scenarios; retained implementation/validation blockers and pending team identities | User requested next phase report |
 | 2026-11-14 | Created initial living plan with requirements, phase checklists, decision register, schedule, risks and completion criteria | User explicitly requested an evolving `plan.md` project backbone |
 | 2026-11-15 | Approved web application format; updated current state, Phase 1 checklist, questions and schedule status | User selection: "web application" |
 | 2026-11-15 | Recorded user-selected baseline stack and end-to-end review; supporting choices remain proposals | User supplied stack screenshot and requested critical analysis |
@@ -582,3 +645,10 @@ Next action: approved repeated-report correlation design/implementation, followe
 | 2026-11-16 | Completed Step 8 and Phases 1–4 acceptance review; reconciled stale checklists, documented architecture/contracts and final evidence, fixed security/UI gaps found during real packaged/browser checks | `mvnw clean verify`: 143 regression + 1 packaged restart test passed; 4 launcher tests; Chromium full workflow at desktop/mobile with reviewed screenshots; later-phase and cross-environment limits retained |
 
 | 2026-11-17 | Accepted Phase 5 automation/backend and packaged restart scope; advanced controlled-provider Phase 6 AI/reporting and Phase 7 regression coverage; corrected SLA snapshots, AI transport/history/validation and reporting authorization | 198 regression + 2 packaged cases passed; strengthened restart rerun 2/2; 4 launcher tests. New extended browser run blocked before navigation; no live AI/spending. Details in `docs/phase-5-6-acceptance.md` and `docs/testing.md` |
+
+| 2026-11-17 | Continued Phase 7 stabilization in the local macOS workspace: synchronized verified source, fixed Windows wrapper selection and BOM/Unicode config parsing, added Windows/demo checklists | 74 Java rules/views + 5 Python launcher cases passed. Full database/fake-provider run blocked by sandbox shared-memory/socket restrictions; native Windows, live AI, correlation and full browser/demo acceptance remain open |
+
+| 2026-11-19 | Renamed the complaint-reporting display role from Employee to Campus Community; retained Admin/Technician, authorization and existing account compatibility | Explicit user decision; UI/display labels and active documentation updated; verification recorded in `docs/testing.md` |
+
+| 2026-11-19 | Applied user-supplied lavender BITSOps UI reference to shared shell, sign-in and data-driven dashboard; added search/nav/password controls and recent ticket highlights | Main build: 77 rules/views passed; expanded views: 22 passed. Visual browser preview blocked by local-file URL policy; no browser pass claimed. Details in `docs/ui-refresh.md` |
+

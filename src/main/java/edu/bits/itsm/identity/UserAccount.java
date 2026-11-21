@@ -9,6 +9,8 @@ public class UserAccount {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  private long credentialRevision;
+  public long getCredentialRevision() { return credentialRevision; }
 
   @Column(nullable = false, length = 100)
   private String displayName;

@@ -25,7 +25,7 @@ Pinned/verified setup: Java target 21, tested JDKs 25.0.1 (earlier macOS accepta
 
 ## Domain contracts and patterns
 
-- **State:** `IncidentState` owns explicit allowed edges; enum declaration order cannot silently change them. `Incident` guards lifecycle mutations. Service-level role, assignment and version checks precede commands.
+- **Table-driven state machine:** `IncidentState` owns explicit allowed edges; enum declaration order cannot silently change them. `Incident` guards lifecycle mutations. Service-level role, assignment and version checks precede commands.
 - **Strategy:** `AssignmentStrategy` has skill-based and load-based implementations. Eligibility and capacity are checked before selecting a candidate. Committed PostgreSQL tests cover both strategies, eligibility, capacity, stable ties, concurrent reports and unchanged existing assignments.
 - **Inheritance/polymorphism:** `BaseNotificationChannel` implements shared persistence behavior; in-app and simulated-email subclasses supply channel/status behavior through the notification contract. No actual external email is sent.
 - **Composition:** incidents embed a `PriorityAssessment`; the incident service composes catalog, assignment, audit, SLA and notification services. Framework repositories support these contracts rather than replacing business rules.
@@ -47,11 +47,13 @@ classDiagram
 
 Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3–7, P2=8–17, P1=18–27. Affected-user count is context. Reporter inputs cannot directly set priority, reporter identity, assignment or status. Reasoned administrator corrections audit old/new factors. Repeat-report correlation/escalation is approved follow-up scope, not implemented.
 
+Campus Community is the displayed complainant role (historically `EMPLOYEE` internally). The stored identifier, authorities, demo email and route paths remain compatible; Admin and Technician labels are unchanged.
+
 ## Interfaces and access
 
 | Interface | Contract |
 |---|---|
-| `/register`, `/login`, POST `/logout` | Employee registration; role cannot be injected; hashed passwords; sessions; CSRF-protected mutations |
+| `/register`, `/login`, POST `/logout` | Campus Community registration; role cannot be injected; hashed passwords; sessions; CSRF-protected mutations |
 | `/employee/incidents/new`, POST `/employee/incidents` | Validated title/description/catalog/impact/urgency/affected count; retain invalid input |
 | `/incidents`, `/incidents/{id}` | Lists/details scoped to reporter, assigned technician or active administrator |
 | POST `/incidents/{id}/action` | Versioned acknowledgment/start/resolve/verify/close/reject; invalid edges and roles rejected |
@@ -60,7 +62,7 @@ Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3
 | `/admin/users`, `/admin/catalog`, `/admin/audit`, `/admin/email` | Active administrator only; sensitive configuration writes check actor at service boundary too |
 | `/api/incidents`, `/api/incidents/{id}`, `/api/metrics` | Authenticated read-only projections; ownership/role scope; no entity/password serialization |
 
-Incident history services recheck current actor access. Staff-only suggestions and private investigation events are omitted from employee history. Account deactivation/role changes invalidate session access on the next request. Forbidden POST forwards now return 403 through the error page. Input/output escaping is verified; this is not a penetration-test or production-hardening claim.
+Incident history services recheck current actor access. Staff-only suggestions and private investigation events are omitted from Campus Community history. Account deactivation/role changes invalidate session access on the next request. Forbidden POST forwards now return 403 through the error page. Input/output escaping is verified; this is not a penetration-test or production-hardening claim.
 
 ## Transactions, history and concurrency
 

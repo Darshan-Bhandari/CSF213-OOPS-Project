@@ -54,19 +54,39 @@ class WorkflowViewsTest {
         "incidents/detail",
         "notifications",
         "admin/catalog",
+        "admin/users",
+        "login",
+        "register",
         "admin/audit",
         "admin/email"
       })
   void pagesRenderForAdministrator(String view) throws Exception {
-    mvc.perform(get("/fixture").param("view", view).param("role", "ADMIN"))
-        .andExpect(status().isOk());
+    String html = mvc.perform(get("/fixture").param("view", view).param("role", "ADMIN"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    if (System.getProperty("app.visual-export") != null) {
+      var directory = java.nio.file.Path.of(".local", "ui-preview");
+      java.nio.file.Files.createDirectories(directory);
+      java.nio.file.Files.writeString(directory.resolve(view.replace('/', '-') + ".html"), html);
+    }
+    if (view.equals("admin/users")) {
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains(">Campus Community</option>"));
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("value=\"EMPLOYEE\""));
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains(">Campus Community</span>"));
+    }
+    if (view.equals("login"))
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("Create a Campus Community account"));
+    if (view.equals("register"))
+      org.junit.jupiter.api.Assertions.assertTrue(html.contains("CAMPUS COMMUNITY REGISTRATION"));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"EMPLOYEE", "TECHNICIAN"})
   void dashboardsAndDetailsRenderForOtherRoles(String role) throws Exception {
     mvc.perform(get("/fixture").param("view", "dashboard").param("role", role))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+            .string(org.hamcrest.Matchers.containsString(">" +
+                (role.equals("EMPLOYEE") ? "Campus Community" : "TECHNICIAN") + "</span>")));
     mvc.perform(get("/fixture").param("view", "incidents/detail").param("role", role))
         .andExpect(status().isOk());
   }
@@ -74,6 +94,7 @@ class WorkflowViewsTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
+        "dashboard",
         "incidents/list",
         "incidents/detail",
         "notifications",
@@ -161,6 +182,13 @@ class WorkflowViewsTest {
       ReflectionTestUtils.setField(account, "id", 2L);
       model.addAttribute("viewer", new AccountPrincipal(account));
       model.addAttribute("form", new IncidentReportForm());
+      if (view.equals("register")) model.addAttribute("form", new RegistrationForm());
+      if (view.equals("admin/users")) {
+        model.addAttribute("form", new AdminAccountForm());
+        var community = new UserAccount("Community fixture", "community@example.test", "hash", Role.EMPLOYEE);
+        ReflectionTestUtils.setField(community, "id", 3L);
+        model.addAttribute("accounts", List.of(community));
+      }
       model.addAttribute("messageForm", new IncidentMessageForm());
       model.addAttribute("actionForm", new IncidentActionForm());
       model.addAttribute("feedbackForm", new IncidentFeedbackForm());
@@ -189,6 +217,7 @@ class WorkflowViewsTest {
       model.addAttribute("statuses", IncidentStatus.values());
       model.addAttribute("total", 0L);
       model.addAttribute("rows", List.of());
+      model.addAttribute("recentIncidents", List.of());
       model.addAttribute("messages", List.of());
       model.addAttribute("audit", List.of());
       model.addAttribute("events", List.of());
@@ -227,6 +256,7 @@ class WorkflowViewsTest {
         row.put("category_id", 1L);
         row.put("applied_at", null);
         model.addAttribute("rows", List.of(row));
+        model.addAttribute("recentIncidents", List.of(row));
         model.addAttribute("messages", List.of(row));
         model.addAttribute("audit", List.of(row));
         model.addAttribute("events", List.of(row));

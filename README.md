@@ -1,12 +1,12 @@
-# Campus IT Service Management
+# BITSOps Assistant simplified edition
 
-Java / Spring Boot / Thymeleaf / HTML / CSS / JavaScript / PostgreSQL. OpenRouter integration is implemented with user-supplied local key/model configuration and remains optional for startup.
+Forgot password and recovery/SMTP setup have been removed at the user’s request. The avatar opens name, email, role and Sign out. Incident email remains simulated. Follow [Mac start instructions](MAC_START_HERE.md) and extract into a NEW folder; do not overlay old source or reset the user database. V1–V5 remain unchanged for database compatibility.
 
-**Phases 1–5 are accepted for the documented automated/backend and packaged HTTP scope.** Core AI category/resolution suggestions and reporting pass controlled-provider acceptance. The latest clean verification passed **198 regression tests + 2 packaged restart cases**, and **4 launcher tests** passed. See [Phase 5–6 evidence and demo steps](docs/phase-5-6-acceptance.md), [architecture](docs/architecture.md), [test history](docs/testing.md), and [current plan](plan.md).
+Current Linux verification (21 November): **202 regression + 2 packaged restart cases passed**, plus **5 launcher tests** and JavaScript syntax. Native Mac/latest visual acceptance remains pending. The earlier 220-case recovery edition is historical.
 
-Live AI verification awaits the user's model/key/budget; approved repeated-report correlation and final stabilization/submission work remain open. Earlier Chromium desktop/mobile acceptance covers Phases 1–4; the extended browser run is blocked in the current workspace before navigation. No live provider request or public deployment is claimed. The old `artifacts/campus-itsm-phase3.zip` is historical; build current source for the latest app.
+[Verification](VERIFICATION_SUMMARY.md) · [Living plan](plan.md) · [Demo script](docs/demo-script.md) · [Independent review instructions](CLAUDE_REVIEW.md)
 
-## Requirements
+## Requirements## Requirements
 
 - Full JDK 21 or 25 (including compiler and release metadata). Code targets Java 21; both JDK versions have been exercised in the recorded environments.
 - Maven 3.9.11 is downloaded by the included Apache Maven Wrapper on first use.
@@ -59,15 +59,17 @@ Open **http://localhost:8080**. Demo accounts all use the password you supplied:
 
 | Account | Role |
 |---|---|
-| `employee@campus.test` | Employee |
+| `employee@campus.test` | Campus Community |
 | `technician@campus.test` | Technician |
 | `admin@campus.test` | Administrator |
+
+Campus Community is the complaint-reporting role, including students and other campus members. The demo email `employee@campus.test` remains valid; its historical name and internal role/URLs are retained for compatibility. Admin and Technician responsibilities are unchanged.
 
 Seeding is idempotent: existing accounts and passwords are retained on restart. Changing `DEMO_PASSWORD` does not reset an existing account. No privileged accounts are seeded unless the `demo` profile is explicitly enabled. Run `./scripts/run-local.sh` without the profile to disable demo provisioning.
 
 ## What works in the foundation
 
-- Public employee registration, normalized unique email and hashed passwords.
+- Public Campus Community registration, normalized unique email and hashed passwords.
 - Login/logout with server-side sessions and CSRF protection.
 - Backend role restrictions and role-specific dashboard routing.
 - Administrator directory, account creation and activation/deactivation; technician account creation includes a technician profile.
@@ -128,6 +130,10 @@ NODE_PATH="$PWD/.local/browser-tools/node_modules" PLAYWRIGHT_BROWSERS_PATH="$PW
 ```
 
 `DEMO_PASSWORD` must already be exported for these runner commands. Alternatively set `DEMO_CREDENTIALS_FILE` to an ignored local JSON file with a `password` field. Passwords are not printed. Screenshots and results default to ignored `.local/acceptance-screenshots/`. The runner accepts only localhost targets. For the extended Phase 5 scenario, start with profiles `demo,sla-demo` and also set `BROWSER_AUTOMATION=true`. It exercises the labelled 10/30-second SLA service, strategy selection, disabled AI buttons, notifications, simulated email and combined dashboard filters. `BROWSER_EXECUTABLE` optionally selects an installed Chromium executable. This extension has not passed browser execution in the current restricted workspace; see the acceptance records for tested scope and deferred checks.
+
+## Windows and final demonstration checks
+
+See [Windows setup](docs/windows-demo.md) for PowerShell commands and the `.env`-loading `scripts/run-local.cmd` launcher. [Phase 7 checklist](docs/phase-7-checklist.md) contains the three repeatable demonstrations and remaining verification gates. Windows wrapper selection and UTF-8 BOM handling are implemented; native Windows execution remains unverified.
 
 ## Third-party wrapper
 

@@ -48,6 +48,13 @@ sys.exit(int(os.getenv('FAKE_MAVEN_EXIT', '0')))
         result = self.launch('LAUNCHER_CHOICE=from-file\n', LAUNCHER_CHOICE='exported')
         self.assertEqual('exported', json.loads(result.stdout)['chosen'])
 
+    def test_windows_utf8_bom_crlf_and_unicode_configuration(self):
+        result = self.launch('\ufeffLAUNCHER_LITERAL="Campus café"\r\nLAUNCHER_BLANK=\r\n')
+        self.assertEqual(0, result.returncode, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual('Campus café', data['literal'])
+        self.assertEqual('', data['blank'])
+
     def test_invalid_configuration_is_rejected_before_launch(self):
         for text in ['MISSING_EQUALS', 'bad-name=value', '=value']:
             with self.subTest(text=text):

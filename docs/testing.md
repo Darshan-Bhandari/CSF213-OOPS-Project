@@ -1,6 +1,6 @@
 # Verification record
 
-Latest acceptance (17 November 2026): **198 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **4 launcher tests**. Phase 5 automated/backend/packaged scope is accepted; Phase 6 core AI/reporting is verified with controlled fixtures. Live AI, repeated-report correlation and final stabilization/submission remain open. The extended browser attempt was blocked before navigation; earlier desktop/mobile acceptance applies to Phases 1–4. See the final section for exact current evidence. Earlier failures below are historical.
+Latest acceptance (21 November 2026 simplified edition, Linux): **202 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Forgot password was removed; its 18 tests are no longer part of the suite. JavaScript syntax passed; native Mac/latest browser/live AI remain unverified. Prior dated recovery-edition runs below are historical.
 
 ## Foundation verification
 
@@ -162,3 +162,46 @@ Initial environment attempts failed before meaningful integration assertions: di
 Browser attempt: installed Chromium failed during startup with Unix-socket creation `Operation not permitted`, before page navigation. Compatible Playwright headless-shell downloads returned an unavailable-site HTML page instead of a browser archive. A separate-process manual app attempt also could not reach the database across isolated command networking; this is not recorded as an application defect or a browser pass. The optional extended runner is syntax-checked only, and must be rerun in a browser-capable environment. Previous 16 November desktop/mobile browser evidence is retained separately. No accessibility/cross-browser/performance/production-security certification is claimed.
 
 Local evidence: `/tmp/itsm-verify.log`, `/tmp/itsm-restart-final.log`, `/tmp/itsm-targeted.log`, `/tmp/itsm-browser.log`, `target/surefire-reports`, `target/failsafe-reports`. Logs, dependency caches, test data, credentials and build output are ignored. The source and documentation are tracked together; Phase 6 live-provider verification and correlation plus final Phase 7–8 gates remain open.
+
+
+## Phase 7 follow-up — local macOS, 17 November 2026
+
+Local workspace was clean on older main `0dde9ee`; 21 tracked source/doc files were synchronized from verified branch commit `2ab4421` without copying configuration or data. Current follow-up changes select `mvnw.cmd` on Windows, add `scripts/run-local.cmd`, and load literal dotenv text with explicit UTF-8/BOM support.
+
+`python3 -m unittest discover -s src/test/python -v` passed **5 cases** on macOS/Python 3.14.2, including BOM, CRLF, Unicode, literal shell-like text, exported-value precedence, invalid configuration and Maven failure exit status. These are POSIX process tests; native Windows execution is not claimed. Windows setup/demo instructions are in `docs/windows-demo.md`.
+
+`MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o -Dtest=WorkflowRulesTest,WorkflowViewsTest test` passed **74 cases (56 rules + 18 views)**, zero failures/errors/skips, on JDK 25.0.1 at 22:49 IST. Compilation succeeded. The preceding full `./mvnw -o test` attempt failed during embedded PostgreSQL initialization (`shmget: Operation not permitted`) and the loopback fake-provider server's socket bind (`Operation not permitted`); database/provider assertions did not execute. Raw Surefire output was 204 cases, 74 passed, 130 errors including six class cleanup/initialization entries; none of those errors is counted as a pass. No sandbox escalation was attempted. Earlier Linux full-suite/package acceptance remains recorded separately.
+
+Logs: `/tmp/itsm-phase7-regression.log`, `/tmp/itsm-phase7-portable.log`; results in ignored `target/surefire-reports`. The targeted rerun overwrites only its two report files; the other failed full-attempt reports remain, so summing the directory is not a fresh successful full-suite result. The sandbox blocks fresh isolated runtime setup; no browser rerun is claimed. `docs/phase-7-checklist.md` prepares the three full workflows but keeps actual execution unchecked. Full verify/browser/native Windows, live user-configured AI and repeated-report correlation remain open; Phase 7 is IN PROGRESS.
+
+
+## Campus Community role label — 19 November 2026
+
+User requested that the complainant role be named Campus Community, with Admin and Technician unchanged. Added an explicit role display label and used it in sidebar badges, administrator account options/directory, sign-in, registration and report-form copy. Reporting-denial wording and newly seeded demo display names use the new name. Persisted EMPLOYEE identifiers, submitted option values, authorities, routes, existing demo email and existing accounts are retained; no migration or permission change is involved.
+
+`MAVEN_USER_HOME="$PWD/.local/maven-home" ./mvnw -o -Dtest=WorkflowRulesTest,WorkflowViewsTest test` passed **77 cases (56 rules + 21 template cases)**, zero failures/errors/skips, on macOS/JDK 25.0.1. Expanded the existing template fixtures to cover login, registration, admin role choices/directory and the community dashboard; assertions verify the displayed Campus Community name and retained EMPLOYEE form value. The report-form heading was then updated and the 21 template cases rerun. Test results do not claim a fresh database or browser acceptance pass; those environment limitations remain as previously recorded. Log: `/tmp/itsm-community-label-tests.log` and `/tmp/itsm-community-label-views.log`.
+
+
+## Lavender UI reference — 19 November 2026
+
+User requested the supplied BITS/BITSOps lavender design. The shared shell, sign-in screen, styles and dashboard now follow that direction. Ticket highlights use the role-scoped query service and escaped persisted content. Existing data/permissions and CSRF form actions are retained; `/images/**` permits public access only to static icons.
+
+`./mvnw -o -Dtest=WorkflowRulesTest,WorkflowViewsTest test` passed 77 cases (56 rules + 21 templates), zero failures/errors/skips. After including the populated dashboard in escaping fixtures, `./mvnw -o -Dapp.visual-export=true -Dtest=WorkflowViewsTest test` passed all 22 template cases. These runs used `MAVEN_USER_HOME="$PWD/.local/maven-home"`, macOS/JDK 25.0.1. No repeated runs are added together as invented distinct tests. Log files: `/tmp/itsm-lavender-ui-tests.log`, `/tmp/itsm-lavender-final-views.log`. Source compilation passed. Subsequent changes only add decorative ARIA attributes and a navigation breakpoint-state reset.
+
+Browser preview attempt rejected local `file:` navigation under the browser URL policy, before rendering. It was stopped without trying a policy workaround. No visual screenshot, responsive geometry, JavaScript interaction or live full-workflow acceptance is claimed. JS/CSS parser tooling was unavailable/restricted, so no separate parser pass is claimed. Existing database initialization restrictions were not rerun for this view change. `docs/ui-refresh.md` records implementation, image attribution/external-network behavior and remaining visual gates.
+
+
+## Password recovery and Mac review bundle — 21 November 2026
+
+User approved implementing forgot password. Added anonymous CSRF-protected recovery/reset forms, 15-minute single-use cryptographic links with hashes stored in PostgreSQL, persisted cooldown/global request limits, atomic consumption/password/audit, and next-request revocation of existing sessions. SMTP sender is user-configured; an explicit loopback-only private local mailbox supports Mac demos without sender credentials. Default delivery is disabled. No real email, provider account, subscription, key or spending was used.
+
+New V5 migration preserves existing users/tickets and leaves V1–V4 unchanged. Full Linux/JDK 21.0.13/PostgreSQL 14.15 clean verify passed **220 regression + 2 packaged restart cases**, zero failures/errors/skips. This includes 14 recovery integration and 4 delivery tests; five Python launcher tests also passed. The initial targeted run passed 92 cases after correcting a test import ambiguity. No new visual browser/native Mac/Windows/real SMTP acceptance is claimed.
+
+Mac instructions: MAC_START_HERE.md. Recovery design/report addendum: docs/password-recovery.md. Claude independently reviews original requirements PDF, plan, source and tests using CLAUDE_REVIEW.md. Source ZIP excludes credentials, local tokens/mail files, databases, caches, build outputs and Git metadata. The 45-page report predates recovery; consult its dated addendum. Phase 8 remains in progress and earlier correlation/live AI/final submission gates remain open.
+
+Command used in this workspace: full JDK at ../project/.local/jdk, inherited proxy settings and shared ignored Maven cache; ordinary Macs use `./mvnw clean verify`. Recovery test SMTP was mocked and local delivery used test-owned temporary files. Real SMTP inbox delivery, latest-page browser interaction and native Mac execution remain unverified.
+
+
+## Simplified edition verification 21 November 2026
+
+After removing recovery and adding the account dropdown, clean verify passed **202 regression + 2 packaged restart tests**, zero failures/errors/skips, on Linux/full JDK 21.0.13/PostgreSQL 14.15. Five Python launcher tests and `node --check src/main/resources/static/js/app.js` passed. The reduction from 220 is exactly the 14 recovery integration and 4 recovery delivery tests removed with that feature; no hidden failing/skipped tests are counted as success. Existing 22 template cases render the shared account menu for the role fixtures. No live visual/browser/native Mac or provider check is claimed. V1–V5 remain unchanged; existing user data and credentials were not reset. Full log in this workspace: /tmp/no-recovery-verify.log.
