@@ -1,12 +1,12 @@
-# BITSOps Assistant simplified edition
+# BITSOps Assistant — Group 57 submission
 
-Forgot password and recovery/SMTP setup have been removed at the user’s request. The avatar opens name, email, role and Sign out. Incident email remains simulated. Follow [Mac start instructions](MAC_START_HERE.md) and extract into a NEW folder; do not overlay old source or reset the user database. V1–V5 remain unchanged for database compatibility.
+Forgot password and recovery/SMTP setup have been removed at the user’s request. The avatar opens name, email, role and Sign out. Incident email remains simulated. Follow [Mac start instructions](MAC_START_HERE.md) and extract into a NEW folder; do not overlay old source or reset the user database. Flyway V6 adds duplicate incident correlation while preserving migrations V1–V5.
 
-Current Linux verification (21 November): **202 regression + 2 packaged restart cases passed**, plus **5 launcher tests** and JavaScript syntax. Native Mac/latest visual acceptance remains pending. The earlier 220-case recovery edition is historical.
+Current Linux verification (21 November): **206 regression + 2 packaged restart cases passed**, plus **5 launcher tests**. The four-student correlation scenario also passed against the packaged app over local HTTP. Native Mac/latest visual acceptance remains pending. The earlier 220-case recovery edition is historical.
 
 [Verification](VERIFICATION_SUMMARY.md) · [Living plan](plan.md) · [Demo script](docs/demo-script.md) · [Independent review instructions](CLAUDE_REVIEW.md)
 
-## Requirements## Requirements
+## Requirements
 
 - Full JDK 21 or 25 (including compiler and release metadata). Code targets Java 21; both JDK versions have been exercised in the recorded environments.
 - Maven 3.9.11 is downloaded by the included Apache Maven Wrapper on first use.
@@ -79,6 +79,10 @@ Seeding is idempotent: existing accounts and passwords are retained on restart. 
 - Persistent catalog: five campus services, six categories and four default SLA policies.
 - Missing OpenRouter configuration does not prevent startup. AI adapter source is present for later acceptance; no live provider request was made or verified.
 
+## Duplicate incident correlation
+
+New reports can suggest related incidents to authorised staff. In incident details, use **Incident correlation** to review candidates and mark a report as a duplicate of a master. Each ticket keeps its own reporter, status, SLA and history. See the [four-student Wi-Fi demo](docs/incident-correlation.md).
+
 ## Tests and packaging
 
 ```sh
@@ -97,9 +101,9 @@ At the AI phase, set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env`. No m
 
 ## Version control
 
-Repository: https://github.com/Darshan-Bhandari/CSF213-OOPS-Project, branch `main`. Initial project upload is complete. Check `plan.md` for uncommitted work and current verification status. Do not commit `.env`, `.local`, database files or build output.
+The Group 57 submission source is on [the main branch](https://github.com/Darshan-Bhandari/CSF213-OOPS-Project/tree/main). The report PDF and recorded demonstration are submitted separately. The editable drafts under `docs/report/` are historical. Keep local `.env`, database files and build output out of Git.
 
-## Current verification status
+## Earlier verification milestones
 
 On 17 November 2026, Linux/JDK 21.0.13/PostgreSQL 14.15 passed 198 regression tests and two real packaged HTTP/app/database restart cases, including startup SLA catch-up and durable deduplication. The strengthened restart suite was recompiled and rerun successfully. Four launcher tests passed. Surefire loads Mockito as a startup agent, avoiding dynamic attach requirements. V1–V4 migrations are unchanged.
 

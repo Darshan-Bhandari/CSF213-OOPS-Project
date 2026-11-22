@@ -1,6 +1,20 @@
 # Oops Project — Living Project Plan
 
-Last updated: 2026-11-21 (Asia/Kolkata)
+Last updated: 2026-11-22 (Asia/Kolkata)
+
+## Group 57 submission source — 22 November 2026
+
+- The final team archive is the source for the submission on `main`. It matches the V6 source verified against the final 46-page report. The report PDF and video are separate deliverables.
+- Publication excludes the local `.env` and restores executable permissions on the Unix launchers. See the verification record below for the Linux application and restart results.
+- On the publishing Mac, all 78 targeted Java rules and view tests and all five Python launcher tests passed. The complete database and restart test evidence is from Linux.
+
+## Current change — duplicate incident correlation
+
+- Implemented staff-reviewed suggestions for independent reports under the same service and category within four hours. Matching, visibility rules and the four-student demonstration are documented in [Incident correlation](docs/incident-correlation.md).
+- Authorised staff can confirm a flat master/report relationship. Candidate discovery and staff confirmation are audited. Links preserve every reporter, workflow state, priority, SLA and incident history. Automatic escalation or reprioritisation is outside the current linking scope.
+- Flyway V6 adds two correlation tables and lookup indexes. OpenRouter remains optional and is outside the matching path.
+
+- Verified on Linux with JDK 21 and PostgreSQL 14.15: 206 Java regression tests, 2 packaged restart tests and 5 Python launcher tests passed. Four new correlation integration cases cover the Wi-Fi scenario, ineligible candidates, staff scope/CSRF and link history after closure.
 
 ## 1. Purpose and working agreement
 
@@ -31,7 +45,7 @@ User explicitly prohibited application-code changes without approval. Claude's r
 
 Completed documentation work: current README/testing headers use 21 November Linux 220 + 2 / Python 5; report now names all 20 ER tables including V5 recovery and credential_revision, removes nonexistent accounts dependency from the legacy class diagram, describes the table-driven state machine accurately, and records all reported limitations including reporter audit privacy. docs/demo-script.md gives three deterministic workflows and existing short-SLA training profile instructions. Filename question is drafted in docs/instructor-filename-question.md, NOT sent. docs/mac-final-verification.md provides the Mac command; Mac remains unavailable and NOT RUN.
 
-Source is already public on GitHub. Current submission source must point to the codex/phase7-stabilization branch until a separately approved merge; the default main is older. Group number, member names/IDs and actual contributions are still required to fill the cover. Recording, instructor reply and submission receipts remain pending. The denylist/privacy fix and all optional application changes remain unapproved and untouched.
+At this review milestone, the stabilization branch was ahead of the default branch. See the 22 November submission note for the current branch. Group number, member names/IDs and actual contributions are still required to fill the cover. Recording, instructor reply and submission receipts remain pending. The denylist/privacy fix and all optional application changes remain unapproved and untouched.
 
 ## Password recovery and Mac review bundle — 21 November 2026
 
@@ -119,7 +133,7 @@ Priority rationale: use the approved product of impact × urgency × criticality
 - Project: Intelligent IT Service Management & Incident Resolution System (I-ITSM).
 - Hard submission deadline: **22 November 2026**. Exact cutoff time is not specified in the document.
 - Required submissions: group PDF report, source repository link, and 15–20-minute recorded application demonstration involving every member.
-- Current phase: Phase 6 — core AI/reporting verified with controlled fixtures; live AI and approved repeated-report correlation remain open. Phases 1–5 accepted for their documented tested scopes. Phase 7 stabilization is in progress; Phase 8 final deliverables remain open. P01–P10 approved; team/submission administration deferred.
+- Current phase: Phase 6 — core AI/reporting verified with controlled fixtures; duplicate correlation implemented; live AI remains open. Phases 1–5 accepted for their documented tested scopes. Phase 7 stabilization is in progress; Phase 8 final deliverables remain open. P01–P10 approved; team/submission administration deferred.
 - Completed: all 17 pages reviewed; initial phase structure prepared; this living plan created at the user's request.
 - Workspace inspected on 2026-11-14: only the source PDF existed before this file. No implementation or repository was present in this folder.
 - Implementation status: 198 regression + 2 packaged restart tests and 4 launcher tests passed on 17 November. Earlier desktop/mobile browser acceptance covers Phases 1–4; new extended browser checks are blocked in the current environment. See current handoff and acceptance records for limits.
@@ -487,7 +501,7 @@ Exit: both strategies, SLA warnings/breaches and both notification channels are 
 
 ### Phase 6 — Intelligence and reporting
 
-Status: IN PROGRESS — core controlled-provider AI/reporting acceptance passed; live AI and approved repeat-report addition remain open. Dependencies: core data and approved D07/D18/D20.
+Status: IN PROGRESS — core controlled-provider AI/reporting acceptance passed; staff-reviewed duplicate linking implemented; live AI remains open. Dependencies: core data and approved D07/D18/D20.
 
 - [x] Build OpenRouter integration for the approved AI feature(s), with configurable key/model, validation and failure handling; user adds their own key at the end. Do not choose a model or spend budget implicitly.
 - [x] Verify startup and non-AI workflows with the key absent; clearly identify unavailable AI and test controlled success/failure responses.
@@ -496,7 +510,7 @@ Status: IN PROGRESS — core controlled-provider AI/reporting acceptance passed;
 - [x] Implement selected intelligent feature 2; document behavior and limitations.
 - [x] Implement at least five approved search/filter criteria and combined filtering.
 - [x] Implement agreed dashboards/reports with precise metric definitions.
-- [ ] Complete approved repeated-report correlation/escalation: document matching evidence, independent reporters, thresholds/rationale, corrections and SLA effects before implementation. This addition remains unimplemented.
+- [x] Implement staff-reviewed duplicate correlation with matching evidence, independent reporters, a documented threshold and preserved SLA/incident records. Automatic escalation and priority changes are outside this delivery.
 - [x] Add realistic positive, negative and boundary sample scenarios.
 
 Exit: two intelligent features and required filters work; dashboard values match underlying data.
@@ -591,9 +605,11 @@ As of 17 November, Phases 1–5 acceptance and controlled-provider Phase 6 core 
 | 2026-11-15 | Updated core stack and dashboard reference recorded | Latest screenshots select Thymeleaf and OpenRouter; sections 4B and D21/D22 supersede earlier choices |
 | 2026-11-15 | Added root `AGENTS.md` for Codex project workflow | User asked to begin using Codex to automate project work; instructions preserve approved scope and verified status |
 
-Next action: approved repeated-report correlation design/implementation, followed by final Phase 7 stabilization and presentation workflows. Live AI awaits the user's model/key/budget. See `docs/phase-5-6-acceptance.md` and `docs/testing.md`; Phase 8 member/report/video/submission details remain deferred.
+Next action: final Phase 7 stabilization and presentation workflows, including a rehearsal of staff-reviewed incident correlation. Live AI awaits the user's model/key/budget. See `docs/phase-5-6-acceptance.md` and `docs/testing.md`; Phase 8 member/report/video/submission details remain deferred.
 
 ## 10. Change log
+
+- 2026-11-22: Prepared the team-provided V6 source for publication on `main`, aligned the README with the submission and kept the final report and video as separate deliverables.
 
 | Date | Change | Basis |
 |---|---|---|

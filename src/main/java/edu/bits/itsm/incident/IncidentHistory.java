@@ -33,11 +33,13 @@ public class IncidentHistory {
   public List<Map<String, Object>> audit(long id, AccountPrincipal actor) {
     incidents.view(id, actor);
     return jdbc.queryForList(
-        "SELECT a.*,COALESCE(u.display_name,'System') actor_name FROM audit_entries a LEFT JOIN"
+        "SELECT a.id,a.actor_id,a.incident_id,a.created_at,a.action,a.subject,a.previous_state,a.new_state,"
+            + " CASE WHEN NOT ? AND a.action LIKE 'CORRELATION_%' THEN 'Incident correlation updated' ELSE a.description END description,"
+            + " COALESCE(u.display_name,'System') actor_name FROM audit_entries a LEFT JOIN"
             + " user_accounts u ON u.id=a.actor_id WHERE incident_id=?"
-            + " AND (? OR (a.action<>'AI_SUGGESTION_GENERATED' AND NOT"
+            + " AND (? OR (a.action<>'AI_SUGGESTION_GENERATED' AND a.action NOT LIKE 'CORRELATION_%' AND NOT"
             + " (a.action='MESSAGE_ADDED' AND a.description LIKE 'INTERNAL message%'))) ORDER BY a.id",
-        id, actor.getRole() != Role.EMPLOYEE);
+        actor.getRole() == Role.ADMIN, id, actor.getRole() != Role.EMPLOYEE);
   }
 
   public List<Map<String, Object>> resolutions(long id, AccountPrincipal actor) {

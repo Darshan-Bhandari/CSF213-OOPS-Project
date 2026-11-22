@@ -52,8 +52,12 @@ End state: verified/closed incident with recorded warning/breach evidence that a
 
 End state: retained failed fix plus accepted second fix; no invented correlation or live AI interaction.
 
+## Alternative workflow 3: correlate a four-reporter outage
+
+Use the [four-student Wi-Fi demonstration](incident-correlation.md). Show the suggestions on reports 2–4, link them to report 1 and verify the three links and audit on the master. Each student retains a separate report. The app makes suggestions and staff confirm the links.
+
 ## 17:00–19:00 testing and limitations
 
-Show VERIFICATION_SUMMARY.md and actual available test logs. State Linux 21 November: 220 regression + 2 packaged restart and 5 Python checks passed. Claude reviewed statically only. A Mac result must come from a Mac log, not these Linux runs. Mention live AI/SMTP, correlation, latest visual/native-platform and submission gates honestly.
+Show VERIFICATION_SUMMARY.md and actual available test logs. State Linux 21 November: 206 regression + 2 packaged restart and 5 Python checks passed. Claude reviewed statically only. A Mac result must come from a Mac log, not these Linux runs. Mention live AI/SMTP, latest visual/native-platform and submission gates honestly.
 
 Explain a race, invalid transition or rollback test from actual source. Finish within 20 minutes. Confirm each member participated and inspect the video before upload.

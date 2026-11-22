@@ -107,6 +107,8 @@ public class WorkflowController {
       model.addAttribute("messageForm", form);
     }
     model.addAttribute("staff", actor.getRole() != Role.EMPLOYEE);
+    if (actor.getRole() != Role.EMPLOYEE)
+      model.addAttribute("correlation", incidents.correlations(id, actor));
     model.addAttribute("messages", history.messages(id, actor));
     model.addAttribute("audit", history.audit(id, actor));
     model.addAttribute("resolutions", history.resolutions(id, actor));
@@ -117,6 +119,19 @@ public class WorkflowController {
         actor.getRole() == Role.EMPLOYEE ? java.util.List.of() : history.suggestions(id, actor));
     model.addAttribute("aiConfigured", config.isConfigured());
     return "incidents/detail";
+  }
+
+  @PostMapping("/incidents/{id}/duplicate")
+  String duplicate(
+      @PathVariable long id,
+      @RequestParam long master,
+      @AuthenticationPrincipal AccountPrincipal actor,
+      RedirectAttributes flash) {
+    boolean linked = incidents.linkDuplicate(id, master, actor);
+    flash.addFlashAttribute("success", linked
+        ? "Duplicate report linked to INC-" + master + "."
+        : "This report is already linked to INC-" + master + ".");
+    return back(id);
   }
 
   @PostMapping("/incidents/{id}/action")

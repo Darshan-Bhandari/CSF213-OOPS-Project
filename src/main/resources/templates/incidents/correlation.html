@@ -1,0 +1,36 @@
+<section xmlns:th="http://www.thymeleaf.org" th:fragment="panel" class="panel" id="correlation"
+         th:if="${staff && correlation != null}">
+  <h2>Incident correlation</h2>
+  <p class="muted">Each report keeps its own status, reporter and history.</p>
+  <h3>Linked incidents</h3>
+  <p class="muted" th:if="${#lists.isEmpty(correlation.linked())}">No linked incidents in your workspace.</p>
+  <article class="timeline-entry" th:each="ticket : ${correlation.linked()}">
+    <a th:href="@{/incidents/{id}(id=${ticket.id()})}" th:text="|INC-${ticket.id()} · ${ticket.title()}|"></a>
+    <span class="badge" th:text="${ticket.master() ? 'Master incident' : 'Linked report'}"></span>
+    <span class="badge" th:text="${ticket.status()}"></span>
+    <p class="pre-wrap" th:text="${ticket.description()}"></p>
+  </article>
+
+  <div th:unless="${correlation.duplicate()}">
+    <h3>Potential duplicates at submission</h3>
+    <p class="muted">Suggestions use matching service and category, recent reports from other reporters, and overlapping text.</p>
+    <p class="muted" th:if="${#lists.isEmpty(correlation.candidates())}">No potential duplicates in your workspace.</p>
+    <article class="timeline-entry" th:each="ticket : ${correlation.candidates()}">
+      <a th:href="@{/incidents/{id}(id=${ticket.id()})}" th:text="|INC-${ticket.id()} · ${ticket.title()}|"></a>
+      <span class="badge" th:text="${ticket.status()}"></span>
+      <span class="badge" th:text="|${ticket.similarity()}% text overlap|"></span>
+      <p class="pre-wrap" th:text="${ticket.description()}"></p>
+      <form th:if="${correlation.canLink() && incident.status.isActive() && ticket.eligibleMaster()}"
+            th:action="@{/incidents/{id}/duplicate(id=${incident.id})}" method="post">
+        <input type="hidden" name="master" th:value="${ticket.id()}">
+        <button class="button secondary" type="submit" th:text="|Use INC-${ticket.id()} as master|"></button>
+      </form>
+    </article>
+  </div>
+  <form th:if="${correlation.canLink() && incident.status.isActive()}"
+        th:action="@{/incidents/{id}/duplicate(id=${incident.id})}" method="post" class="form-stack">
+    <label for="master-incident">Master incident number</label>
+    <input id="master-incident" name="master" type="number" min="1" required placeholder="For INC-42, enter 42">
+    <button class="button secondary" type="submit">Link as duplicate</button>
+  </form>
+</section>

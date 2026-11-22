@@ -4,6 +4,7 @@ import edu.bits.itsm.assignment.AssignmentService;
 import edu.bits.itsm.audit.AuditService;
 import edu.bits.itsm.catalog.CatalogService;
 import edu.bits.itsm.identity.*;
+import edu.bits.itsm.incident.correlation.IncidentCorrelation;
 import edu.bits.itsm.notification.NotificationService;
 import edu.bits.itsm.shared.*;
 import edu.bits.itsm.sla.SlaService;
@@ -25,6 +26,7 @@ public class IncidentService {
   private final SlaService sla;
   private final JdbcTemplate jdbc;
   private final Clock clock;
+  private final IncidentCorrelation correlation;
 
   public IncidentService(
       IncidentRepository incidents,
@@ -34,7 +36,8 @@ public class IncidentService {
       NotificationService notifications,
       SlaService sla,
       JdbcTemplate jdbc,
-      Clock clock) {
+      Clock clock,
+      IncidentCorrelation correlation) {
     this.incidents = incidents;
     this.catalog = catalog;
     this.assignment = assignment;
@@ -43,6 +46,7 @@ public class IncidentService {
     this.sla = sla;
     this.jdbc = jdbc;
     this.clock = clock;
+    this.correlation = correlation;
   }
 
   @Transactional(readOnly = true)
@@ -150,7 +154,25 @@ public class IncidentService {
     sla.startCycle(i);
     autoAssign(i, actor.getAccountId());
     notifications.incident(i, "Incident created", "INC-" + i.getId() + ": " + i.getTitle());
-    return incidents.saveAndFlush(i);
+    incidents.saveAndFlush(i);
+    correlation.recordCandidates(i);
+    return i;
+  }
+
+  @Transactional(readOnly = true)
+  public IncidentCorrelation.Panel correlations(long id, AccountPrincipal actor) {
+    requireStaff(view(id, actor), actor);
+    return correlation.panel(id, actor);
+  }
+
+  @Transactional
+  public boolean linkDuplicate(long id, long masterId, AccountPrincipal actor) {
+    catalog.lock();
+    var report = view(id, actor);
+    requireStaff(report, actor);
+    var master = view(masterId, actor);
+    requireStaff(master, actor);
+    return correlation.link(report, master, actor.getAccountId());
   }
 
   private void step(Incident i, IncidentStatus target, Long actor, String action, String details) {

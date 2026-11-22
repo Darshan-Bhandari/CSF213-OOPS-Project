@@ -142,6 +142,138 @@ class WorkflowIntegrationTest {
   }
 
   @Test
+  void fourStudentsReportWifiOutageAndStaffLinkThreeReportsToOneMaster() throws Exception {
+    var third = new AccountPrincipal(
+        accounts.register("Student three", "third@workflow.test", "Test-password-123"));
+    var fourth = new AccountPrincipal(
+        accounts.register("Student four", "fourth@workflow.test", "Test-password-123"));
+
+    long master = submitWifi(employee, "Wi-Fi is down", "Campus Wi-Fi outage in the library.");
+    long second = submitWifi(other, "Cannot connect to wifi", "Laptops cannot join wifi at the library.");
+    long thirdReport = submitWifi(third, "Wireless connection unavailable", "Wifi is offline on every floor.");
+    long fourthReport = submitWifi(fourth, "Wi Fi not working", "Phones lost access during the wifi outage.");
+
+    assertTrue(incidents.correlations(master, admin).candidates().isEmpty());
+    assertTrue(incidents.correlations(fourthReport, admin).candidates().size() > 1);
+    for (long report : new long[]{second, thirdReport, fourthReport}) {
+      assertTrue(incidents.correlations(report, technician).candidates().stream()
+          .anyMatch(candidate -> candidate.id() == master));
+      var before = incidents.view(report, admin);
+      var deadline = before.getResolutionDue();
+      var version = before.getVersion();
+      mvc.perform(post("/incidents/{id}/duplicate", report).with(user(technician)).with(csrf())
+              .param("master", Long.toString(master)))
+          .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/incidents/" + report));
+      assertEquals(deadline, incidents.view(report, admin).getResolutionDue());
+      assertEquals(version, incidents.view(report, admin).getVersion());
+      assertEquals(IncidentStatus.ASSIGNED, incidents.view(report, admin).getStatus());
+      assertTrue(history.audit(report, admin).stream().anyMatch(entry ->
+          entry.get("action").equals("CORRELATION_DUPLICATE_LINKED")
+              && entry.get("description").toString().contains("INC-" + master)));
+    }
+    var all = incidents.correlations(master, admin).linked();
+    assertEquals(java.util.List.of(second, thirdReport, fourthReport),
+        all.stream().map(link -> link.id()).toList());
+    assertEquals(third.getAccountId(), incidents.view(thirdReport, third).getReporterId());
+    assertEquals(fourth.getAccountId(), incidents.view(fourthReport, fourth).getReporterId());
+    assertEquals(3, history.audit(master, admin).stream()
+        .filter(row -> row.get("action").equals("CORRELATION_DUPLICATE_ADDED")).count());
+    assertEquals(1, history.audit(fourthReport, admin).stream()
+        .filter(row -> row.get("action").equals("CORRELATION_CANDIDATES_FOUND")).count());
+    mvc.perform(get("/incidents/{id}", master).with(user(admin)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("INC-" + fourthReport)))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Phones lost access during the wifi outage.")));
+    mvc.perform(get("/incidents/{id}", fourthReport).with(user(fourth)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.not(
+            org.hamcrest.Matchers.containsString("CORRELATION_DUPLICATE_LINKED"))));
+  }
+
+  @Test
+  void noSuggestionForOldClosedSameReporterDifferentScopeOrUnrelatedText() {
+    create();
+    clock.advance(4 * 3600 + 1);
+    var closed = create();
+    resolve(closed);
+    incidents.transition(closed.getId(), closed.getVersion(), "VERIFY_CLOSE", "", employee);
+    incidents.create(other, "Campus network outage", "Cannot connect",
+        service, category, 2, 2, 2);
+    var otherService = jdbc.queryForObject("SELECT id FROM it_services WHERE name='Campus login'", Long.class);
+    var otherCategory = jdbc.queryForObject("SELECT id FROM categories WHERE name='Hardware'", Long.class);
+    incidents.create(employee, "Campus network offline", "Cannot connect",
+        otherService, category, 2, 2, 2);
+    incidents.create(employee, "Campus network offline", "Cannot connect",
+        service, otherCategory, 2, 2, 2);
+    incidents.create(employee, "Laptop battery", "Charging port broken",
+        service, category, 2, 2, 2);
+
+    var current = incidents.create(other, "Campus network offline", "Cannot connect",
+        service, category, 2, 2, 2);
+    assertTrue(incidents.correlations(current.getId(), admin).candidates().isEmpty());
+    assertThrows(BusinessException.class,
+        () -> incidents.linkDuplicate(current.getId(), closed.getId(), admin));
+    assertTrue(incidents.correlations(closed.getId(), admin).linked().isEmpty());
+    assertEquals(IncidentStatus.CLOSED, incidents.view(closed.getId(), admin).getStatus());
+  }
+
+  @Test
+  void correlationIsScopedToBothIncidentPermissionsAndRequiresCsrf() throws Exception {
+    var master = create();
+    var newTech = new AccountPrincipal(accounts.createByAdmin("Second tech", "newtech@workflow.test",
+        "Test-password-123", Role.TECHNICIAN, admin.getAccountId()));
+    assignment.skill(newTech.getAccountId(), category, 2, admin.getAccountId());
+    var report = incidents.create(other, "Campus network outage", "Unable to connect",
+        service, category, 2, 2, 2);
+    incidents.assign(report.getId(), report.getVersion(), newTech.getAccountId(), "Redistribute", admin);
+    assertTrue(incidents.correlations(report.getId(), newTech).candidates().isEmpty());
+    assertThrows(AccessDeniedException.class,
+        () -> incidents.linkDuplicate(report.getId(), master.getId(), newTech));
+    mvc.perform(post("/incidents/{id}/duplicate", report.getId()).with(user(other)).with(csrf())
+        .param("master", master.getId().toString())).andExpect(status().isForbidden());
+    mvc.perform(post("/incidents/{id}/duplicate", report.getId()).with(user(admin))
+        .param("master", master.getId().toString())).andExpect(status().isForbidden());
+    assertTrue(incidents.linkDuplicate(report.getId(), master.getId(), admin));
+    assertTrue(incidents.correlations(report.getId(), newTech).linked().isEmpty());
+    assertTrue(incidents.correlations(master.getId(), technician).linked().isEmpty());
+    assertTrue(history.audit(report.getId(), newTech).stream().noneMatch(row ->
+        row.get("action").equals("CORRELATION_DUPLICATE_LINKED")
+            && row.get("description").toString().contains("INC-")));
+  }
+
+  @Test
+  void existingLinkSurvivesClosureAndRepeatedSubmitDoesNotDuplicateAudit() {
+    var master = create();
+    var child = incidents.create(other, "Network outage", "Cannot connect",
+        service, category, 2, 2, 2);
+    var standalone = create();
+    assertTrue(incidents.linkDuplicate(child.getId(), master.getId(), admin));
+    assertThrows(BusinessException.class,
+        () -> incidents.linkDuplicate(standalone.getId(), child.getId(), admin));
+    assertThrows(BusinessException.class,
+        () -> incidents.linkDuplicate(master.getId(), child.getId(), admin));
+    assertThrows(BusinessException.class,
+        () -> incidents.linkDuplicate(master.getId(), master.getId(), admin));
+    assertThrows(BusinessException.class,
+        () -> incidents.linkDuplicate(child.getId(), standalone.getId(), admin));
+    resolve(master);
+    incidents.transition(master.getId(), master.getVersion(), "VERIFY_CLOSE", "", employee);
+    assertFalse(incidents.linkDuplicate(child.getId(), master.getId(), admin));
+    assertEquals("CLOSED", incidents.correlations(child.getId(), admin).linked().getFirst().status());
+    assertEquals(1, history.audit(master.getId(), admin).stream()
+        .filter(row -> row.get("action").equals("CORRELATION_DUPLICATE_ADDED")).count());
+  }
+
+  private long submitWifi(AccountPrincipal reporter, String title, String description) throws Exception {
+    var result = mvc.perform(post("/employee/incidents").with(user(reporter)).with(csrf())
+        .param("title", title).param("description", description)
+        .param("service", Long.toString(service)).param("category", Long.toString(category))
+        .param("impact", "2").param("urgency", "2").param("affected", "10"))
+        .andExpect(status().is3xxRedirection()).andReturn().getResponse().getRedirectedUrl();
+    return Long.parseLong(result.substring(result.lastIndexOf('/') + 1));
+  }
+
+  @Test
   void completeWorkflowPersistsAuditNotificationsAndFeedback() {
     var i = create();
     assertEquals(IncidentStatus.ASSIGNED, i.getStatus());

@@ -1,6 +1,11 @@
 # Verification record
 
-Latest acceptance (21 November 2026 simplified edition, Linux): **202 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Forgot password was removed; its 18 tests are no longer part of the suite. JavaScript syntax passed; native Mac/latest browser/live AI remain unverified. Prior dated recovery-edition runs below are historical.
+## Duplicate incident correlation
+
+The V6 build passed Linux/JDK 21.0.13/PostgreSQL 14.15 clean verify: **206 regression tests and 2 packaged restart tests**, with zero failures, errors or skips. Five Python launcher tests also passed. Four added WorkflowIntegrationTest cases exercise four independent Wi-Fi reporters and a shared master, exclusion of stale/closed/unrelated reports, scope and CSRF enforcement, and link history after closure. A separate local HTTP run against the packaged app used four registered demo accounts, submitted four different Wi-Fi reports, confirmed three master links through the rendered forms and checked audit history, unchanged statuses and reporter visibility. No browser visual run or live AI request was made.
+
+
+Earlier V5 acceptance (21 November 2026 simplified edition, Linux): **202 regression + 2 packaged restart cases passed**, zero failures/errors/skips, plus **5 Python launcher tests**. Forgot password was removed; its 18 tests are no longer part of the suite. JavaScript syntax passed; native Mac/latest browser/live AI remain unverified. Prior dated recovery-edition runs below are historical.
 
 ## Foundation verification
 
