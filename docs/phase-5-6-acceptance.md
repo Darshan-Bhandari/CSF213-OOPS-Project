@@ -1,6 +1,6 @@
 # Assignment, SLA, notifications, AI and reporting acceptance
 
-Work date: 17 November 2026. `plan.md` remains the phase/status authority. This record distinguishes local provider fixtures from a live AI demonstration.
+Historical verification for the 17 November 2026 snapshot. The tests used controlled provider fixtures. See the [V6 verification summary](../VERIFICATION_SUMMARY.md) for the final results.
 
 ## Changes
 
@@ -48,20 +48,3 @@ Work date: 17 November 2026. `plan.md` remains the phase/status authority. This 
 | Deactivated account / null principal | Reporting service access denied | `reportingServiceRejectsDeactivatedAccountsAndNullPrincipals` |
 
 Execution totals and final outcomes are recorded in `docs/testing.md`; table entries identify executable assertions rather than inventing separate case counts.
-
-## Manual Phase 5 demo
-
-1. Start the development database and app using README instructions. For accelerated, clearly labelled timing only, use profiles `demo,sla-demo`; keep OpenRouter configuration empty. Existing demo passwords are never reset by seeding.
-2. In separate browser sessions, sign in as employee, technician and administrator. In catalog configuration, switch SKILL/LOAD. To show different choices, provision two technicians with Network skills and deliberately different proficiency/workload. Show that old assignments stay unchanged.
-3. Report a Network incident against **Demo SLA training — short targets**, impact 3, urgency 3. Its P1 targets are 10 seconds response and 30 seconds resolution. Normal services retain their normal policies.
-4. Leave it unacknowledged. Refresh after roughly 8/11 seconds for response warning/breach and 24/31 seconds for resolution warning/breach; the training scheduler scans each second. Show the incident timeline, employee inbox and admin's explicitly simulated-email ledger. Reloading does not create additional alerts.
-5. Filter the admin dashboard by this incident ID, status, P1, Network, training service, technician and breached SLA. Total, backlog, critical backlog and recorded violations each show one for that isolated pending ticket. Averages display N/A until a qualifying completion exists.
-6. The AI buttons remain unavailable while credentials/model are absent. Test fixture advice is never shown as a live provider response.
-
-The extended browser runner automates these checks plus the full existing lifecycle at desktop/mobile sizes. Start a disposable `demo,sla-demo` instance as in README and set `BROWSER_AUTOMATION=true`. `BROWSER_EXECUTABLE` optionally selects an installed Chromium binary; otherwise Playwright uses its own browser. Credentials, database files and screenshots remain ignored.
-
-## Remaining gates
-
-- Real OpenRouter call and live AI demonstration require the user's chosen model, local key and spending approval. None was selected or used here.
-- Approved repeated-report correlation/escalation still requires its documented matching/threshold/SLA design and implementation; it is not silently claimed by the existing filters or priority formula.
-- Final three complete presentation workflows, broader stabilization, member allocation, report/UML/ER, recording and submission remain tracked in Phases 7–8. Linux/Chromium acceptance does not certify Windows/macOS execution, other browsers, production load, accessibility or penetration testing.

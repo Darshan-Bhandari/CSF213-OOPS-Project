@@ -1,6 +1,6 @@
-# Windows setup and demonstration
+# Run BITSOps Assistant on Windows
 
-Use the latest source ZIP (extract it first), or the review branch listed in `plan.md`. Run commands from the directory containing `pom.xml` and `mvnw.cmd`. Install a full JDK 21 or 25 and Python 3 with the Windows Python launcher (`py`). Internet is needed on the first Maven run. These instructions and wrapper selection have been prepared; native Windows execution still requires verification on the teammate's machine.
+Run the PowerShell commands from the project root containing `pom.xml` and `mvnw.cmd`. Install a full JDK 21 or 25 and Python 3 with the Windows Python launcher (`py`). The first Maven run needs internet access.
 
 ## 1. Check prerequisites in PowerShell
 
@@ -42,7 +42,7 @@ OPENROUTER_MODEL=
 
 Replace the demo-password placeholder with your chosen 8–64 character password (at most 72 UTF-8 bytes). All three seeded demo accounts initially use it. Existing accounts/passwords are retained across restarts; changing this setting does not reset them.
 
-Keep AI entries empty until you have chosen a model and budget. To enable AI, add your actual OpenRouter key and exact model ID locally, then restart the app. The key must never be put in source files, committed or displayed during recording. Exported environment variables take precedence over `.env`.
+Leave the OpenRouter settings blank for normal evaluation. Exported environment values take precedence over `.env`. Keep your configuration local.
 
 ## 4. Start the app
 
@@ -52,21 +52,12 @@ Keep AI entries empty until you have chosen a model and budget. To enable AI, ad
 
 The Windows launcher loads `.env` and selects `mvnw.cmd`. Open `http://127.0.0.1:8080`. Use separate browser profiles/private sessions for `employee@campus.test`, `technician@campus.test` and `admin@campus.test`, all with the chosen demo password.
 
-For the clearly labelled accelerated SLA demonstration only:
-
-```powershell
-.\scripts\run-local.cmd "-Dspring-boot.run.profiles=demo,sla-demo"
-```
-
-Stop the previous app first with Ctrl+C; keep the database running. This profile adds the training service with 10/30-second P1 targets and a one-second monitor interval. Ordinary service policies are retained.
-
 ## 5. Verify the extracted project
 
 ```powershell
 .\mvnw.cmd clean verify
-py -3 -m unittest discover -s src/test/python -v
 ```
 
-Record the actual result. Java integration checks create isolated databases; they do not reset your development database. The Python process tests currently use a POSIX fake executable and were verified on macOS; they are not a native Windows acceptance suite. The Windows application/demo and Java checks must still be exercised on Windows. See `docs/phase-7-checklist.md` for the three demonstrations and evidence to record.
+Java integration checks create isolated databases. Native Windows execution remains unverified. See the [test guide](testing.md) for test coverage and the [application walkthrough](phase-7-checklist.md) for example workflows.
 
 Ctrl+C stops the application; Ctrl+C in the database terminal stops the helper. Retain `.local/postgres-data` if you want the same saved incidents next time.

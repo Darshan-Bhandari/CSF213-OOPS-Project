@@ -1,6 +1,6 @@
 # Architecture and implementation contracts
 
-Reviewed against Phases 1–5 and the controlled AI/reporting scope on 17 November 2026. Final submission UML/ER/report artifacts remain Phase 8 deliverables.
+Architecture of the Group 57 V6 submission.
 
 ## Runtime and boundaries
 
@@ -45,7 +45,7 @@ classDiagram
   BaseNotificationChannel <|-- SimulatedEmailChannel
 ```
 
-Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3–7, P2=8–17, P1=18–27. Affected-user count is context. Reporter inputs cannot directly set priority, reporter identity, assignment or status. Reasoned administrator corrections audit old/new factors. Repeat-report correlation/escalation is approved follow-up scope, not implemented.
+Priority is impact × urgency × snapshotted service criticality. P4=1–2, P3=3–7, P2=8–17, P1=18–27. Affected-user count is context. Reporter inputs cannot directly set priority, reporter identity, assignment or status. Reasoned administrator corrections audit old/new factors. Flyway V6 adds staff-reviewed duplicate incident correlation. Linking preserves each incident’s original priority, deadlines and workflow. Automatic escalation is outside the submission scope.
 
 Campus Community is the displayed complainant role (historically `EMPLOYEE` internally). The stored identifier, authorities, demo email and route paths remain compatible; Admin and Technician labels are unchanged.
 
@@ -58,6 +58,7 @@ Campus Community is the displayed complainant role (historically `EMPLOYEE` inte
 | `/incidents`, `/incidents/{id}` | Lists/details scoped to reporter, assigned technician or active administrator |
 | POST `/incidents/{id}/action` | Versioned acknowledgment/start/resolve/verify/close/reject; invalid edges and roles rejected |
 | POST `/incidents/{id}/messages` | Versioned public/internal/request messages; only reporter replies to same-incident requests |
+| POST `/incidents/{id}/duplicate` | Authorised staff confirm a related incident, with an audit entry on each report |
 | POST `/incidents/{id}/feedback` | Optional reporter feedback after resolution; rating 1–5; once per incident |
 | `/admin/users`, `/admin/catalog`, `/admin/audit`, `/admin/email` | Active administrator only; sensitive configuration writes check actor at service boundary too |
 | `/api/incidents`, `/api/incidents/{id}`, `/api/metrics` | Authenticated read-only projections; ownership/role scope; no entity/password serialization |
@@ -76,8 +77,9 @@ Rejection retains old resolution/cycle/breach records and first response/resolut
 
 `AiAdvisor` composes incident authorization, a transport contract and transactional suggestion storage. `OpenRouterAdapter` fixes the production HTTPS endpoint, keeps credentials backend-only, caps the complete request at 25 seconds and cancels response bodies above 64 KiB. Requests happen outside the save transaction; saving and applying recheck the incident version. Category IDs must be integral and active, and application must retain eligible skills. Resolution advice creates an editable draft only. The server labels retrieved final accepted resolutions separately from generated advice; it selects at most three relevant closed-ticket examples, 500 characters each, and accepts at most 6,000 characters of generated resolution advice. Tests use a mock transport or a loopback fake provider, never a live paid request.
 
-Reporting builds parameterized AND predicates shared by list/count/metrics/category totals. Current account activity/role and reporter/assignee/admin scope are checked in the service. Dates are inclusive Asia/Kolkata calendar days with an exclusive next-midnight upper bound. Pages contain 20 rows, ordered by creation time then stable ID. Averages include only qualifying timestamps and expose sample counts; missing averages remain N/A. Compliance uses eligible first-cycle incidents without recorded first-cycle breaches, as defined in P09; recorded alerts can lag a deadline by the scan interval.
+Reporting builds parameterized AND predicates shared by list/count/metrics/category totals. Current account activity/role and reporter/assignee/admin scope are checked in the service. Dates are inclusive Asia/Kolkata calendar days with an exclusive next-midnight upper bound. Pages contain 20 rows, ordered by creation time then stable ID. Averages include only qualifying timestamps and expose sample counts; missing averages remain N/A. Compliance uses eligible first-cycle incidents without recorded first-cycle breaches, as defined in the [project scope](../plan.md); recorded alerts can lag a deadline by the scan interval.
 
-## Remaining phase gates
+## Further reading
 
-See `docs/phase-5-6-acceptance.md` and `plan.md` for execution evidence/status. Phase 6 still needs the user's live AI model/key/budget and separate provider verification; approved repeated-report correlation/escalation remains unimplemented. Phase 7 broader stabilization and the final three demonstration workflows remain open. Phase 8 covers final diagrams/report/member responsibility/video/submission evidence.
+- [Duplicate matching and permissions](incident-correlation.md)
+- [Verification commands and coverage](testing.md)

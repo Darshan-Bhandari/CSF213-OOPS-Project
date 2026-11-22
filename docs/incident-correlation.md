@@ -10,7 +10,7 @@ A confirmed link marks one report as a duplicate of a master and keeps every inc
 
 Flyway V6 creates the candidate and duplicate-link tables, plus indexes for recent lookups and master membership. The matching audit is written when candidates are recorded. Staff confirmation and its two audit entries commit together. The existing write lock serializes confirmation with incident changes. Reports created before V6 can be linked manually; submission suggestions are generated for new reports.
 
-## Demonstrate four Wi-Fi reports
+## Try four related Wi-Fi reports
 
 1. Use the latest build and four different Campus Community accounts. Submit all four reports within four hours. Use **Campus Wi-Fi** as the service and **Network** as the category. Keep them active. Use a demo database or fictional accounts and descriptions.
 2. Submit these title and description pairs in order.
@@ -22,5 +22,5 @@ Flyway V6 creates the candidate and duplicate-link tables, plus indexes for rece
    | 3 | Wireless connection unavailable | Wifi is offline on every floor. |
    | 4 | Wi Fi not working | Phones lost access during the wifi outage. |
 
-3. Note the first incident ID. Sign in as Admin and open reports 2, 3 and 4. In **Incident correlation**, find the first report under **Potential duplicates at submission**. Show the displayed ID, status, description and text overlap. Click **Use INC-… as master** on that candidate for each report.
-4. Open the first incident and show all three reports under **Linked incidents**. Open a linked report and show the master reference. Show the staff audit entry on the master and at least one linked report. Switch back to a student account and show that the student's own report still exists with its current status and history.
+3. Note the first incident ID. Sign in as Admin and open reports 2, 3 and 4. In **Incident correlation**, find the first report under **Potential duplicates at submission**. Check the displayed ID, status, description and text overlap. Click **Use INC-… as master** on that candidate for each report.
+4. Open the first incident and show all three reports under **Linked incidents**. Open a linked report and show the master reference. Check the staff audit entry on the master and at least one linked report. Switch back to a student account and show that the student's own report still exists with its current status and history.

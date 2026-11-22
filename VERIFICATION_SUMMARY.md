@@ -1,14 +1,15 @@
-# Project verification summary
+# Group 57 V6 verification
 
-## V6 duplicate incident correlation
+| Environment | Scope | Result |
+| --- | --- | --- |
+| Linux, JDK 21.0.13, PostgreSQL 14.15 | Java regression suite | 206 passed |
+| Linux, JDK 21.0.13, PostgreSQL 14.15 | Packaged application and database restart | 2 passed |
+| Linux | Python launcher suite | 5 passed |
+| macOS, JDK 25.0.1 targeting Java 21 | Java workflow rules and view tests | 78 passed |
+| macOS | Python launcher suite | 5 passed |
 
-Linux/JDK 21.0.13/PostgreSQL 14.15 clean verify passed **206 regression tests + 2 packaged restart tests** with zero failures, errors or skips. Five Python launcher tests passed. The four-reporter case was also demonstrated through authenticated HTTP on the packaged app. The simplified V5 result below is historical.
+All listed runs completed with zero test failures, errors or skips. A separate HTTP check on the packaged Linux application submitted four reports and linked three to the same master, then checked audit records, incident statuses and reporter visibility.
 
-## Simplified V5 build
+Live OpenRouter calls, complete V6 browser acceptance and full native Windows verification were outside these recorded runs. The targeted Mac run covered rules, views and the launcher. The full database and restart results are from Linux.
 
-| Scope | Tests | Failures | Errors | Skipped |
-|---|---:|---:|---:|---:|
-| Regression | 202 | 0 | 0 | 0 |
-| Packaged restart | 2 | 0 | 0 | 0 |
-
-Python launcher: 5 passed. JavaScript syntax check passed. Full clean verify: BUILD SUCCESS on Linux/JDK 21.0.13/PostgreSQL 14.15. Current count is 202, down from 220 because 14 recovery integration and 4 delivery tests were removed with that feature. No native Mac or visual/browser acceptance was run for this change. No live AI or SMTP called.
+See [test commands and coverage](docs/testing.md) for reproduction.
